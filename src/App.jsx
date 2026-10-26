@@ -4,7 +4,7 @@ import { initUserData, clearUserData, savePlan, refreshSubscription, saveEmailDi
 import { getActivePlan, canAddCourse, createCheckoutSession, activateTrial, hasUsedTrial, isTrialActive, getCachedSubscription, TRIAL_DURATION_DAYS, TRIAL_PLAN, TRIAL_BILLING_PERIOD } from './lib/subscription'
 import { useTheme } from './utils/useTheme'
 import { initAnalytics, identifyUser, resetUser, track, register, registerOnce } from './lib/analytics'
-import { captureReferralParam, getStoredReferrer, clearStoredReferrer } from './lib/referral'
+import { captureReferralParam, claimStoredReferral } from './lib/referral'
 import { captureFirstTouch, getFirstTouch, firstTouchPostHogProps } from './lib/firstTouch'
 import { captureUtmForOnboarding } from './lib/utmPersonalize'
 import SharedPlanView from './components/SharedPlanView'
@@ -319,21 +319,9 @@ export default function App() {
             }),
           }).then(() => localStorage.setItem(welcomeKey, '1')).catch(() => {})
         }
-        // Save referral - fire-and-forget, won't overwrite if already set
-        const referrer = getStoredReferrer()
-        if (referrer && referrer !== session.user.id) {
-          supabase.from('user_data').select('subscription').eq('user_id', session.user.id).maybeSingle()
-            .then(({ data }) => {
-              if (data?.subscription?.referredBy) return // already saved
-              const merged = { ...(data?.subscription ?? {}), referredBy: referrer }
-              return supabase.from('user_data').upsert(
-                { user_id: session.user.id, subscription: merged, updated_at: new Date().toISOString() },
-                { onConflict: 'user_id' }
-              )
-            })
-            .then(() => clearStoredReferrer())
-            .catch(() => {})
-        }
+        // Referral: the server records it (api/referral.js). The old path
+        // wrote user_data.subscription.referredBy from the browser.
+        claimStoredReferral(session.access_token)
       }
       setSession(session)
       if (!session) {

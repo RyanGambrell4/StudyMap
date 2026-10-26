@@ -13,6 +13,8 @@
  */
 
 import Stripe from 'stripe'
+import { recordPaid } from '../lib/server/referrals.js'
+import { notifyReward } from './referral.js'
 import { createClient } from '@supabase/supabase-js'
 import { Resend } from 'resend'
 import { onTrialEndingSoon, onUpgraded, onChurned } from '../lib/server/loops.js'
@@ -760,62 +762,14 @@ ${preheader('You started signing up for Pro but didn\'t finish. Your spot is sti
         if (error) throw error
         console.log(`[stripe webhook] Updated user ${userId} → ${mergedSub.plan} (${mergedSub.status})`)
 
-        // ── Referral reward ───────────────────────────────────────────────────
-        // Fire when a referred user's subscription becomes active (trial→paid or direct).
-        // Applies a $9.99 Stripe credit to both the new subscriber and their referrer.
-        if (
-          sub.status === 'active' &&
-          mergedSub.referredBy &&
-          !mergedSub.referralRewarded
-        ) {
+        // ── Referral reward (lib/server/referrals.js) ────────────────────────
+        // The friend's first paid period: status turns 'active' after the
+        // trial converts (or straight away with no trial). recordPaid is
+        // idempotent, so webhook retries never reward twice.
+        if (sub.status === 'active') {
           try {
-            const referrerId = mergedSub.referredBy
-            const { data: referrerRow } = await supabaseAdmin
-              .from('user_data')
-              .select('subscription')
-              .eq('user_id', referrerId)
-              .maybeSingle()
-
-            const referrerCustomerId = referrerRow?.subscription?.stripeCustomerId
-            const newCustomerId = sub.customer
-
-            const CREDIT_CENTS = 999 // $9.99 - 1 month Pro at new pricing
-
-            if (referrerCustomerId) {
-              await stripe.customers.createBalanceTransaction(referrerCustomerId, {
-                amount: -CREDIT_CENTS,
-                currency: 'usd',
-                description: 'Referral reward - friend upgraded to Pro',
-              })
-              // Increment referrer's count
-              const referrerMerged = {
-                ...(referrerRow?.subscription ?? {}),
-                referralCount: (referrerRow?.subscription?.referralCount ?? 0) + 1,
-              }
-              await supabaseAdmin.from('user_data').upsert(
-                { user_id: referrerId, subscription: referrerMerged, updated_at: new Date().toISOString() },
-                { onConflict: 'user_id' }
-              )
-            }
-
-            if (newCustomerId) {
-              await stripe.customers.createBalanceTransaction(newCustomerId, {
-                amount: -CREDIT_CENTS,
-                currency: 'usd',
-                description: 'Referral signup bonus - 1 month free',
-              })
-            }
-
-            // Mark as rewarded so it never fires twice
-            await supabaseAdmin.from('user_data').upsert(
-              {
-                user_id: userId,
-                subscription: { ...mergedSub, referralRewarded: true },
-                updated_at: new Date().toISOString(),
-              },
-              { onConflict: 'user_id' }
-            )
-            console.log(`[stripe webhook] Referral reward applied - referrer: ${referrerId}, new: ${userId}`)
+            const result = await recordPaid(supabaseAdmin, { referredId: userId, via: 'stripe' }, { stripe, notify: notifyReward })
+            if (result.reward) console.log('[stripe webhook] referral rewarded', { referredId: userId, kind: result.reward.kind })
           } catch (refErr) {
             console.error('[stripe webhook] Referral reward failed (non-fatal):', refErr)
           }

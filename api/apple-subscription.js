@@ -12,6 +12,8 @@
  * 200:  { ok: true, plan, status, currentPeriodEnd, environment, action }
  * 400:  the JWS did not verify or is not one of our subscriptions
  */
+import { recordPaid } from '../lib/server/referrals.js'
+import { notifyReward } from './referral.js'
 import { createClient } from '@supabase/supabase-js'
 import { verifyAuth } from '../lib/server/usage.js'
 import { readBilling, commitAppleBilling } from '../lib/server/billing.js'
@@ -69,6 +71,15 @@ export default async function handler(req, res) {
   if (decision.action === 'write') {
     const written = await commitAppleBilling(supabase, auth.userId, decision.fields)
     if (!written.ok) return res.status(500).json({ error: 'Billing write failed' })
+  }
+
+  // Referral: the friend's first paid App Store period (not the free trial).
+  if (derived.status === 'active') {
+    try {
+      await recordPaid(supabase, { referredId: auth.userId, via: 'apple' }, { notify: notifyReward })
+    } catch (e) {
+      console.error('[apple-subscription] referral reward failed (non-fatal)', e)
+    }
   }
 
   console.log('[apple-subscription] synced', {

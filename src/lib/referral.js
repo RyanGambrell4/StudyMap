@@ -13,7 +13,7 @@ const STORAGE_KEY = 'studyedge_referrer'
 export function captureReferralParam() {
   try {
     const ref = new URLSearchParams(window.location.search).get('ref')
-    if (ref && ref.length > 10) { // basic UUID length check
+    if (ref && /^[A-Za-z0-9-]{4,40}$/.test(ref)) { // a 6-char code, or a legacy user id
       localStorage.setItem(STORAGE_KEY, ref)
     }
   } catch { /* ignore */ }
@@ -29,7 +29,21 @@ export function clearStoredReferrer() {
   try { localStorage.removeItem(STORAGE_KEY) } catch { /* ignore */ }
 }
 
-/** Builds the shareable referral link for a given user */
+/** Claims the stored code for the signed-in student (server records it). */
+export async function claimStoredReferral(accessToken) {
+  const code = getStoredReferrer()
+  if (!code || !accessToken) return
+  try {
+    await fetch('/api/referral', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${accessToken}` },
+      body: JSON.stringify({ code }),
+    })
+  } catch { /* best effort; the code stays stored for the next sign-in */ return }
+  clearStoredReferrer()
+}
+
+/** Builds the shareable referral link for a given user (legacy id form). */
 export function getReferralLink(userId) {
   const params = new URLSearchParams({
     ref: userId,

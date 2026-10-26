@@ -1,6 +1,5 @@
 import { useState, useEffect } from 'react'
 import { supabase, getAccessToken } from '../lib/supabase'
-import { getReferralLink } from '../lib/referral'
 import { track } from '../lib/analytics'
 
 export default function ReferralCard() {
@@ -8,6 +7,7 @@ export default function ReferralCard() {
   const [copied, setCopied] = useState(false)
   const [referralCount, setReferralCount] = useState(0)
   const [convertedCount, setConvertedCount] = useState(0)
+  const [link, setLink] = useState(null)
 
   useEffect(() => {
     supabase.auth.getSession().then(async ({ data: { session } }) => {
@@ -15,19 +15,18 @@ export default function ReferralCard() {
       setUserId(session.user.id)
       try {
         const token = await getAccessToken()
-        const res = await fetch('/api/referral-stats', { headers: { Authorization: `Bearer ${token}` } })
+        const res = await fetch('/api/referral', { headers: { Authorization: `Bearer ${token}` } })
         if (res.ok) {
           const d = await res.json()
-          setReferralCount(d.total ?? 0)
-          setConvertedCount(d.converted ?? 0)
+          setLink(d.link ?? null)
+          setReferralCount(d.invited ?? 0)
+          setConvertedCount(d.joined ?? 0)
         }
       } catch { /* non-critical */ }
     })
   }, [])
 
-  if (!userId) return null
-
-  const link = getReferralLink(userId)
+  if (!userId || !link) return null
 
   const handleCopy = () => {
     track('referral_link_copied')
@@ -46,17 +45,17 @@ export default function ReferralCard() {
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
         <div>
           <p style={{ margin: 0, fontSize: 11, fontWeight: 700, color: '#9B9B9B', textTransform: 'uppercase', letterSpacing: '0.06em' }}>Refer a Friend</p>
-          <p style={{ margin: '4px 0 0', fontSize: 13, color: '#6B6B6B' }}>Both of you get 1 month free</p>
+          <p style={{ margin: '4px 0 0', fontSize: 13, color: '#6B6B6B' }}>A free month for every friend who subscribes</p>
         </div>
         {referralCount > 0 && (
           <span style={{ fontSize: 12, fontWeight: 700, color: '#3B61C4', background: 'rgba(59,97,196,0.08)', padding: '3px 10px', borderRadius: 999 }}>
-            {referralCount} joined{convertedCount > 0 ? ` · ${convertedCount} converted` : ''}
+            {referralCount} signed up{convertedCount > 0 ? ` · ${convertedCount} subscribed` : ''}
           </span>
         )}
       </div>
 
       <p style={{ margin: '8px 0 12px', fontSize: 13, color: '#9B9B9B', lineHeight: 1.6 }}>
-        Share your link. When a friend upgrades to Pro, they get their first month free, and so do you.
+        Share your link. When a friend you invite subscribes, you get a month of Pro free.
       </p>
 
       <div style={{ display: 'flex', gap: 8, marginBottom: 10 }}>

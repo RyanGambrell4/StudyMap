@@ -1188,6 +1188,11 @@
   ],
   "redirects": [
     {
+      "source": "/r/:code",
+      "destination": "/signup?ref=:code&utm_source=referral&utm_medium=user_share&utm_campaign=in_app_referral",
+      "permanent": false
+    },
+    {
       "source": "/privacy.html",
       "destination": "/privacy",
       "permanent": true
