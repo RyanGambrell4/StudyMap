@@ -59,8 +59,13 @@ For each item return:
   "notes": "any extra details like time, room, or chapters - null if none"
 }
 
-Return ONLY the JSON array with no other text, markdown, or explanation.
-Example: [{"name":"Midterm Exam","date":"${currentYear}-03-12","type":"Midterm","weight":25,"notes":"In class, closed book"}]` }]
+Also list:
+- "topics": the course's main topics or units as the syllabus names them (5 to 15 short names, in course order). Only topics the syllabus actually lists.
+- "meetings": the class meeting times if the syllabus gives them, as {"day": "Monday", "start": "HH:MM", "end": "HH:MM"} in 24-hour time, one entry per weekday. Empty if not given.
+
+Return ONLY this JSON object with no other text, markdown, or explanation:
+{"events": [...], "topics": [...], "meetings": [...]}
+Example: {"events": [{"name":"Midterm Exam","date":"${currentYear}-03-12","type":"Midterm","weight":25,"notes":"In class, closed book"}], "topics": ["Supply and demand", "Elasticity"], "meetings": [{"day":"Tuesday","start":"10:00","end":"11:20"}]}` }]
         }]
       })
     })
@@ -77,13 +82,24 @@ Example: [{"name":"Midterm Exam","date":"${currentYear}-03-12","type":"Midterm",
     })
     const content = data.content?.[0]?.text
     if (!content) throw new Error(data.error?.message ?? 'Empty AI response')
+    // The reply is {events, topics, meetings}; a bare array (the old shape)
+    // is still accepted as events alone.
+    const firstBrace = content.indexOf('{')
     const firstBracket = content.indexOf('[')
-    const lastBracket = content.lastIndexOf(']')
-    const cleaned = content.slice(firstBracket, lastBracket + 1)
-    const events = JSON.parse(cleaned)
+    let events = []
+    let topics = []
+    let meetings = []
+    if (firstBrace !== -1 && (firstBracket === -1 || firstBrace < firstBracket)) {
+      const parsed = JSON.parse(content.slice(firstBrace, content.lastIndexOf('}') + 1))
+      events = Array.isArray(parsed.events) ? parsed.events : []
+      topics = Array.isArray(parsed.topics) ? parsed.topics.filter(t => typeof t === 'string' && t.trim()).slice(0, 20) : []
+      meetings = Array.isArray(parsed.meetings) ? parsed.meetings.filter(m => m && m.day && m.start) : []
+    } else {
+      events = JSON.parse(content.slice(firstBracket, content.lastIndexOf(']') + 1))
+    }
     // The work succeeded, so charge for it now.
     await gate.commit?.()
-    res.status(200).json({ events })
+    res.status(200).json({ events, topics, meetings })
   } catch (error) {
     console.error('Syllabus extraction error:', error)
     console.error(error)
