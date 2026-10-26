@@ -146,9 +146,12 @@ Rules:
   if (step === 'schedule') {
     const now = new Date()
     const startLabel = now.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true })
-    const hours = safeHours
+    // Plan at most the next 8 hours in at most 10 blocks. "Fill exactly 24
+    // hours" produced ~30 blocks, overran max_tokens, and the truncated JSON
+    // made this step 500 on every app call (Vercel logs, 2026-10-26).
+    const hours = Math.min(safeHours, 8)
 
-    const prompt = `You are an expert academic coach. A student has ${hours} hours starting now (${startLabel}) to study for their ${resolvedName} exam.
+    const prompt = `You are an expert academic coach. A student is about to study for their ${resolvedName} exam, starting now (${startLabel}). Plan their next ${hours} hours of study.` + (safeHours > hours ? `\nThe exam is ${safeHours} hours away; this is the first session, not the whole window.` : '') + `
 
 ${ANTI_GUESSING_RULES}
 
@@ -182,6 +185,8 @@ Return ONLY valid JSON with no other text:
 
 Rules:
 - Fill exactly ${hours} hours total (blocks plus buffer)
+- Use at most 10 blocks; each block is 25 to 90 minutes
+- Keep each focus under 25 words
 - Last 10 minutes is always the bufferBlock
 - type is "study" or "buffer"
 - focus must be specific and actionable, not generic
@@ -198,7 +203,7 @@ Rules:
         },
         body: JSON.stringify({
           model: 'claude-haiku-4-5-20251001',
-          max_tokens: 1400,
+          max_tokens: 3000,
           messages: [{ role: 'user', content: [{ type: 'text', text: prompt, cache_control: { type: 'ephemeral' } }] }],
         }),
       })
@@ -222,8 +227,7 @@ Rules:
       await gate.commit?.()
       return res.status(200).json(result)
     } catch (e) {
-      console.error('[exam-rescue schedule]', e)
-      return res.status(500).json({ error: 'Failed to generate schedule. Please try again.' })
+      return sendUserError(res, 'generation_failed', e)
     }
   }
 

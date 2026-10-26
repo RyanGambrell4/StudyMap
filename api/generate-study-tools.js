@@ -419,6 +419,16 @@ Hard rules:
     if (firstBrace === -1 || lastBrace <= firstBrace) throw new Error('Malformed AI response. Please try again.')
     const parsed = JSON.parse(stripped.slice(firstBrace, lastBrace + 1))
 
+    // Only real cards go back. A reply with no usable flashcards used to
+    // return 200, which the app could only show as an empty set.
+    if (Array.isArray(parsed.flashcards)) {
+      parsed.flashcards = parsed.flashcards.filter(c =>
+        c && String(c.front ?? c.question ?? '').trim() && String(c.back ?? c.answer ?? '').trim())
+    }
+    if (!parsed.flashcards?.length && !parsed.quiz?.length) {
+      return sendUserError(res, 'generation_failed', 'generate-study-tools: reply had no usable flashcards or quiz')
+    }
+
     // Shuffle quiz options so correct answer is evenly distributed across positions
     if (parsed.quiz) {
       parsed.quiz = parsed.quiz.map(q => {
