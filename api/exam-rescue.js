@@ -15,6 +15,7 @@ export default async function handler(req, res) {
     step,
     topics,
     topic,
+    timeZone,
     syllabusText,
     recallHistory,
     coachPlan,
@@ -145,7 +146,15 @@ Rules:
 
   if (step === 'schedule') {
     const now = new Date()
-    const startLabel = now.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true })
+    // The student's clock, not the server's: without timeZone the blocks were
+    // labelled in UTC (10:19 PM in Toronto read "2:19 AM").
+    const fmt = { hour: 'numeric', minute: '2-digit', hour12: true }
+    let startLabel
+    try {
+      startLabel = now.toLocaleTimeString('en-US', typeof timeZone === 'string' && timeZone ? { ...fmt, timeZone } : fmt)
+    } catch {
+      startLabel = now.toLocaleTimeString('en-US', fmt)
+    }
     // Plan at most the next 8 hours in at most 10 blocks. "Fill exactly 24
     // hours" produced ~30 blocks, overran max_tokens, and the truncated JSON
     // made this step 500 on every app call (Vercel logs, 2026-10-26).
