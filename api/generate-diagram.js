@@ -1,7 +1,7 @@
 import { reserveAiUsage, verifyAuth } from '../lib/server/usage.js'
 import { sendUserError } from '../lib/server/userErrors.js'
 import { getCourseContext, formatCourseContextForPrompt, resolveCourseId } from '../lib/server/courseContext.js'
-import { ANTI_GUESSING_RULES } from '../lib/server/coachAntiGuessing.js'
+import { TOPIC_TOOL_RULES } from '../lib/server/coachAntiGuessing.js'
 import { buildClientSupplementBlock } from '../lib/server/courseContextPrompt.js'
 import { saveArtifact } from '../lib/server/artifactWriter.js'
 import { logAiCall } from '../lib/server/aiCost.js'
@@ -113,7 +113,7 @@ export default async function handler(req, res) {
 
   const prompt = `You are drawing a study diagram for a specific student.
 
-${ANTI_GUESSING_RULES}
+${TOPIC_TOOL_RULES}
 
 ${contextBlock}${supplementBlock}
 

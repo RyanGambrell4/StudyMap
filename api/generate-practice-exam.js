@@ -1,6 +1,6 @@
 import { reserveAiUsage, verifyAuth } from '../lib/server/usage.js'
 import { getCourseContext, formatCourseContextForPrompt, resolveCourseId } from '../lib/server/courseContext.js'
-import { ANTI_GUESSING_RULES } from '../lib/server/coachAntiGuessing.js'
+import { TOPIC_TOOL_RULES } from '../lib/server/coachAntiGuessing.js'
 import { saveArtifact } from '../lib/server/artifactWriter.js'
 import { sendUserError } from '../lib/server/userErrors.js'
 import { logAiCall } from '../lib/server/aiCost.js'
@@ -84,7 +84,7 @@ export default async function handler(req, res) {
 
     const prompt = `You are an expert exam designer building a realistic practice exam.
 
-${ANTI_GUESSING_RULES}
+${TOPIC_TOOL_RULES}
 
 ${courseContextBlock}
 

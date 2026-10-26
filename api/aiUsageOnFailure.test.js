@@ -74,7 +74,9 @@ const ENDPOINTS = [
   ['connections-mode', { phase: 'generate' }],
   ['exam-rescue', {}],
   ['brain-dump-score', { text: 'some recalled material' }],
-  ['chat-tutor', { messages: [{ role: 'user', content: 'hi' }] }],
+  // No course at all is the General tutor and is charged; a named course
+  // that does not resolve is the failure this table guards.
+  ['chat-tutor', { messages: [{ role: 'user', content: 'hi' }], courseName: 'Not A Course' }],
   ['essay-thesis', { topic: 'a topic' }],
   ['essay-outline', { topic: 'a topic' }],
   ['essay-review-section', { sectionName: 'Intro', draft: 'a draft' }],

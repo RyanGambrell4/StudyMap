@@ -1,7 +1,7 @@
 import { verifyAuth, reserveAiUsage } from '../lib/server/usage.js'
 import { createClient } from '@supabase/supabase-js'
 import { getCourseContext, formatCourseContextForPrompt } from '../lib/server/courseContext.js'
-import { ANTI_GUESSING_RULES } from '../lib/server/coachAntiGuessing.js'
+import { TOPIC_TOOL_RULES } from '../lib/server/coachAntiGuessing.js'
 import { saveArtifact } from '../lib/server/artifactWriter.js'
 import { reportQueryError } from '../lib/server/supabaseErrors.js'
 import { readBilling, commitFeatureUsage } from '../lib/server/billing.js'
@@ -168,7 +168,7 @@ export default async function handler(req, res) {
   // Generate dialogue script with Claude Haiku
   const scriptPrompt = `You are producing an engaging audio study podcast for a college student preparing for an exam.
 
-${ANTI_GUESSING_RULES}
+${TOPIC_TOOL_RULES}
 
 ${podcastContextBlock}
 

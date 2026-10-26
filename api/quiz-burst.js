@@ -1,7 +1,7 @@
 import { reserveAiUsage, verifyAuth } from '../lib/server/usage.js'
 import { sendUserError } from '../lib/server/userErrors.js'
 import { getCourseContext, formatCourseContextForPrompt, resolveCourseId } from '../lib/server/courseContext.js'
-import { ANTI_GUESSING_RULES } from '../lib/server/coachAntiGuessing.js'
+import { TOPIC_TOOL_RULES } from '../lib/server/coachAntiGuessing.js'
 import { buildClientSupplementBlock } from '../lib/server/courseContextPrompt.js'
 import { saveArtifact } from '../lib/server/artifactWriter.js'
 import { logAiCall } from '../lib/server/aiCost.js'
@@ -72,7 +72,7 @@ export default async function handler(req, res) {
 
   const prompt = `You are writing a Quick Quiz Burst for a specific student. This student's course context is below — every question you write must be defensibly grounded in it.
 
-${ANTI_GUESSING_RULES}
+${TOPIC_TOOL_RULES}
 
 ${contextBlock}${supplementBlock}
 

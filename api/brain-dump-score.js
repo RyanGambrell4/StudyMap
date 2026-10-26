@@ -2,7 +2,7 @@ import { reserveAiUsage, verifyAuth } from '../lib/server/usage.js'
 import { sendUserError } from '../lib/server/userErrors.js'
 import { tracedCall } from '../lib/server/langfuse.js'
 import { getCourseContext, formatCourseContextForPrompt, resolveCourseId } from '../lib/server/courseContext.js'
-import { ANTI_GUESSING_RULES } from '../lib/server/coachAntiGuessing.js'
+import { TOPIC_TOOL_RULES } from '../lib/server/coachAntiGuessing.js'
 import { buildClientSupplementBlock } from '../lib/server/courseContextPrompt.js'
 import { recordTopicSignal } from '../lib/server/topicSignals.js'
 import { saveArtifact } from '../lib/server/artifactWriter.js'
@@ -84,7 +84,7 @@ export default async function handler(req, res) {
 
   const prompt = `You are the student's academic coach scoring a brain dump exercise for ${resolvedName}.
 
-${ANTI_GUESSING_RULES}
+${TOPIC_TOOL_RULES}
 
 ${contextBlock}${supplementBlock}
 

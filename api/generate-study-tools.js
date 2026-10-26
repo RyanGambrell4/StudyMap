@@ -1,7 +1,7 @@
 import { reserveAiUsage, verifyAuth } from '../lib/server/usage.js'
 import { checkFeatureRateLimit } from '../lib/server/rateLimit.js'
 import { getCourseContext, formatCourseContextForPrompt, resolveCourseId } from '../lib/server/courseContext.js'
-import { ANTI_GUESSING_RULES } from '../lib/server/coachAntiGuessing.js'
+import { TOPIC_TOOL_RULES } from '../lib/server/coachAntiGuessing.js'
 import { buildClientSupplementBlock } from '../lib/server/courseContextPrompt.js'
 import { saveArtifact } from '../lib/server/artifactWriter.js'
 import { USER_ERRORS, sendUserError } from '../lib/server/userErrors.js'
@@ -45,7 +45,7 @@ export default async function handler(req, res) {
       return sendUserError(res, 'course_context_failed', err)
     }
     resolvedCourseName = brain.identity?.name || courseName || 'Unknown Course'
-    ctxBlock = ANTI_GUESSING_RULES + '\n\n' + formatCourseContextForPrompt(brain)
+    ctxBlock = TOPIC_TOOL_RULES + '\n\n' + formatCourseContextForPrompt(brain)
     supplementBlock = buildClientSupplementBlock(legacyCtx)
   }
 
@@ -112,8 +112,9 @@ ${ctxBlock}${supplementBlock}
 
 ${emphasisLine}${struggleLine}${scopeLine}${sourceLine}${imageLine}Generate exactly 5 multiple choice questions.
 
-${hasTopic ? 'EVERY question must directly test the topic above. Do not drift to other material. If a source was provided, the questions must come from content that is inside the source AND inside the topic.' : ''}
-${hasText || hasImages ? 'Only quiz on material that is actually present in the source. Do not invent facts.' : ''}
+${hasTopic ? 'EVERY question must directly test the topic above. Do not drift to other material.' : ''}
+${hasTopic && (hasText || hasImages) ? 'Use the source wherever it covers the topic. If the source does not cover the topic, ignore it and quiz on the topic itself.' : ''}
+${!hasTopic && (hasText || hasImages) ? 'Only quiz on material that is actually present in the source. Do not invent facts.' : ''}
 
 Return ONLY this JSON array with no other text:
 [
@@ -336,7 +337,8 @@ ${emphasisFc}${struggleFc}${styleFc}${scopeFc}${sourceFc}${imagesFc}Generate exa
 }
 
 ${hasTopicFc ? 'EVERY flashcard and quiz question MUST stay strictly inside the requested topic. Do not produce any card that goes outside it. If the topic is narrow, produce fewer but deeper cards - quality over quantity.' : ''}
-${hasTextFc || hasImagesFc ? 'Only build cards on material that actually appears in the source. Do not invent facts.' : ''}
+${hasTopicFc && (hasTextFc || hasImagesFc) ? 'Use the source wherever it covers the topic. If the source does not cover the topic, ignore it and build the cards from the topic itself.' : ''}
+${!hasTopicFc && (hasTextFc || hasImagesFc) ? 'Only build cards on material that actually appears in the source. Do not invent facts.' : ''}
 
 Creativity rules (make the cards actually interesting, not robotic):
 - Mix card styles: definition recall, "fill in the blank", "which of these is NOT…", scenario-based ("A student argues X - what concept are they missing?"), contrast pairs ("How does X differ from Y?"), causal chains ("If X happens, what follows?"), and compare/contrast.
@@ -376,7 +378,9 @@ Hard rules:
       },
       body: JSON.stringify({
         model: 'claude-haiku-4-5-20251001',
-        max_tokens: 4000,
+        // 15 cards + 10 quiz questions with explanations runs close to 4000;
+        // a cut-off reply is unparseable JSON.
+        max_tokens: 6000,
         messages: [{ role: 'user', content: userContentFc }]
       })
     });
@@ -412,7 +416,7 @@ Hard rules:
       console.error('[generate-study-tools] No content. Full Anthropic response:', JSON.stringify(data).slice(0, 500))
       throw new Error(data.error?.message ?? 'Empty AI response')
     }
-    console.log('[generate-study-tools] AI content preview:', content.slice(0, 300))
+    console.log('[generate-study-tools] AI content preview:', `stop=${data.stop_reason}`, content.slice(0, 300))
     const stripped = content.replace(/```(?:json)?\s*/gi, '').replace(/```\s*/g, '')
     const firstBrace = stripped.indexOf('{')
     const lastBrace = stripped.lastIndexOf('}')

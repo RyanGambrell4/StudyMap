@@ -1,7 +1,7 @@
 import { reserveAiUsage, verifyAuth } from '../lib/server/usage.js'
 import { sendUserError } from '../lib/server/userErrors.js'
 import { getCourseContext, formatCourseContextForPrompt, resolveCourseId } from '../lib/server/courseContext.js'
-import { ANTI_GUESSING_RULES } from '../lib/server/coachAntiGuessing.js'
+import { TOPIC_TOOL_RULES } from '../lib/server/coachAntiGuessing.js'
 import { buildContextBlock } from '../lib/server/courseContextPrompt.js'
 import { logAiCall } from '../lib/server/aiCost.js'
 
@@ -53,7 +53,7 @@ export default async function handler(req, res) {
 
   const prompt = `You are the student's tutor, re-explaining a concept in a specific mode. Every word must earn its place — students bounce off long walls of text.
 
-${ANTI_GUESSING_RULES}
+${TOPIC_TOOL_RULES}
 
 ${contextBlock}
 

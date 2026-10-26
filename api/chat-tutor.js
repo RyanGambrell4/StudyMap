@@ -5,7 +5,7 @@ import { logAiCall } from '../lib/server/axiom.js'
 // This one is the costed `ai.call` event; both are kept.
 import { logAiCall as logAiCost } from '../lib/server/aiCost.js'
 import { getCourseContext, formatCourseContextForPrompt, resolveCourseId } from '../lib/server/courseContext.js'
-import { ANTI_GUESSING_RULES } from '../lib/server/coachAntiGuessing.js'
+import { TOPIC_TOOL_RULES } from '../lib/server/coachAntiGuessing.js'
 
 export default async function handler(req, res) {
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' })
@@ -40,7 +40,12 @@ export default async function handler(req, res) {
 
   let courseId = bodyCourseId
   if (!courseId && courseName) courseId = await resolveCourseId(auth.userId, courseName)
-  if (!courseId) return sendUserError(res, 'course_required', `chat-tutor: no courseId resolved (courseName=${courseName ?? 'none'})`)
+  // The app's "General" tutor sends no course (or the label "General Study").
+  // That is a real choice, not a sync failure, so it gets a tutor with no
+  // course context instead of course_required. A named course that does not
+  // resolve is still an error.
+  const generalTutor = !courseId && (!courseName || courseName === 'General Study')
+  if (!courseId && !generalTutor) return sendUserError(res, 'course_required', `chat-tutor: no courseId resolved (courseName=${courseName ?? 'none'})`)
 
   // Quota is reserved only now, once the request is known to be well formed.
   // It used to be taken at the top of the handler, so a request that was about
@@ -54,18 +59,20 @@ export default async function handler(req, res) {
   // student is actually asking about) and the Wolfram Alpha pattern check.
   const latestUserMessage = messages.filter(m => m.role === 'user').slice(-1)[0]?.content ?? ''
 
-  let brain
-  try {
-    brain = await getCourseContext(gate.userId, courseId, {
-      topic: typeof latestUserMessage === 'string' ? latestUserMessage.slice(0, 200) : null,
-      request: req,
-    })
-  } catch (err) {
-    console.error('[chat-tutor] getCourseContext failed', err)
-    return sendUserError(res, 'course_context_failed', err)
+  let brain = null
+  if (!generalTutor) {
+    try {
+      brain = await getCourseContext(gate.userId, courseId, {
+        topic: typeof latestUserMessage === 'string' ? latestUserMessage.slice(0, 200) : null,
+        request: req,
+      })
+    } catch (err) {
+      console.error('[chat-tutor] getCourseContext failed', err)
+      return sendUserError(res, 'course_context_failed', err)
+    }
   }
-  const resolvedCourseName = brain.identity?.name || courseName
-  const serverContextBlock = formatCourseContextForPrompt(brain)
+  const resolvedCourseName = brain?.identity?.name || (generalTutor ? 'any subject the student asks about' : courseName)
+  const serverContextBlock = brain ? formatCourseContextForPrompt(brain) : ''
 
   // Direct probe hint from mastery. The topics block in serverContextBlock
   // already carries per-topic mastery; this line surfaces the shortlist so
@@ -128,7 +135,7 @@ export default async function handler(req, res) {
 
   const systemPrompt = `You are a focused study tutor for ${resolvedCourseName}. The student has an exam on ${examDate ?? 'an upcoming date'} and their goal is ${targetGrade ?? 'to do well'}.
 
-${ANTI_GUESSING_RULES}
+${TOPIC_TOOL_RULES}
 
 ${serverContextBlock}
 
