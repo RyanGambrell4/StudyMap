@@ -26,7 +26,7 @@ vi.mock('../lib/server/redis.js', () => ({
   }),
 }))
 
-vi.mock('../lib/server/axiom.js', () => ({ log: () => {}, logAiCall: () => {} }))
+vi.mock('../lib/server/telemetry.js', () => ({ log: () => {}, logAiCall: () => {} }))
 
 let currentPlan = 'free'
 vi.mock('../lib/server/usage.js', () => ({

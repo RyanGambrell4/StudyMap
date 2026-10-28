@@ -1,7 +1,7 @@
 import { reserveAiUsage, verifyAuth } from '../lib/server/usage.js'
 import { USER_ERRORS, sendUserError } from '../lib/server/userErrors.js'
 import { tracedCall } from '../lib/server/langfuse.js'
-import { logAiCall } from '../lib/server/axiom.js'
+import { logAiCall } from '../lib/server/telemetry.js'
 import { logAiCall as logAiCost } from '../lib/server/aiCost.js'
 import {
   ANTI_GUESSING_RULES,
@@ -270,7 +270,7 @@ Rules:
       },
     })
 
-    // Imported under an alias because lib/server/axiom.js exports its own
+    // Imported under an alias because lib/server/telemetry.js exports its own
     // logAiCall (the `ai.request` latency event above). This one is the costed
     // `ai.call` event; both are kept so the latency series is not lost.
     await logAiCost({

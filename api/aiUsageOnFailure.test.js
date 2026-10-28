@@ -53,7 +53,7 @@ vi.mock('../lib/server/courseContext.js', () => ({
 }))
 
 vi.mock('../lib/server/rateLimit.js', () => ({ checkAiRateLimit: async () => ({ allowed: true }) }))
-vi.mock('../lib/server/axiom.js', () => ({ log: async () => {}, logAiCall: async () => {} }))
+vi.mock('../lib/server/telemetry.js', () => ({ log: async () => {}, logAiCall: async () => {} }))
 vi.mock('../lib/server/artifactWriter.js', () => ({ saveArtifact: async () => {} }))
 
 // Nothing should reach the network. If an endpoint gets this far, the test

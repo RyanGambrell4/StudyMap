@@ -1,7 +1,7 @@
 import { createClient } from '@supabase/supabase-js'
 import { Resend } from 'resend'
 import { upsertContact, triggerEvent } from '../lib/server/loops.js'
-import { logUserEvent } from '../lib/server/axiom.js'
+import { logUserEvent } from '../lib/server/telemetry.js'
 import { preheader, listUnsubscribeHeaders } from '../lib/server/emailHelpers.js'
 import { verifyAuth } from '../lib/server/usage.js'
 import { reportQueryError } from '../lib/server/supabaseErrors.js'

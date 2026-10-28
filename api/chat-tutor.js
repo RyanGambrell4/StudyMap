@@ -1,7 +1,7 @@
 import { reserveAiUsage, verifyAuth } from '../lib/server/usage.js'
 import { USER_ERRORS, sendUserError } from '../lib/server/userErrors.js'
-import { logAiCall } from '../lib/server/axiom.js'
-// Aliased: axiom.js exports its own logAiCall (the `ai.request` latency event).
+import { logAiCall } from '../lib/server/telemetry.js'
+// Aliased: telemetry.js exports its own logAiCall (the `ai.request` latency event).
 // This one is the costed `ai.call` event; both are kept.
 import { logAiCall as logAiCost } from '../lib/server/aiCost.js'
 import { getCourseContext, formatCourseContextForPrompt, resolveCourseId } from '../lib/server/courseContext.js'

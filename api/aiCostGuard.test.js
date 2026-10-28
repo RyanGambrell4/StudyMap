@@ -54,8 +54,8 @@ describe('every Anthropic endpoint is gated and instrumented', () => {
     ).toBe(true)
   })
 
-  it('imports logAiCall from aiCost.js, not the latency-only one in axiom.js', () => {
-    // axiom.js exports a logAiCall of its own that carries no cost. A file that
+  it('imports logAiCall from aiCost.js, not the latency-only one in telemetry.js', () => {
+    // telemetry.js exports a logAiCall of its own that carries no cost. A file that
     // imported only that one would satisfy the grep above while still leaving
     // its spend unattributed, so the import has to be checked, not just the
     // call. Files may import both; two do, under an alias.
