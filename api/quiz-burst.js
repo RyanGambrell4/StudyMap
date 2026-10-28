@@ -1,6 +1,7 @@
 import { reserveAiUsage, verifyAuth } from '../lib/server/usage.js'
 import { sendUserError } from '../lib/server/userErrors.js'
-import { getCourseContext, formatCourseContextForPrompt, resolveCourseId } from '../lib/server/courseContext.js'
+import { getCourseContext, formatCourseContextForPrompt, resolveCourseId, topicScope } from '../lib/server/courseContext.js'
+import { shuffleChoices } from '../lib/server/shuffleChoices.js'
 import { TOPIC_TOOL_RULES } from '../lib/server/coachAntiGuessing.js'
 import { buildClientSupplementBlock } from '../lib/server/courseContextPrompt.js'
 import { saveArtifact } from '../lib/server/artifactWriter.js'
@@ -67,8 +68,9 @@ export default async function handler(req, res) {
 
   const resolvedName = brain.identity?.name || courseName
   const focus = pickFocus(topic, brain, legacyCtx)
-  const contextBlock = formatCourseContextForPrompt(brain)
-  const supplementBlock = buildClientSupplementBlock(legacyCtx)
+  const contextBlock = formatCourseContextForPrompt(brain, topicScope(topic))
+  const scoped = typeof topic === 'string' && topic.trim().length > 0
+  const supplementBlock = scoped ? '' : buildClientSupplementBlock(legacyCtx)
 
   const prompt = `You are writing a Quick Quiz Burst for a specific student. This student's course context is below — every question you write must be defensibly grounded in it.
 
@@ -78,6 +80,7 @@ ${contextBlock}${supplementBlock}
 
 QUIZ FOCUS: ${focus.label}
 ${focus.detail ? `Detail: ${focus.detail}` : ''}
+${scoped ? 'Every question tests this focus topic. Weak topics, past misses and emphasis below mean the weak parts of THIS topic only.' : ''}
 
 Write exactly 5 multiple-choice questions with this difficulty arc:
 - Q1 easy (confidence builder tied to a concept in the context)
@@ -157,7 +160,7 @@ Rules:
     const first = content.indexOf('[')
     const last = content.lastIndexOf(']')
     if (first === -1 || last === -1) throw new Error('Malformed AI response')
-    const questions = JSON.parse(content.slice(first, last + 1))
+    const questions = shuffleChoices(JSON.parse(content.slice(first, last + 1)))
     const payload = {
       questions,
       focus: focus.label,

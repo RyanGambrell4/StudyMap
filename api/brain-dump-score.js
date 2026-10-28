@@ -1,7 +1,7 @@
 import { reserveAiUsage, verifyAuth } from '../lib/server/usage.js'
 import { sendUserError } from '../lib/server/userErrors.js'
 import { tracedCall } from '../lib/server/langfuse.js'
-import { getCourseContext, formatCourseContextForPrompt, resolveCourseId } from '../lib/server/courseContext.js'
+import { getCourseContext, formatCourseContextForPrompt, resolveCourseId, topicScope } from '../lib/server/courseContext.js'
 import { TOPIC_TOOL_RULES } from '../lib/server/coachAntiGuessing.js'
 import { buildClientSupplementBlock } from '../lib/server/courseContextPrompt.js'
 import { recordTopicSignal } from '../lib/server/topicSignals.js'
@@ -39,7 +39,7 @@ export default async function handler(req, res) {
 
   const resolvedName = brain.identity?.name || courseName || 'this course'
   const wordCount = text.trim().split(/\s+/).length
-  const contextBlock = formatCourseContextForPrompt(brain)
+  const contextBlock = formatCourseContextForPrompt(brain, topicScope(topic))
 
   // Whether this dump was actually compared against the student's own
   // uploaded material. Computed here from the retrieved excerpts, never

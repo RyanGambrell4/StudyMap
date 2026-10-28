@@ -1,3 +1,4 @@
+import { shuffleChoices, shuffleQuestion } from '../lib/server/shuffleChoices.js'
 import { reserveAiUsage, verifyAuth } from '../lib/server/usage.js'
 import { sendUserError } from '../lib/server/userErrors.js'
 import { logAiCall } from '../lib/server/aiCost.js'
@@ -75,7 +76,9 @@ Rules:
     if (first === -1 || last === -1) throw new Error('Malformed AI response')
     // The work succeeded, so charge for it now.
     await gate.commit?.()
-    return res.status(200).json(JSON.parse(content.slice(first, last + 1)))
+    const parsed = JSON.parse(content.slice(first, last + 1))
+    if (Array.isArray(parsed?.questions)) parsed.questions = shuffleChoices(parsed.questions)
+    return res.status(200).json(parsed)
   } catch (e) {
     console.error('[timed-challenge]', e)
     return res.status(500).json({ error: 'Failed. Please try again.' })

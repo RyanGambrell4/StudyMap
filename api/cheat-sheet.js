@@ -1,6 +1,6 @@
 import { reserveAiUsage, verifyAuth } from '../lib/server/usage.js'
 import { sendUserError } from '../lib/server/userErrors.js'
-import { getCourseContext, formatCourseContextForPrompt, resolveCourseId } from '../lib/server/courseContext.js'
+import { getCourseContext, formatCourseContextForPrompt, resolveCourseId, topicScope } from '../lib/server/courseContext.js'
 import { TOPIC_TOOL_RULES } from '../lib/server/coachAntiGuessing.js'
 import { buildClientSupplementBlock } from '../lib/server/courseContextPrompt.js'
 import { saveArtifact } from '../lib/server/artifactWriter.js'
@@ -40,7 +40,7 @@ export default async function handler(req, res) {
       ? 'Recompute the ranking emphasizing cross-topic connections and applied problems drawn from the coach plan and syllabus.'
       : 'Rank the most likely exam topics using ALL context signals below. Weight = syllabus mention density × recent quiz-miss rate × proximity to exam date × professor emphasis.'
 
-  const contextBlock = formatCourseContextForPrompt(brain)
+  const contextBlock = formatCourseContextForPrompt(brain, topicScope(examPrompt))
 
   const prompt = `You are the student's academic coach preparing a personalized cheat sheet for their ${resolvedName} exam.
 

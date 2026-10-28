@@ -1,3 +1,4 @@
+import { shuffleChoices, shuffleQuestion } from '../lib/server/shuffleChoices.js'
 import { reserveAiUsage, verifyAuth } from '../lib/server/usage.js'
 import { getCourseContext, formatCourseContextForPrompt, resolveCourseId } from '../lib/server/courseContext.js'
 import { TOPIC_TOOL_RULES } from '../lib/server/coachAntiGuessing.js'
@@ -238,7 +239,8 @@ Hard rules:
     // The work succeeded, so charge for it now. A reservation that never
     // reaches this line costs the user nothing.
     await gate.commit?.()
-    return res.status(200).json({ questions: normalized })
+    // Verbatim questions copied from the student's material keep their order.
+    return res.status(200).json({ questions: normalized.map(q => q.sourceType === 'verbatim' ? q : shuffleQuestion(q)) })
 
   } catch (err) {
     console.error('[generate-practice-exam] Unhandled error:', err)

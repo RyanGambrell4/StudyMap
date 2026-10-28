@@ -1,8 +1,10 @@
+import { debugPrompt } from '../lib/server/promptDebug.js'
 import { reserveAiUsage, verifyAuth } from '../lib/server/usage.js'
 import { checkFeatureRateLimit } from '../lib/server/rateLimit.js'
 import { getCourseContext, formatCourseContextForPrompt, resolveCourseId } from '../lib/server/courseContext.js'
 import { TOPIC_TOOL_RULES } from '../lib/server/coachAntiGuessing.js'
 import { buildClientSupplementBlock } from '../lib/server/courseContextPrompt.js'
+import { sectionize, renderSections, MATERIAL_ONLY_RULES } from '../lib/server/sourceSections.js'
 import { saveArtifact } from '../lib/server/artifactWriter.js'
 import { USER_ERRORS, sendUserError } from '../lib/server/userErrors.js'
 import { logAiCall } from '../lib/server/aiCost.js'
@@ -23,8 +25,16 @@ export default async function handler(req, res) {
   const auth = await verifyAuth(req)
   if (!auth.ok) return res.status(auth.status).json({ error: auth.error })
 
-  const { text, mode, courseName, courseId: bodyCourseId, sessionType, topic, images, professorEmphasis, struggles, learningStyle, courseContext: legacyCtx } = req.body;
+  const { text, mode, courseName, courseId: bodyCourseId, sessionType, topic, images, professorEmphasis: rawEmphasis, struggles: rawStruggles, learningStyle, courseContext: legacyCtx } = req.body;
   const safeImages = Array.isArray(images) ? images.slice(0, 6).filter(i => i?.data && i?.media_type) : []
+  // A request about a typed topic or about material sent with it is scoped
+  // to that: course weak areas and emphasis are left out, because "make sure
+  // these are well-represented" pulled every later request toward whatever
+  // a past one-off quiz had flagged.
+  const topicScoped = (typeof topic === 'string' && topic.trim().length > 0)
+    || (typeof text === 'string' && text.length >= 50) || safeImages.length > 0
+  const professorEmphasis = topicScoped ? null : rawEmphasis
+  const struggles = topicScoped ? [] : rawStruggles
 
   // predict-grade mode does simple math on request-body components; no
   // course context needed. Load context only for AI-generating modes.
@@ -45,8 +55,8 @@ export default async function handler(req, res) {
       return sendUserError(res, 'course_context_failed', err)
     }
     resolvedCourseName = brain.identity?.name || courseName || 'Unknown Course'
-    ctxBlock = TOPIC_TOOL_RULES + '\n\n' + formatCourseContextForPrompt(brain)
-    supplementBlock = buildClientSupplementBlock(legacyCtx)
+    ctxBlock = TOPIC_TOOL_RULES + '\n\n' + formatCourseContextForPrompt(brain, topicScoped ? { scope: 'topic' } : {})
+    supplementBlock = topicScoped ? '' : buildClientSupplementBlock(legacyCtx)
   }
 
   // The course has resolved and the request is well formed, so this is the
@@ -97,7 +107,7 @@ export default async function handler(req, res) {
       ? `The student wants to be quizzed ONLY on this topic. Do not quiz on anything outside it:\n"${topic.trim()}"\n\n`
       : ''
     const sourceLine = hasText
-      ? `The student's source material:\n${text.slice(0, 6000)}\n\n`
+      ? `The student's material, in numbered sections:\n${renderSections(sectionize(text))}\n\n${MATERIAL_ONLY_RULES}\n\n`
       : ''
     const imageLine = hasImages
       ? `The student also uploaded ${safeImages.length} image(s) (attached) - treat them as authoritative source material.\n\n`
@@ -113,8 +123,7 @@ ${ctxBlock}${supplementBlock}
 ${emphasisLine}${struggleLine}${scopeLine}${sourceLine}${imageLine}Generate exactly 5 multiple choice questions.
 
 ${hasTopic ? 'EVERY question must directly test the topic above. Do not drift to other material.' : ''}
-${hasTopic && (hasText || hasImages) ? 'Use the source wherever it covers the topic. If the source does not cover the topic, ignore it and quiz on the topic itself.' : ''}
-${!hasTopic && (hasText || hasImages) ? 'Only quiz on material that is actually present in the source. Do not invent facts.' : ''}
+${hasText || hasImages ? 'Every question must come from the material. The topic above is only its label.' : ''}
 
 Return ONLY this JSON array with no other text:
 [
@@ -122,7 +131,7 @@ Return ONLY this JSON array with no other text:
     "question": "question text",
     "options": ["A. option", "B. option", "C. option", "D. option"],
     "answer": "exact text of correct option including the letter prefix",
-    "explanation": "one sentence explanation"
+    "explanation": "one sentence explanation"${hasText ? ',\n    "source": "Section N"' : ''}
   }
 ]
 
@@ -305,7 +314,7 @@ Rules:
     ? `The student asked for flashcards ONLY on this topic - do not go outside it:\n"${topic.trim()}"\n\n`
     : ''
   const sourceFc = hasTextFc
-    ? `Source material the student uploaded or wrote:\n${text.slice(0, 8000)}\n\n`
+    ? `The student's material, in numbered sections:\n${renderSections(sectionize(text))}\n\n${MATERIAL_ONLY_RULES}\n\n`
     : ''
   const imagesFc = hasImagesFc
     ? `The student also uploaded ${safeImages.length} image(s), attached - use them as source material.\n\n`
@@ -328,17 +337,16 @@ ${ctxBlock}${supplementBlock}
 ${emphasisFc}${struggleFc}${styleFc}${scopeFc}${sourceFc}${imagesFc}Generate exactly this JSON structure with no extra text:
 {
   "flashcards": [
-    {"front": "clear question about a key concept", "back": "concise answer - a few words or 1 short sentence", "topic": "topic name", "isWeakTopic": false, "reviewFirst": false}
+    {"front": "clear question about a key concept", "back": "concise answer - a few words or 1 short sentence", "topic": "topic name", "isWeakTopic": false, "reviewFirst": false${hasTextFc ? ', "source": "Section N"' : ''}}
   ],
   "quiz": [
-    {"question": "question text", "type": "multiple_choice", "options": ["A", "B", "C", "D"], "answer": "correct option text", "explanation": "why this is correct", "topic": "topic name"}
+    {"question": "question text", "type": "multiple_choice", "options": ["A", "B", "C", "D"], "answer": "correct option text", "explanation": "why this is correct", "topic": "topic name"${hasTextFc ? ', "source": "Section N"' : ''}}
   ],
   "startHere": "Optional one-line hint pointing to which flashcard or topic the student should review first, tied to a weak topic or past miss. Omit if no strong signal."
 }
 
 ${hasTopicFc ? 'EVERY flashcard and quiz question MUST stay strictly inside the requested topic. Do not produce any card that goes outside it. If the topic is narrow, produce fewer but deeper cards - quality over quantity.' : ''}
-${hasTopicFc && (hasTextFc || hasImagesFc) ? 'Use the source wherever it covers the topic. If the source does not cover the topic, ignore it and build the cards from the topic itself.' : ''}
-${!hasTopicFc && (hasTextFc || hasImagesFc) ? 'Only build cards on material that actually appears in the source. Do not invent facts.' : ''}
+${hasTextFc || hasImagesFc ? 'Every card and question must come from the material. The topic above is only its label.' : ''}
 
 Creativity rules (make the cards actually interesting, not robotic):
 - Mix card styles: definition recall, "fill in the blank", "which of these is NOT…", scenario-based ("A student argues X - what concept are they missing?"), contrast pairs ("How does X differ from Y?"), causal chains ("If X happens, what follows?"), and compare/contrast.
@@ -357,6 +365,7 @@ Hard rules:
 - When source material is thin, prefer the syllabus, emphasis topics, and weak topics from the context above. Only fall back to canonical course knowledge as a last resort.
 - No em dashes in any field.`
 
+  debugPrompt(gate.userId, 'generate-study-tools (flashcards)', fcPrompt)
   const userContentFc = hasImagesFc
     ? [
         ...safeImages.map(img => ({

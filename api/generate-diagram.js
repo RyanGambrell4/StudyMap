@@ -1,6 +1,6 @@
 import { reserveAiUsage, verifyAuth } from '../lib/server/usage.js'
 import { sendUserError } from '../lib/server/userErrors.js'
-import { getCourseContext, formatCourseContextForPrompt, resolveCourseId } from '../lib/server/courseContext.js'
+import { getCourseContext, formatCourseContextForPrompt, resolveCourseId, topicScope } from '../lib/server/courseContext.js'
 import { TOPIC_TOOL_RULES } from '../lib/server/coachAntiGuessing.js'
 import { buildClientSupplementBlock } from '../lib/server/courseContextPrompt.js'
 import { saveArtifact } from '../lib/server/artifactWriter.js'
@@ -108,7 +108,7 @@ export default async function handler(req, res) {
     return sendUserError(res, 'course_context_failed', err)
   }
 
-  const contextBlock = formatCourseContextForPrompt(brain)
+  const contextBlock = formatCourseContextForPrompt(brain, topicScope(topic))
   const supplementBlock = buildClientSupplementBlock(legacyCtx)
 
   const prompt = `You are drawing a study diagram for a specific student.

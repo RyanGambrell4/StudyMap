@@ -1,6 +1,6 @@
 import { reserveAiUsage, verifyAuth } from '../lib/server/usage.js'
 import { sendUserError } from '../lib/server/userErrors.js'
-import { getCourseContext, formatCourseContextForPrompt, resolveCourseId } from '../lib/server/courseContext.js'
+import { getCourseContext, formatCourseContextForPrompt, resolveCourseId, topicScope } from '../lib/server/courseContext.js'
 import { TOPIC_TOOL_RULES } from '../lib/server/coachAntiGuessing.js'
 import { buildContextBlock } from '../lib/server/courseContextPrompt.js'
 import { logAiCall } from '../lib/server/aiCost.js'
@@ -41,7 +41,7 @@ export default async function handler(req, res) {
   if (courseId) {
     try {
       const brain = await getCourseContext(gate.userId, courseId, { topic: concept.trim(), request: req })
-      contextBlock = formatCourseContextForPrompt(brain)
+      contextBlock = formatCourseContextForPrompt(brain, topicScope(concept))
     } catch (err) {
       console.error('[reteach] getCourseContext failed, continuing without course context', err)
     }

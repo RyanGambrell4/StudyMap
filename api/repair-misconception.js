@@ -1,3 +1,4 @@
+import { shuffleChoices, shuffleQuestion } from '../lib/server/shuffleChoices.js'
 import { reserveAiUsage, verifyAuth } from '../lib/server/usage.js'
 import { sendUserError } from '../lib/server/userErrors.js'
 import { recordTopicSignal } from '../lib/server/topicSignals.js'
@@ -75,6 +76,7 @@ Rules:
     const last = content.lastIndexOf('}')
     if (first === -1 || last === -1) throw new Error('Malformed AI response')
     const result = JSON.parse(content.slice(first, last + 1))
+    if (result?.repairQuestion) result.repairQuestion = shuffleQuestion(result.repairQuestion)
 
     // Presence of a misconception is a weak-signal for the topic. Fixed
     // low score at full weight (see SIGNAL_TYPE_SCORE_RULES). Skip if
