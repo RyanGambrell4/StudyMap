@@ -19,6 +19,13 @@ import {
 import { assignScheduledDates } from '../lib/shared/coachPlan.js'
 import { logAiCall } from '../lib/server/aiCost.js'
 import { rateLimit } from '../lib/server/rateLimit.js'
+import {
+  SESSION_CONTENT_MODEL,
+  SYSTEM_PROMPT as SESSION_SYSTEM_PROMPT,
+  buildUserPrompt,
+  normalizeItems,
+  parseContent,
+} from '../lib/server/sessionContent.js'
 
 /**
  * What one coach plan costs against the monthly AI allowance.
@@ -298,6 +305,80 @@ function repairPlan(plan, scaffold, sessionsPerWeek, sessionMinutes, phaseMap, s
   }
 }
 
+// ─── Session content (iOS plan engine) ───────────────────────────────────────
+// The app builds the schedule, types and steps itself and asks only for the
+// wording of one batch of sessions (see lib/server/sessionContent.js). Part 0
+// is the plan the student asked for and costs what a plan costs; the later
+// parts are the same plan filled in the background and are capped by count.
+const SESSION_PARTS_PER_HOUR = 80
+
+async function handleSessionContent(req, res, auth) {
+  const items = normalizeItems(req.body?.items)
+  if (!items) return res.status(400).json({ error: 'Missing sessions' })
+  const part = Math.max(0, Number(req.body?.part) || 0)
+
+  let gate = null
+  if (part === 0) {
+    gate = await reserveAiUsage(req, { verified: auth, cost: COACH_PLAN_AI_COST })
+    if (!gate.ok) return res.status(gate.status).json({ error: gate.error, usage: gate.usage })
+    const attempts = await rateLimit(
+      `coach:attempts:${gate.userId}`,
+      gate.plan === 'free' ? COACH_ATTEMPTS_PER_HOUR_FREE : COACH_ATTEMPTS_PER_HOUR_PAID,
+      3600,
+    )
+    if (!attempts.allowed) {
+      const minutes = Math.max(1, Math.ceil(attempts.resetIn / 60))
+      return res.status(429).json({
+        error: `You've hit the hourly limit for building study plans. Try again in ${minutes} minutes.`,
+        code: 'COACH_ATTEMPT_LIMIT',
+        retryAfter: attempts.resetIn,
+      })
+    }
+  } else {
+    const parts = await rateLimit(`coach:parts:${auth.userId}`, SESSION_PARTS_PER_HOUR, 3600)
+    if (!parts.allowed) {
+      return res.status(429).json({ error: 'Too many plan requests. Try again in a few minutes.', code: 'COACH_PARTS_LIMIT' })
+    }
+  }
+
+  try {
+    const userPrompt = buildUserPrompt(req.body?.courseName, items)
+    debugPrompt(auth.userId, `generate-study-coach-plan (sessions part ${part})`, `SYSTEM:\n${SESSION_SYSTEM_PROMPT}\n\nUSER:\n${userPrompt}`)
+    const response = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: {
+        'x-api-key': process.env.ANTHROPIC_API_KEY,
+        'anthropic-version': '2023-06-01',
+        'content-type': 'application/json',
+      },
+      body: JSON.stringify({
+        model: SESSION_CONTENT_MODEL,
+        max_tokens: 300 + items.length * 260,
+        system: [{ type: 'text', text: SESSION_SYSTEM_PROMPT, cache_control: { type: 'ephemeral' } }],
+        messages: [{ role: 'user', content: userPrompt }],
+      }),
+    })
+    const data = await response.json()
+    await logAiCall({
+      endpoint: 'generate-study-coach-plan:sessions',
+      model: SESSION_CONTENT_MODEL,
+      userId: auth.userId,
+      plan: gate?.plan,
+      usage: data?.usage,
+      ok: response.ok,
+      reason: response.ok ? null : (data?.error?.type ?? `http_${response.status}`),
+    })
+    if (!response.ok) throw new Error(data?.error?.message ?? `Anthropic API error ${response.status}`)
+    const sessions = parseContent(data.content?.[0]?.text ?? '', items)
+    if (!Object.keys(sessions).length) throw new Error('No usable session content')
+    await gate?.commit?.()
+    res.status(200).json({ sessions })
+  } catch (error) {
+    console.error('Session content error:', error)
+    res.status(500).json({ error: USER_ERRORS.unexpected.error, code: USER_ERRORS.unexpected.code })
+  }
+}
+
 // ─── Handler ─────────────────────────────────────────────────────────────────
 export default async function handler(req, res) {
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' })
@@ -326,6 +407,8 @@ export default async function handler(req, res) {
     strengths,
     courseRecallScores,
   } = req.body || {}
+
+  if (req.body?.mode === 'sessions') return handleSessionContent(req, res, auth)
 
   if (!goal) return res.status(400).json({ error: 'Missing goal' })
 
