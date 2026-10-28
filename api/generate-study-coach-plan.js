@@ -375,7 +375,7 @@ export default async function handler(req, res) {
     return sendUserError(res, 'course_context_failed', err)
   }
   const resolvedCourseName = brain.identity?.name || courseName
-  const serverContextBlock = formatCourseContextForPrompt(brain)
+  const serverContextBlock = formatCourseContextForPrompt(brain, { scope: 'plan' })
 
   const EXAM_PATTERN = /C\/P|CARS|B\/B|P\/S|Logical Reasoning|Analytical Reasoning|Reading Comprehension|FAR|AUD|REG|MBE|MEE|MPT|Verbal Reasoning|Quantitative Reasoning|Analytical Writing|Quantitative|Data Insights/i
   const isExamMode = EXAM_PATTERN.test(resolvedCourseName)

@@ -125,6 +125,24 @@ describe('topic isolation', () => {
   })
 })
 
+describe('plan isolation', () => {
+  it('a plan uses the course\'s intake and syllabus, not topics derived from past tool use', async () => {
+    // Derived topics, struggles, sessions and an old plan are contaminated;
+    // the course's own uploaded syllabus is legitimate input to a plan.
+    currentBrain = { ...brainFor('Econ', 'World war 2'),
+                     materials: { excerpts: [{ text: 'ECON syllabus: labour markets, elasticity', source: 'syllabus' }] } }
+    await call('./generate-study-coach-plan.js', {
+      courseName: 'Econ', goal: 'Reach A in Econ', emphasisTopics: 'Labour economics, Elasticity',
+      importantDates: [], daysPerWeek: 4, sessionMinutes: 45, struggles: [], strengths: '',
+    })
+    expect(prompts.length).toBeGreaterThan(0)
+    for (const p of prompts) {
+      expect(p).toContain('Labour economics')
+      expect(p).not.toMatch(WW2)
+    }
+  })
+})
+
 describe('course isolation', () => {
   it('two courses: a request in course Y has nothing from course X', async () => {
     currentBrain = brainFor('History', 'World war 2')

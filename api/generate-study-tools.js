@@ -33,6 +33,9 @@ export default async function handler(req, res) {
   // a past one-off quiz had flagged.
   const topicScoped = (typeof topic === 'string' && topic.trim().length > 0)
     || (typeof text === 'string' && text.length >= 50) || safeImages.length > 0
+  // With material attached the material is the only source; the typed
+  // topic is just its label.
+  const hasMaterial = (typeof text === 'string' && text.length >= 50) || safeImages.length > 0
   const professorEmphasis = topicScoped ? null : rawEmphasis
   const struggles = topicScoped ? [] : rawStruggles
 
@@ -55,7 +58,7 @@ export default async function handler(req, res) {
       return sendUserError(res, 'course_context_failed', err)
     }
     resolvedCourseName = brain.identity?.name || courseName || 'Unknown Course'
-    ctxBlock = TOPIC_TOOL_RULES + '\n\n' + formatCourseContextForPrompt(brain, topicScoped ? { scope: 'topic' } : {})
+    ctxBlock = (hasMaterial ? '' : TOPIC_TOOL_RULES + '\n\n') + formatCourseContextForPrompt(brain, topicScoped ? { scope: 'topic' } : {})
     supplementBlock = topicScoped ? '' : buildClientSupplementBlock(legacyCtx)
   }
 
@@ -103,7 +106,7 @@ export default async function handler(req, res) {
     const hasText = typeof text === 'string' && text.length > 50
     const hasImages = safeImages.length > 0
 
-    const scopeLine = hasTopic
+    const scopeLine = hasTopic && !hasText && !hasImages
       ? `The student wants to be quizzed ONLY on this topic. Do not quiz on anything outside it:\n"${topic.trim()}"\n\n`
       : ''
     const sourceLine = hasText
@@ -122,7 +125,7 @@ ${ctxBlock}${supplementBlock}
 
 ${emphasisLine}${struggleLine}${scopeLine}${sourceLine}${imageLine}Generate exactly 5 multiple choice questions.
 
-${hasTopic ? 'EVERY question must directly test the topic above. Do not drift to other material.' : ''}
+${hasTopic && !hasText && !hasImages ? 'EVERY question must directly test the topic above. Do not drift to other material.' : ''}
 ${hasText || hasImages ? 'Every question must come from the material. The topic above is only its label.' : ''}
 
 Return ONLY this JSON array with no other text:
@@ -140,8 +143,7 @@ Rules:
 - All 4 options must be plausible
 - Answer must exactly match one of the options strings
 - Explanations must be 1-2 sentences maximum
-- When source material is thin, prefer the syllabus, emphasis topics, and weak topics from the context above. Only fall back to canonical course knowledge as a last resort.
-- No em dashes in any field`
+${topicScoped ? '' : '- When source material is thin, prefer the syllabus, emphasis topics, and weak topics from the context above. Only fall back to canonical course knowledge as a last resort.\n'}- No em dashes in any field`
 
     const userContent = hasImages
       ? [
@@ -310,7 +312,7 @@ Rules:
     return res.status(400).json({ error: 'Provide a topic, source material, or notes.' });
   }
 
-  const scopeFc = hasTopicFc
+  const scopeFc = hasTopicFc && !hasTextFc && !hasImagesFc
     ? `The student asked for flashcards ONLY on this topic - do not go outside it:\n"${topic.trim()}"\n\n`
     : ''
   const sourceFc = hasTextFc
@@ -345,7 +347,7 @@ ${emphasisFc}${struggleFc}${styleFc}${scopeFc}${sourceFc}${imagesFc}Generate exa
   "startHere": "Optional one-line hint pointing to which flashcard or topic the student should review first, tied to a weak topic or past miss. Omit if no strong signal."
 }
 
-${hasTopicFc ? 'EVERY flashcard and quiz question MUST stay strictly inside the requested topic. Do not produce any card that goes outside it. If the topic is narrow, produce fewer but deeper cards - quality over quantity.' : ''}
+${hasTopicFc && !hasTextFc && !hasImagesFc ? 'EVERY flashcard and quiz question MUST stay strictly inside the requested topic. Do not produce any card that goes outside it. If the topic is narrow, produce fewer but deeper cards - quality over quantity.' : ''}
 ${hasTextFc || hasImagesFc ? 'Every card and question must come from the material. The topic above is only its label.' : ''}
 
 Creativity rules (make the cards actually interesting, not robotic):
@@ -361,9 +363,7 @@ Hard rules:
 - Bad backs: long explanations, multiple clauses, anything over 25 words unless truly necessary.
 - Generate 15 flashcards and 10 quiz questions (fewer only if the topic is too narrow to support that many - never pad with irrelevant content).
 - Quiz wrong answers must be plausible but clearly wrong if you know the material.
-- Set isWeakTopic=true and reviewFirst=true on any flashcard whose topic matches a weak topic, recent miss, or struggle from the context above. Aim for at least 3 cards flagged when weak topics exist.
-- When source material is thin, prefer the syllabus, emphasis topics, and weak topics from the context above. Only fall back to canonical course knowledge as a last resort.
-- No em dashes in any field.`
+${topicScoped ? '' : '- Set isWeakTopic=true and reviewFirst=true on any flashcard whose topic matches a weak topic, recent miss, or struggle from the context above. Aim for at least 3 cards flagged when weak topics exist.\n- When source material is thin, prefer the syllabus, emphasis topics, and weak topics from the context above. Only fall back to canonical course knowledge as a last resort.\n'}- No em dashes in any field.`
 
   debugPrompt(gate.userId, 'generate-study-tools (flashcards)', fcPrompt)
   const userContentFc = hasImagesFc
