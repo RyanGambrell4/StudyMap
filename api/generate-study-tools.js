@@ -1,4 +1,3 @@
-import { debugPrompt } from '../lib/server/promptDebug.js'
 import { reserveAiUsage, verifyAuth } from '../lib/server/usage.js'
 import { checkFeatureRateLimit } from '../lib/server/rateLimit.js'
 import { getCourseContext, formatCourseContextForPrompt, resolveCourseId } from '../lib/server/courseContext.js'
@@ -365,7 +364,6 @@ Hard rules:
 - Quiz wrong answers must be plausible but clearly wrong if you know the material.
 ${topicScoped ? '' : '- Set isWeakTopic=true and reviewFirst=true on any flashcard whose topic matches a weak topic, recent miss, or struggle from the context above. Aim for at least 3 cards flagged when weak topics exist.\n- When source material is thin, prefer the syllabus, emphasis topics, and weak topics from the context above. Only fall back to canonical course knowledge as a last resort.\n'}- No em dashes in any field.`
 
-  debugPrompt(gate.userId, 'generate-study-tools (flashcards)', fcPrompt)
   const userContentFc = hasImagesFc
     ? [
         ...safeImages.map(img => ({

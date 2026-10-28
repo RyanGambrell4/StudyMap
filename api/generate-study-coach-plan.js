@@ -1,4 +1,3 @@
-import { debugPrompt } from '../lib/server/promptDebug.js'
 import { reserveAiUsage, verifyAuth } from '../lib/server/usage.js'
 import { USER_ERRORS, sendUserError } from '../lib/server/userErrors.js'
 import {
@@ -343,7 +342,6 @@ async function handleSessionContent(req, res, auth) {
 
   try {
     const userPrompt = buildUserPrompt(req.body?.courseName, items)
-    debugPrompt(auth.userId, `generate-study-coach-plan (sessions part ${part})`, `SYSTEM:\n${SESSION_SYSTEM_PROMPT}\n\nUSER:\n${userPrompt}`)
     const response = await fetch('https://api.anthropic.com/v1/messages', {
       method: 'POST',
       headers: {
@@ -628,7 +626,6 @@ Output the JSON now.`
   // can do and it needs its own line in the cost data rather than being summed
   // into the initial attempt.
   const callModel = async (messages, phase = 'initial') => {
-    debugPrompt(gate.userId, `generate-study-coach-plan (${phase})`, `SYSTEM:\n${systemPrompt}\n\nMESSAGES:\n${messages.map(m => `[${m.role}]\n${typeof m.content === 'string' ? m.content : JSON.stringify(m.content)}`).join('\n\n')}`)
     const response = await fetch('https://api.anthropic.com/v1/messages', {
       method: 'POST',
       headers: {
