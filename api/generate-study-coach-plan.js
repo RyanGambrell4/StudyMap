@@ -1,4 +1,4 @@
-import { reserveAiUsage, verifyAuth } from '../lib/server/usage.js'
+import { getEnforcedPlan, reserveAiUsage, verifyAuth } from '../lib/server/usage.js'
 import { USER_ERRORS, sendUserError } from '../lib/server/userErrors.js'
 import {
   ANTI_GUESSING_RULES,
@@ -310,6 +310,10 @@ function repairPlan(plan, scaffold, sessionsPerWeek, sessionMinutes, phaseMap, s
 // is the plan the student asked for and costs what a plan costs; the later
 // parts are the same plan filled in the background and are capped by count.
 const SESSION_PARTS_PER_HOUR = 80
+// A free account gets one plan; its later weeks are a handful of batches, so
+// a dozen a day covers building and re-placing it without making the wording
+// call a way around the monthly AI allowance.
+const SESSION_PARTS_PER_DAY_FREE = 12
 
 async function handleSessionContent(req, res, auth) {
   const items = normalizeItems(req.body?.items)
@@ -334,7 +338,10 @@ async function handleSessionContent(req, res, auth) {
       })
     }
   } else {
-    const parts = await rateLimit(`coach:parts:${auth.userId}`, SESSION_PARTS_PER_HOUR, 3600)
+    const plan = await getEnforcedPlan(auth.userId)
+    const parts = plan === 'free'
+      ? await rateLimit(`coach:parts:day:${auth.userId}`, SESSION_PARTS_PER_DAY_FREE, 86400)
+      : await rateLimit(`coach:parts:${auth.userId}`, SESSION_PARTS_PER_HOUR, 3600)
     if (!parts.allowed) {
       return res.status(429).json({ error: 'Too many plan requests. Try again in a few minutes.', code: 'COACH_PARTS_LIMIT' })
     }
