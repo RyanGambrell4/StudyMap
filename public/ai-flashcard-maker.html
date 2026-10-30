@@ -115,11 +115,12 @@
   </script>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500;1,600&family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600;9..40,700&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,600;1,8..60,400&display=swap" rel="stylesheet" />
 
-  <style>
+  <link rel="stylesheet" href="/seo.css" />
+<style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-    html { font-family: 'DM Sans', 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #F7F6F3; color: #1A1A1A; line-height: 1.6; -webkit-font-smoothing: antialiased; }
+    html { font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #F7F6F3; color: #1A1A1A; line-height: 1.6; -webkit-font-smoothing: antialiased; }
     body { min-height: 100vh; }
     a { color: #3B61C4; text-decoration: none; }
     a:hover { text-decoration: underline; }
@@ -133,8 +134,8 @@
     .hero { max-width: 780px; margin: 80px auto 60px; padding: 0 24px; text-align: center; }
     .badge { display: inline-flex; align-items: center; gap: 8px; background: #FFFFFF; color: #3B61C4; font-size: 12px; font-weight: 600; padding: 7px 14px; border-radius: 999px; border: 1px solid rgba(0,0,0,0.07); margin-bottom: 26px; letter-spacing: 0.14em; text-transform: uppercase; }
     .badge::before { content: ""; width: 6px; height: 6px; border-radius: 50%; background: #3B61C4; box-shadow: 0 0 0 3px rgba(59,97,196,0.18); display: inline-block; }
-    h1 { font-family: 'DM Sans', sans-serif; font-size: clamp(36px, 5.6vw, 62px); font-weight: 700; line-height: 1.05; letter-spacing: -0.03em; color: #1A1A1A; margin-bottom: 22px; }
-    h1 span { font-family: 'Cormorant Garamond', Georgia, serif; font-style: italic; font-weight: 500; color: #3B61C4; }
+    h1 { font-family: sans-serif; font-size: clamp(36px, 5.6vw, 62px); font-weight: 700; line-height: 1.05; letter-spacing: -0.03em; color: #1A1A1A; margin-bottom: 22px; }
+    h1 span { font-family: 'Source Serif 4', Georgia, serif; font-style: italic; font-weight: 500; color: #3B61C4; }
     .hero p { font-size: 18.5px; color: #6B6B6B; max-width: 600px; margin: 0 auto 36px; line-height: 1.6; }
     .cta-group { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
     .btn-primary { background: #3B61C4; color: #fff; padding: 14px 28px; border-radius: 12px; font-size: 15.5px; font-weight: 600; display: inline-block; transition: background 0.15s; }
@@ -143,14 +144,14 @@
     .btn-ghost:hover { background: #FAFAF8; border-color: rgba(0,0,0,0.14); text-decoration: none; }
 
     .section { max-width: 900px; margin: 0 auto 88px; padding: 0 24px; }
-    h2 { font-family: 'DM Sans', sans-serif; font-size: clamp(26px, 3.8vw, 40px); font-weight: 700; letter-spacing: -0.025em; line-height: 1.12; color: #1A1A1A; margin-bottom: 14px; }
-    h2 span { font-family: 'Cormorant Garamond', Georgia, serif; font-style: italic; font-weight: 500; color: #3B61C4; }
+    h2 { font-family: sans-serif; font-size: clamp(26px, 3.8vw, 40px); font-weight: 700; letter-spacing: -0.025em; line-height: 1.12; color: #1A1A1A; margin-bottom: 14px; }
+    h2 span { font-family: 'Source Serif 4', Georgia, serif; font-style: italic; font-weight: 500; color: #3B61C4; }
     h3 { font-size: 18px; font-weight: 700; color: #1A1A1A; margin-bottom: 8px; letter-spacing: -0.005em; }
     p { color: #6B6B6B; margin-bottom: 16px; }
 
     .steps { display: grid; gap: 18px; margin-top: 40px; }
     .step { background: #FFFFFF; border: 1px solid rgba(0,0,0,0.07); border-radius: 16px; padding: 28px; display: flex; gap: 22px; align-items: flex-start; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
-    .step-num { background: rgba(59,97,196,0.10); color: #3B61C4; width: 44px; height: 44px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-family: 'Cormorant Garamond', Georgia, serif; font-style: italic; font-weight: 500; font-size: 22px; flex-shrink: 0; }
+    .step-num { background: rgba(59,97,196,0.10); color: #3B61C4; width: 44px; height: 44px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-family: 'Source Serif 4', Georgia, serif; font-style: italic; font-weight: 500; font-size: 22px; flex-shrink: 0; }
 
     .features-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 18px; margin-top: 40px; }
     .feature-card { background: #FFFFFF; border: 1px solid rgba(0,0,0,0.07); border-radius: 14px; padding: 24px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
