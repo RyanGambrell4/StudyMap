@@ -11,16 +11,15 @@ last_updated: "2026-06-20"
 
 - **Price:** $0/month — no credit card required
 - **Courses:** 1 course
-- **AI Tutor:** 1 action per day
+- **AI actions:** 5 per month
 - **Session Blueprints:** 1 free use
-- **Focus Mode:** 1 free use
+- **Focus Mode:** up to 30 minutes per day
 - **AI Coach Plan:** 1 free use
-- **Flashcards:** Basic flashcard access
+- **Flashcards:** 1 deck, up to 10 cards
 - **Grade tracking:** Included
 
 ## Pro Plan
 
-- **Weekly:** $9.99/month
 - **Monthly:** $9.99/month
 - **Annual:** $69.99/year (~$5.83/month, save 42%)
 - **Trial:** 7-day free trial, cancel anytime
@@ -34,7 +33,6 @@ last_updated: "2026-06-20"
 
 ## Unlimited Plan
 
-- **Weekly:** $14.99/month
 - **Monthly:** $14.99/month
 - **Annual:** $119.99/year (~$10/month, save 33%)
 - **Courses:** Unlimited courses

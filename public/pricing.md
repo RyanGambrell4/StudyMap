@@ -5,7 +5,7 @@ AI study planner for college students. Free to start, no credit card required.
 ## Free
 - Price: $0/month, forever
 - Courses: 1 course
-- AI actions: 10 AI actions/month
+- AI actions: 5 AI actions/month
 - Included features: 1 free use of Session Blueprints, Focus Mode, and AI Coach; flashcards, quizzes, active recall
 - Credit card: Not required
 

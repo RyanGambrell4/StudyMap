@@ -48,7 +48,7 @@ Upload your syllabus PDF and StudyEdge AI extracts all assignments, exams, and d
 ## Platform
 
 - Web app: https://getstudyedge.com/app
-- iOS app: Available on the App Store
+- iOS app: coming soon (web app works on iPhone today)
 - Android: Available on Google Play
 
 ## Related Pages
