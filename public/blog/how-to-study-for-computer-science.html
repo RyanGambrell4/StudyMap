@@ -186,6 +186,9 @@
   section { page-break-inside: avoid; }
 }
 </style>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,600;1,8..60,400&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/blog/editorial.css" />
 </head>
 <body>
 <div id="rp" style="position:fixed;top:0;left:0;width:0%;height:3px;background:#3B61C4;z-index:9999;pointer-events:none;" aria-hidden="true"></div>
@@ -207,13 +210,13 @@
 <section class="post-hero">
   <div class="container">
     <div class="post-meta"><a href="/blog">Blog</a> &middot; STEM &middot; July 13, 2026 <span class="updated-badge">Updated Jul 2026</span> &middot; 8 min read</div>
-<div class="share-bar" style="display:flex;align-items:center;gap:10px;margin-top:18px;flex-wrap:wrap;">
-  <span style="font-size:13px;color:#6B6B6B;font-weight:500;letter-spacing:.02em;">Share:</span>
-  <a href="https://twitter.com/intent/tweet?url=https://getstudyedge.com/blog/how-to-study-for-computer-science&amp;text=How%20to%20Study%20for%20Computer%20Science%20%7C%20StudyEdge%20AI" target="_blank" rel="noopener" style="display:inline-flex;align-items:center;gap:6px;padding:6px 14px;background:#000;color:#fff;border-radius:6px;font-size:13px;font-weight:500;text-decoration:none;">
+<div class="share-bar">
+  <span>Share:</span>
+  <a href="https://twitter.com/intent/tweet?url=https://getstudyedge.com/blog/how-to-study-for-computer-science&amp;text=How%20to%20Study%20for%20Computer%20Science%20%7C%20StudyEdge%20AI" target="_blank" rel="noopener">
     <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-4.714-6.231-5.401 6.231H2.738l7.726-8.85L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
     Share on X
   </a>
-  <button onclick="navigator.clipboard.writeText(window.location.href).then(function(){var b=this;b.textContent='Copied!';setTimeout(function(){b.textContent='Copy link'},2000)}.bind(this))" style="display:inline-flex;align-items:center;gap:6px;padding:6px 14px;background:#F7F6F3;color:#111111;border:1px solid rgba(0,0,0,0.12);border-radius:6px;font-size:13px;font-weight:500;cursor:pointer;font-family:inherit;">
+  <button onclick="navigator.clipboard.writeText(window.location.href).then(function(){var b=this;b.textContent='Copied!';setTimeout(function(){b.textContent='Copy link'},2000)}.bind(this))">
     Copy link
   </button>
 </div>
@@ -343,19 +346,17 @@
 </div>
 
 
-<div class="inline-email-capture" style="background:#f0f4ff;border:1.5px solid rgba(59,97,196,.2);border-radius:12px;padding:24px 28px;margin:36px 0;text-align:center;">
-  <p style="font-size:12px;font-weight:700;letter-spacing:0.10em;text-transform:uppercase;color:#3B61C4;margin:0 0 8px;">Free from StudyEdge</p>
-  <p style="font-size:18px;font-weight:700;color:#111;margin:0 0 6px;">Get weekly study research in plain English</p>
-  <p style="font-size:14px;color:#555;margin:0 0 18px;">Evidence-based study tips, exam tactics, and cognitive science findings delivered once a week. No filler.</p>
-  <form class="inline-email-form" onsubmit="return inlineSubscribe(this, event)" style="display:flex;gap:8px;max-width:400px;margin:0 auto;">
-    <input type="email" placeholder="your@email.com" required
-      style="flex:1;padding:10px 13px;border:1.5px solid rgba(59,97,196,.3);border-radius:7px;font-size:14px;outline:none;background:#fff;color:#111;" />
-    <button type="submit"
-      style="padding:10px 18px;background:#3B61C4;color:#fff;border:none;border-radius:7px;font-size:14px;font-weight:600;cursor:pointer;white-space:nowrap;">
+<div class="inline-email-capture">
+  <p>Free from StudyEdge</p>
+  <p>Get weekly study research in plain English</p>
+  <p>Evidence-based study tips, exam tactics, and cognitive science findings delivered once a week. No filler.</p>
+  <form class="inline-email-form" onsubmit="return inlineSubscribe(this, event)">
+    <input type="email" placeholder="your@email.com" required />
+    <button type="submit">
       Subscribe
     </button>
   </form>
-  <p class="inline-email-msg" style="display:none;margin-top:10px;font-size:13px;font-weight:600;color:#3B61C4;"></p>
+  <p class="inline-email-msg"></p>
 </div>
 <script>
 function inlineSubscribe(form, e) {
@@ -385,9 +386,9 @@ function inlineSubscribe(form, e) {
 }
 </script>
 
-<section class="sources-section" style="margin-top:48px;padding-top:32px;border-top:1px solid rgba(0,0,0,.08);">
-  <h2 style="font-size:18px;font-weight:700;margin-bottom:16px;color:var(--text,#111);">Sources</h2>
-  <ol style="font-size:13px;line-height:1.7;color:var(--muted,#555);padding-left:20px;">
+<section class="sources-section">
+  <h2>Sources</h2>
+  <ol>
       <li>Dunlosky, J., Rawson, K. A., Marsh, E. J., Nathan, M. J., &amp; Willingham, D. T. (2013). Improving students&#39; learning with effective learning techniques. <em>Psychological Science in the Public Interest</em>, <em>14</em>(1), 4&#8211;58. <a href="https://doi.org/10.1177/1529100612453266" rel="noopener noreferrer" target="_blank">doi:10.1177/1529100612453266</a></li>
       <li>Karpicke, J. D., &amp; Blunt, J. R. (2011). Retrieval practice produces more learning than elaborative studying with concept mapping. <em>Science</em>, <em>331</em>(6018), 772&#8211;775. <a href="https://doi.org/10.1126/science.1199327" rel="noopener noreferrer" target="_blank">doi:10.1126/science.1199327</a></li>
       <li>Robins, A., Rountree, J., &amp; Rountree, N. (2003). Learning and teaching programming: A review and discussion. <em>Computer Science Education</em>, <em>13</em>(2), 137&#8211;172. <a href="https://doi.org/10.1076/csed.13.2.137.14200" rel="noopener noreferrer" target="_blank">doi:10.1076/csed.13.2.137.14200</a></li>
@@ -407,19 +408,6 @@ function inlineSubscribe(form, e) {
     </div>
   </div>
 </section>
-
-<div style="background:var(--bg,#F7F6F3);padding:4px 24px 0;">
-  <div style="max-width:760px;margin:0 auto;">
-    <div class="proof-strip">
-      <div class="proof-item"><span class="proof-num">7-day</span> free trial</div>
-      <div class="proof-divider"></div>
-      <div class="proof-item"><span class="proof-num">2 min</span> to your first study plan</div>
-      <div class="proof-divider"></div>
-      <div class="proof-item"><span class="proof-num">AI</span> flashcards from your notes</div>
-      <div class="proof-divider"></div>
-      <div class="proof-item"><span class="proof-num">✓</span> cancel anytime</div>
-    </div>
-  </div>
 </div>
 <section class="section" style="padding-top:0;">
   <div class="container">
@@ -450,15 +438,15 @@ function inlineSubscribe(form, e) {
   </div>
 </section>
 
-<section class="related-links" style="background:#FFFFFF;border-top:1px solid rgba(0,0,0,0.07);padding:48px 24px">
-  <div class="container" style="max-width:1100px;margin:0 auto">
-    <h2 id="related-on-studyedge-ai" style="font-size:20px;font-weight:600;color:#111;margin:0 0 18px;letter-spacing:-0.01em">Related on StudyEdge AI</h2>
-    <ul style="list-style:none;padding:0;margin:0;display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:10px 24px">
-      <li><a href="/best-study-app-for-computer-science-students" style="color:#1a56db;text-decoration:none;font-size:15px">Best Study App for Computer Science Students</a></li>
-      <li><a href="/blog/how-to-study-for-calculus" style="color:#1a56db;text-decoration:none;font-size:15px">How to Study for Calculus</a></li>
-      <li><a href="/ai-tutor" style="color:#1a56db;text-decoration:none;font-size:15px">AI Tutor for CS Concepts</a></li>
-      <li><a href="/active-recall-app" style="color:#1a56db;text-decoration:none;font-size:15px">Active Recall App</a></li>
-      <li><a href="/blog/how-to-study-effectively" style="color:#1a56db;text-decoration:none;font-size:15px">How to Study Effectively</a></li>
+<section class="related-links">
+  <div class="container">
+    <h2 id="related-on-studyedge-ai">Related on StudyEdge AI</h2>
+    <ul>
+      <li><a href="/best-study-app-for-computer-science-students">Best Study App for Computer Science Students</a></li>
+      <li><a href="/blog/how-to-study-for-calculus">How to Study for Calculus</a></li>
+      <li><a href="/ai-tutor">AI Tutor for CS Concepts</a></li>
+      <li><a href="/active-recall-app">Active Recall App</a></li>
+      <li><a href="/blog/how-to-study-effectively">How to Study Effectively</a></li>
     </ul>
   </div>
 </section>

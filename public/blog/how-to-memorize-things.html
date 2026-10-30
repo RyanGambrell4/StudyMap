@@ -265,6 +265,9 @@ a:hover{text-decoration:underline}
   section { page-break-inside: avoid; }
 }
 </style>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,600;1,8..60,400&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/blog/editorial.css" />
 </head>
 <body>
 <div id="rp" style="position:fixed;top:0;left:0;width:0%;height:3px;background:#3B61C4;z-index:9999;pointer-events:none;" aria-hidden="true"></div>
@@ -272,25 +275,33 @@ a:hover{text-decoration:underline}
 (function(){var r=document.getElementById('rp');window.addEventListener('scroll',function(){var d=document.documentElement;r.style.width=Math.min(100,d.scrollTop/(d.scrollHeight-d.clientHeight)*100)+'%';},{passive:true});})();
 </script>
 
-<nav class="site-nav">
-  <a class="logo" href="/">Study<span>Edge</span> AI</a>
-  <a href="/gpa-calculator" style="font-size:14px;color:var(--muted)">GPA Calculator</a>
-  <a href="/ai-study-coach" style="font-size:14px;color:var(--muted)">AI Study Coach</a>
-  <a href="/blog" style="font-size:14px;color:var(--muted)">Blog</a>
-</nav>
+<header class="site-header">
+  <nav class="site-nav">
+    <a class="nav-logo" href="/">
+      <img src="/favicon.png" alt="StudyEdge AI" />
+      StudyEdge AI
+    </a>
+    <div class="nav-links">
+      <a href="/#features">Features</a>
+      <a href="/studyedge-ai#pricing">Pricing</a>
+      <a href="/blog">Blog</a>
+      <a href="/app?signup=1" class="nav-cta">Try Free</a>
+    </div>
+  </nav>
+</header>
 
 <section class="hero">
   <div class="container">
     <p class="breadcrumb"><a href="/">Home</a> &rsaquo; <a href="/blog">Blog</a> &rsaquo; How to Memorize Things</p>
     <h1>How to Memorize Things: 7 Techniques That Actually Work</h1>
     <p class="meta">Published July 12, 2026 <span class="updated-badge">Updated Jul 2026</span> &middot; 11 min read</p>
-<div class="share-bar" style="display:flex;align-items:center;gap:10px;margin-top:18px;flex-wrap:wrap;">
-  <span style="font-size:13px;color:#6B6B6B;font-weight:500;letter-spacing:.02em;">Share:</span>
-  <a href="https://twitter.com/intent/tweet?url=https://getstudyedge.com/blog/how-to-memorize-things&amp;text=Study%20Guide%20%7C%20StudyEdge%20AI" target="_blank" rel="noopener" style="display:inline-flex;align-items:center;gap:6px;padding:6px 14px;background:#000;color:#fff;border-radius:6px;font-size:13px;font-weight:500;text-decoration:none;">
+<div class="share-bar">
+  <span>Share:</span>
+  <a href="https://twitter.com/intent/tweet?url=https://getstudyedge.com/blog/how-to-memorize-things&amp;text=Study%20Guide%20%7C%20StudyEdge%20AI" target="_blank" rel="noopener">
     <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-4.714-6.231-5.401 6.231H2.738l7.726-8.85L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
     Share on X
   </a>
-  <button onclick="navigator.clipboard.writeText(window.location.href).then(function(){var b=this;b.textContent='Copied!';setTimeout(function(){b.textContent='Copy link'},2000)}.bind(this))" style="display:inline-flex;align-items:center;gap:6px;padding:6px 14px;background:#F7F6F3;color:#111111;border:1px solid rgba(0,0,0,0.12);border-radius:6px;font-size:13px;font-weight:500;cursor:pointer;font-family:inherit;">
+  <button onclick="navigator.clipboard.writeText(window.location.href).then(function(){var b=this;b.textContent='Copied!';setTimeout(function(){b.textContent='Copy link'},2000)}.bind(this))">
     Copy link
   </button>
 </div>
@@ -321,11 +332,11 @@ a:hover{text-decoration:underline}
       <p><strong>Research anchor:</strong> Karpicke and Blunt (2011) found that students who used retrieval practice (practice testing) outperformed students who used elaborative concept mapping by 50% on a final test of retention, despite concept mapping taking more time. Retrieval is the mechanism, not passive review.</p>
     </div>
 
-    <div class="toc">
-      <div class="quick-answer" style="background:#EEF2FF;border-left:4px solid #3B61C4;border-radius:0 10px 10px 0;padding:16px 20px;margin:0 0 28px;">
-  <p style="font-size:13px;font-weight:700;color:#3B61C4;margin:0 0 6px;text-transform:uppercase;letter-spacing:0.06em;">Quick Answer</p>
-  <p style="font-size:15px;color:#111;margin:0;line-height:1.65;">The most reliable way to memorize things is to use active recall combined with spaced repetition. Encode information by writing it in your own words, then test yourself repeatedly at increasing intervals (1 day, 3 days, 1 week, 2 weeks). Mnemonics and the method of loci help when the material lacks inherent structure.</p>
+    <div class="quick-answer">
+  <p class="quick-answer-label">Quick answer</p>
+  <p>The most reliable way to memorize things is to use active recall combined with spaced repetition. Encode information by writing it in your own words, then test yourself repeatedly at increasing intervals (1 day, 3 days, 1 week, 2 weeks). Mnemonics and the method of loci help when the material lacks inherent structure.</p>
 </div>
+<div class="toc">
 <h2>In this article</h2>
       <ol>
         <li><a href="#technique-1">Technique 1: Spaced repetition</a></li>
@@ -427,7 +438,7 @@ a:hover{text-decoration:underline}
 
     <p>Sleep is not a passive recovery state: it is an active memory consolidation phase. During slow-wave sleep, the hippocampus replays recently encoded memories and transfers them to neocortical storage for long-term retention. During REM sleep, the brain processes emotional context and integrates new memories with existing knowledge networks. Both stages are critical for converting short-term learning into durable long-term memory.</p>
 
-    <p>Walker and Stickgold's research at Harvard (2006) showed that a night of sleep after learning produced a 20 to 30% improvement in memory recall compared to the same period spent awake. More pointedly, Stickgold demonstrated that memories not consolidated by sleep within 30 hours of encoding become highly vulnerable to interference and decay.</p>
+    <p>Research on sleep and memory (Diekelmann & Born, 2010) shows that a night of sleep after learning improves recall compared to the same period spent awake. More pointedly, Stickgold demonstrated that memories not consolidated by sleep within 30 hours of encoding become highly vulnerable to interference and decay.</p>
 
     <p>The practical implications are direct: pulling an all-nighter before an exam sacrifices the consolidation process for the material you reviewed during the preceding days and also impairs the working memory, attention, and cognitive flexibility you need to perform on complex exam questions the next morning. A student who studies for 6 hours and sleeps 8 hours will substantially outperform a student who studies for 14 hours straight on a delayed retention test. Sleep after studying is not a reward for finishing; it is a required part of the memorization process.</p>
 
@@ -538,12 +549,12 @@ a:hover{text-decoration:underline}
   <p style="font-size:13px;color:#555;margin:0;line-height:1.6;"><strong style="color:#111;">Chicago (17th ed.):</strong> StudyEdge AI. &ldquo;How to Memorize Things: 7 Techniques That Actually Work.&rdquo; StudyEdge AI Blog. Last modified July 12, 2026. https://getstudyedge.com/blog/how-to-memorize-things.</p>
 </div>
 
-<section class="sources-section" id="sources" style="border-top:1px solid rgba(0,0,0,0.07);margin-top:48px;padding-top:32px;">
-  <div class="container" style="max-width:760px;">
-    <h2 style="font-size:1.1rem;font-weight:600;color:#111;margin-bottom:16px;">Sources</h2>
-    <ol style="margin:0;padding-left:20px;display:flex;flex-direction:column;gap:10px;">
-      <li style="font-size:14px;color:#6B6B6B;line-height:1.6;">Roediger, H.L. & Karpicke, J.D. (2006). <em>Test-Enhanced Learning: Taking Memory Tests Improves Long-Term Retention</em>. Psychological Science, 17(3), 249-255. <a href="https://doi.org/10.1111/j.1467-9280.2006.01693.x" target="_blank" rel="noopener" style="color:#3B61C4;">https://doi.org/10.1111/j.1467-9280.2006.01693.x</a> Retrieved July 2026.</li>
-      <li style="font-size:14px;color:#6B6B6B;line-height:1.6;">Cepeda, N.J. et al. (2008). <em>Spacing Effects in Learning: A Temporal Ridgeline of Optimal Retention</em>. Psychological Science, 19(11), 1095-1102. <a href="https://doi.org/10.1111/j.1467-9280.2008.02209.x" target="_blank" rel="noopener" style="color:#3B61C4;">https://doi.org/10.1111/j.1467-9280.2008.02209.x</a> Retrieved July 2026.</li>
+<section class="sources-section" id="sources">
+  <div class="container">
+    <h2>Sources</h2>
+    <ol>
+      <li>Roediger, H.L. & Karpicke, J.D. (2006). <em>Test-Enhanced Learning: Taking Memory Tests Improves Long-Term Retention</em>. Psychological Science, 17(3), 249-255. <a href="https://doi.org/10.1111/j.1467-9280.2006.01693.x" target="_blank" rel="noopener">https://doi.org/10.1111/j.1467-9280.2006.01693.x</a> Retrieved July 2026.</li>
+      <li>Cepeda, N.J. et al. (2008). <em>Spacing Effects in Learning: A Temporal Ridgeline of Optimal Retention</em>. Psychological Science, 19(11), 1095-1102. <a href="https://doi.org/10.1111/j.1467-9280.2008.02209.x" target="_blank" rel="noopener">https://doi.org/10.1111/j.1467-9280.2008.02209.x</a> Retrieved July 2026.</li>
     </ol>
   </div>
 </section>
@@ -573,19 +584,17 @@ a:hover{text-decoration:underline}
   </div>
 </section>
 
-<div class="inline-email-capture" style="background:#f0f4ff;border:1.5px solid rgba(59,97,196,.2);border-radius:12px;padding:24px 28px;margin:36px 0;text-align:center;">
-  <p style="font-size:12px;font-weight:700;letter-spacing:0.10em;text-transform:uppercase;color:#3B61C4;margin:0 0 8px;">Free from StudyEdge</p>
-  <p style="font-size:18px;font-weight:700;color:#111;margin:0 0 6px;">Get weekly study research in plain English</p>
-  <p style="font-size:14px;color:#555;margin:0 0 18px;">Evidence-based study tips, exam tactics, and cognitive science findings delivered once a week. No filler.</p>
-  <form class="inline-email-form" onsubmit="return inlineSubscribe(this, event)" style="display:flex;gap:8px;max-width:400px;margin:0 auto;">
-    <input type="email" placeholder="your@email.com" required
-      style="flex:1;padding:10px 13px;border:1.5px solid rgba(59,97,196,.3);border-radius:7px;font-size:14px;outline:none;background:#fff;color:#111;" />
-    <button type="submit"
-      style="padding:10px 18px;background:#3B61C4;color:#fff;border:none;border-radius:7px;font-size:14px;font-weight:600;cursor:pointer;white-space:nowrap;">
+<div class="inline-email-capture">
+  <p>Free from StudyEdge</p>
+  <p>Get weekly study research in plain English</p>
+  <p>Evidence-based study tips, exam tactics, and cognitive science findings delivered once a week. No filler.</p>
+  <form class="inline-email-form" onsubmit="return inlineSubscribe(this, event)">
+    <input type="email" placeholder="your@email.com" required />
+    <button type="submit">
       Subscribe
     </button>
   </form>
-  <p class="inline-email-msg" style="display:none;margin-top:10px;font-size:13px;font-weight:600;color:#3B61C4;"></p>
+  <p class="inline-email-msg"></p>
 </div>
 <script>
 function inlineSubscribe(form, e) {
@@ -627,19 +636,6 @@ function inlineSubscribe(form, e) {
     </div>
   </div>
 </section>
-
-<div style="background:var(--bg,#F7F6F3);padding:4px 24px 0;">
-  <div style="max-width:760px;margin:0 auto;">
-    <div class="proof-strip">
-      <div class="proof-item"><span class="proof-num">7-day</span> free trial</div>
-      <div class="proof-divider"></div>
-      <div class="proof-item"><span class="proof-num">2 min</span> to your first study plan</div>
-      <div class="proof-divider"></div>
-      <div class="proof-item"><span class="proof-num">AI</span> flashcards from your notes</div>
-      <div class="proof-divider"></div>
-      <div class="proof-item"><span class="proof-num">✓</span> cancel anytime</div>
-    </div>
-  </div>
 </div>
 <section class="blog-cta-section">
   <div class="container">

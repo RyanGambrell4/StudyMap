@@ -21,7 +21,7 @@
   <meta name="twitter:card" content="summary_large_image" />
   <meta name="twitter:site" content="@getstudyedge" />
   <meta name="twitter:title" content="Spaced Repetition: The Science Behind Why It Works (and How to Use It) | StudyEdge AI" />
-  <meta name="twitter:description" content="80% of new material is forgotten within 24 hours without review. Learn the spaced repetition system that 4x your retention with the same study time." />
+  <meta name="twitter:description" content="Without review, most new material fades within a day (Ebbinghaus). Learn the spaced repetition system that keeps it." />
   <meta name="twitter:image" content="https://images.unsplash.com/photo-1503676260728-1c00da094a0b?w=1260&h=750&fit=crop&q=80&auto=format" />
 
   <meta name="robots" content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1" />
@@ -223,12 +223,15 @@
   "@context": "https://schema.org",
   "@type": "DefinedTerm",
   "name": "Spaced Repetition",
-  "description": "A learning technique that schedules review sessions at increasing time intervals based on the forgetting curve, reviewing material just before it would be forgotten. Also called distributed practice or the spacing effect. Cepeda et al. (2006) found it produces up to 200% better long-term retention than massed practice.",
+  "description": "A learning technique that schedules review sessions at increasing time intervals based on the forgetting curve, reviewing material just before it would be forgotten. Also called distributed practice or the spacing effect. Cepeda et al. (2006), reviewing 317 experiments, found spaced practice reliably beats massed practice for long-term retention.",
   "inDefinedTermSet": "https://getstudyedge.com/blog/best-study-techniques-science",
   "termCode": "spaced-repetition",
   "url": "https://getstudyedge.com/blog/spaced-repetition-study-technique"
 }
 </script>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,600;1,8..60,400&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/blog/editorial.css" />
 </head>
 <body>
 <div id="rp" style="position:fixed;top:0;left:0;width:0%;height:3px;background:#3B61C4;z-index:9999;pointer-events:none;" aria-hidden="true"></div>
@@ -272,13 +275,13 @@
       <span style="color:var(--text-dim)">&#183;</span>
       <span>11 min read</span>
     </div>
-<div class="share-bar" style="display:flex;align-items:center;gap:10px;margin-top:18px;flex-wrap:wrap;">
-  <span style="font-size:13px;color:#6B6B6B;font-weight:500;letter-spacing:.02em;">Share:</span>
-  <a href="https://twitter.com/intent/tweet?url=https://getstudyedge.com/blog/spaced-repetition-study-technique&amp;text=Spaced%20Repetition%3A%20The%20Science%20Behind%20Why%20It%20Works%20%28and%20How%20to%20Use%20It%29%20%7C%20StudyEdge%20AI" target="_blank" rel="noopener" style="display:inline-flex;align-items:center;gap:6px;padding:6px 14px;background:#000;color:#fff;border-radius:6px;font-size:13px;font-weight:500;text-decoration:none;">
+<div class="share-bar">
+  <span>Share:</span>
+  <a href="https://twitter.com/intent/tweet?url=https://getstudyedge.com/blog/spaced-repetition-study-technique&amp;text=Spaced%20Repetition%3A%20The%20Science%20Behind%20Why%20It%20Works%20%28and%20How%20to%20Use%20It%29%20%7C%20StudyEdge%20AI" target="_blank" rel="noopener">
     <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-4.714-6.231-5.401 6.231H2.738l7.726-8.85L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
     Share on X
   </a>
-  <button onclick="navigator.clipboard.writeText(window.location.href).then(function(){var b=this;b.textContent='Copied!';setTimeout(function(){b.textContent='Copy link'},2000)}.bind(this))" style="display:inline-flex;align-items:center;gap:6px;padding:6px 14px;background:#F7F6F3;color:#111111;border:1px solid rgba(0,0,0,0.12);border-radius:6px;font-size:13px;font-weight:500;cursor:pointer;font-family:inherit;">
+  <button onclick="navigator.clipboard.writeText(window.location.href).then(function(){var b=this;b.textContent='Copied!';setTimeout(function(){b.textContent='Copy link'},2000)}.bind(this))">
     Copy link
   </button>
 </div>
@@ -333,7 +336,7 @@
       </div>
     </div>
 
-      <p>Memory does not fade linearly. It drops sharply at first and then levels off. Without any review, you lose roughly 50% of newly learned information within an hour of learning it. Within 24 hours, that figure rises to around 70%. Within a week, closer to 90%. Ebbinghaus called this the forgetting curve, and subsequent research has confirmed the basic shape of it holds across almost every type of learning.</p>
+      <p>Memory does not fade linearly. It drops sharply at first and then levels off. Without any review, you lose roughly 50% of newly learned information within an hour of learning it. Within 24 hours, that figure rises to around 70%. Within a week, closer to 75%. Ebbinghaus called this the forgetting curve, and subsequent research has confirmed the basic shape of it holds across almost every type of learning.</p>
 
       <p>The good news is that Ebbinghaus also discovered how to fight it. Each time you successfully review and retrieve information, the forgetting curve resets, but it resets at a shallower slope. In other words, each review makes the memory more durable and slower to fade. Review material enough times at the right intervals, and the forgetting curve flattens almost entirely. This is the mechanism that spaced repetition exploits.</p>
 
@@ -342,9 +345,9 @@
       </div>
 
 
-      <div class="quick-answer" style="background:#EEF2FF;border-left:4px solid #3B61C4;border-radius:0 10px 10px 0;padding:16px 20px;margin:0 0 28px;">
-  <p style="font-size:13px;font-weight:700;color:#3B61C4;margin:0 0 6px;text-transform:uppercase;letter-spacing:0.06em;">Quick Answer</p>
-  <p style="font-size:15px;color:#111;margin:0;line-height:1.65;">Spaced repetition means spreading study sessions out over days and weeks instead of cramming. You review material at increasing intervals -- right before you would forget it. A 2006 study by Cepeda and colleagues found spaced practice produces up to 200% better long-term retention compared to massed practice sessions.</p>
+      <div class="quick-answer">
+  <p class="quick-answer-label">Quick answer</p>
+  <p>Spaced repetition means spreading study sessions out over days and weeks instead of cramming. You review material at increasing intervals -- right before you would forget it. Cepeda and colleagues (2006), reviewing 317 experiments, found spaced practice reliably beats massed practice for long-term retention.</p>
 </div>
 <h2 id="the-spacing-effect">The Spacing Effect: What Research Actually Shows</h2>
 
@@ -483,13 +486,13 @@
   <p style="font-size:13px;color:#555;margin:0;line-height:1.6;"><strong style="color:#111;">Chicago (17th ed.):</strong> StudyEdge AI. &ldquo;Spaced Repetition: The Science Behind Why It Works (and How to Use It).&rdquo; StudyEdge AI Blog. Last modified July 15, 2026. https://getstudyedge.com/blog/spaced-repetition-study-technique.</p>
 </div>
 
-<section class="sources-section" id="sources" style="border-top:1px solid rgba(0,0,0,0.07);margin-top:48px;padding-top:32px;">
-  <div class="container" style="max-width:760px;">
-    <h2 style="font-size:1.1rem;font-weight:600;color:#111;margin-bottom:16px;">Sources</h2>
-    <ol style="margin:0;padding-left:20px;display:flex;flex-direction:column;gap:10px;">
-      <li style="font-size:14px;color:#6B6B6B;line-height:1.6;">Cepeda, N.J. et al. (2008). <em>Spacing Effects in Learning: A Temporal Ridgeline of Optimal Retention</em>. Psychological Science, 19(11), 1095-1102. <a href="https://doi.org/10.1111/j.1467-9280.2008.02209.x" target="_blank" rel="noopener" style="color:#3B61C4;">https://doi.org/10.1111/j.1467-9280.2008.02209.x</a> Retrieved July 2026.</li>
-      <li style="font-size:14px;color:#6B6B6B;line-height:1.6;">Ebbinghaus, H. (1885). <em>Memory: A Contribution to Experimental Psychology</em>. Leipzig: Duncker & Humblot (English translation 1913). <a href="https://psychclassics.yorku.ca/Ebbinghaus/memory-intro.htm" target="_blank" rel="noopener" style="color:#3B61C4;">https://psychclassics.yorku.ca/Ebbinghaus/memory-intro.htm</a> Retrieved July 2026.</li>
-      <li style="font-size:14px;color:#6B6B6B;line-height:1.6;">Dunlosky, J. et al. (2013). <em>Improving Students' Learning With Effective Learning Techniques</em>. Psychological Science in the Public Interest, 14(1), 4-58. <a href="https://doi.org/10.1177/1529100612453266" target="_blank" rel="noopener" style="color:#3B61C4;">https://doi.org/10.1177/1529100612453266</a> Retrieved July 2026.</li>
+<section class="sources-section" id="sources">
+  <div class="container">
+    <h2>Sources</h2>
+    <ol>
+      <li>Cepeda, N.J. et al. (2008). <em>Spacing Effects in Learning: A Temporal Ridgeline of Optimal Retention</em>. Psychological Science, 19(11), 1095-1102. <a href="https://doi.org/10.1111/j.1467-9280.2008.02209.x" target="_blank" rel="noopener">https://doi.org/10.1111/j.1467-9280.2008.02209.x</a> Retrieved July 2026.</li>
+      <li>Ebbinghaus, H. (1885). <em>Memory: A Contribution to Experimental Psychology</em>. Leipzig: Duncker & Humblot (English translation 1913). <a href="https://psychclassics.yorku.ca/Ebbinghaus/memory-intro.htm" target="_blank" rel="noopener">https://psychclassics.yorku.ca/Ebbinghaus/memory-intro.htm</a> Retrieved July 2026.</li>
+      <li>Dunlosky, J. et al. (2013). <em>Improving Students' Learning With Effective Learning Techniques</em>. Psychological Science in the Public Interest, 14(1), 4-58. <a href="https://doi.org/10.1177/1529100612453266" target="_blank" rel="noopener">https://doi.org/10.1177/1529100612453266</a> Retrieved July 2026.</li>
     </ol>
   </div>
 </section>
@@ -527,19 +530,17 @@
   </div>
 </section>
 
-<div class="inline-email-capture" style="background:#f0f4ff;border:1.5px solid rgba(59,97,196,.2);border-radius:12px;padding:24px 28px;margin:36px 0;text-align:center;">
-  <p style="font-size:12px;font-weight:700;letter-spacing:0.10em;text-transform:uppercase;color:#3B61C4;margin:0 0 8px;">Free from StudyEdge</p>
-  <p style="font-size:18px;font-weight:700;color:#111;margin:0 0 6px;">Get weekly study research in plain English</p>
-  <p style="font-size:14px;color:#555;margin:0 0 18px;">Evidence-based study tips, exam tactics, and cognitive science findings delivered once a week. No filler.</p>
-  <form class="inline-email-form" onsubmit="return inlineSubscribe(this, event)" style="display:flex;gap:8px;max-width:400px;margin:0 auto;">
-    <input type="email" placeholder="your@email.com" required
-      style="flex:1;padding:10px 13px;border:1.5px solid rgba(59,97,196,.3);border-radius:7px;font-size:14px;outline:none;background:#fff;color:#111;" />
-    <button type="submit"
-      style="padding:10px 18px;background:#3B61C4;color:#fff;border:none;border-radius:7px;font-size:14px;font-weight:600;cursor:pointer;white-space:nowrap;">
+<div class="inline-email-capture">
+  <p>Free from StudyEdge</p>
+  <p>Get weekly study research in plain English</p>
+  <p>Evidence-based study tips, exam tactics, and cognitive science findings delivered once a week. No filler.</p>
+  <form class="inline-email-form" onsubmit="return inlineSubscribe(this, event)">
+    <input type="email" placeholder="your@email.com" required />
+    <button type="submit">
       Subscribe
     </button>
   </form>
-  <p class="inline-email-msg" style="display:none;margin-top:10px;font-size:13px;font-weight:600;color:#3B61C4;"></p>
+  <p class="inline-email-msg"></p>
 </div>
 <script>
 function inlineSubscribe(form, e) {
@@ -581,19 +582,6 @@ function inlineSubscribe(form, e) {
     </div>
   </div>
 </section>
-
-<div style="background:var(--bg,#F7F6F3);padding:4px 24px 0;">
-  <div style="max-width:760px;margin:0 auto;">
-    <div class="proof-strip">
-      <div class="proof-item"><span class="proof-num">7-day</span> free trial</div>
-      <div class="proof-divider"></div>
-      <div class="proof-item"><span class="proof-num">2 min</span> to your first study plan</div>
-      <div class="proof-divider"></div>
-      <div class="proof-item"><span class="proof-num">AI</span> flashcards from your notes</div>
-      <div class="proof-divider"></div>
-      <div class="proof-item"><span class="proof-num">✓</span> cancel anytime</div>
-    </div>
-  </div>
 </div>
 <section class="blog-cta-section">
   <div class="container">

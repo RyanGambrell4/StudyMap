@@ -124,7 +124,7 @@
     {
       "@type": "Question",
       "name": "Why is re-reading an ineffective study method?",
-      "acceptedAnswer": {"@type": "Answer", "text": "Re-reading creates a feeling of fluency and familiarity that students often mistake for learning. When you read material a second time, it feels easier because your brain recognizes patterns, but recognition is not the same as recall. On an exam, you need to produce information without prompts, not recognize it from a list of options. Roediger and Karpicke (2006) showed that students who re-read a passage four times scored 50% lower on a one-week delayed retention test than students who read it once and then practiced retrieval. Re-reading is useful for initial first-pass understanding but should not be used as a review strategy."}
+      "acceptedAnswer": {"@type": "Answer", "text": "Re-reading creates a feeling of fluency and familiarity that students often mistake for learning. When you read material a second time, it feels easier because your brain recognizes patterns, but recognition is not the same as recall. On an exam, you need to produce information without prompts, not recognize it from a list of options. Roediger and Karpicke (2006) showed that students who re-read a passage four times scored about a third lower (40% vs 61%) on a one-week delayed retention test than students who read it once and then practiced retrieval. Re-reading is useful for initial first-pass understanding but should not be used as a review strategy."}
     }
   ]
 }
@@ -265,6 +265,9 @@ a:hover{text-decoration:underline}
   section { page-break-inside: avoid; }
 }
 </style>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,600;1,8..60,400&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/blog/editorial.css" />
 </head>
 <body>
 <div id="rp" style="position:fixed;top:0;left:0;width:0%;height:3px;background:#3B61C4;z-index:9999;pointer-events:none;" aria-hidden="true"></div>
@@ -272,25 +275,33 @@ a:hover{text-decoration:underline}
 (function(){var r=document.getElementById('rp');window.addEventListener('scroll',function(){var d=document.documentElement;r.style.width=Math.min(100,d.scrollTop/(d.scrollHeight-d.clientHeight)*100)+'%';},{passive:true});})();
 </script>
 
-<nav class="site-nav">
-  <a class="logo" href="/">Study<span>Edge</span> AI</a>
-  <a href="/gpa-calculator" style="font-size:14px;color:var(--muted)">GPA Calculator</a>
-  <a href="/ai-study-coach" style="font-size:14px;color:var(--muted)">AI Study Coach</a>
-  <a href="/blog" style="font-size:14px;color:var(--muted)">Blog</a>
-</nav>
+<header class="site-header">
+  <nav class="site-nav">
+    <a class="nav-logo" href="/">
+      <img src="/favicon.png" alt="StudyEdge AI" />
+      StudyEdge AI
+    </a>
+    <div class="nav-links">
+      <a href="/#features">Features</a>
+      <a href="/studyedge-ai#pricing">Pricing</a>
+      <a href="/blog">Blog</a>
+      <a href="/app?signup=1" class="nav-cta">Try Free</a>
+    </div>
+  </nav>
+</header>
 
 <section class="hero">
   <div class="container">
     <p class="breadcrumb"><a href="/">Home</a> &rsaquo; <a href="/blog">Blog</a> &rsaquo; How to Study Effectively</p>
     <h1>How to Study Effectively: A Science-Backed System That Actually Works</h1>
     <p class="meta">Published July 12, 2026 <span class="updated-badge">Updated Jul 2026</span> &middot; 10 min read</p>
-<div class="share-bar" style="display:flex;align-items:center;gap:10px;margin-top:18px;flex-wrap:wrap;">
-  <span style="font-size:13px;color:#6B6B6B;font-weight:500;letter-spacing:.02em;">Share:</span>
-  <a href="https://twitter.com/intent/tweet?url=https://getstudyedge.com/blog/how-to-study-effectively&amp;text=Study%20Guide%20%7C%20StudyEdge%20AI" target="_blank" rel="noopener" style="display:inline-flex;align-items:center;gap:6px;padding:6px 14px;background:#000;color:#fff;border-radius:6px;font-size:13px;font-weight:500;text-decoration:none;">
+<div class="share-bar">
+  <span>Share:</span>
+  <a href="https://twitter.com/intent/tweet?url=https://getstudyedge.com/blog/how-to-study-effectively&amp;text=Study%20Guide%20%7C%20StudyEdge%20AI" target="_blank" rel="noopener">
     <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-4.714-6.231-5.401 6.231H2.738l7.726-8.85L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
     Share on X
   </a>
-  <button onclick="navigator.clipboard.writeText(window.location.href).then(function(){var b=this;b.textContent='Copied!';setTimeout(function(){b.textContent='Copy link'},2000)}.bind(this))" style="display:inline-flex;align-items:center;gap:6px;padding:6px 14px;background:#F7F6F3;color:#111111;border:1px solid rgba(0,0,0,0.12);border-radius:6px;font-size:13px;font-weight:500;cursor:pointer;font-family:inherit;">
+  <button onclick="navigator.clipboard.writeText(window.location.href).then(function(){var b=this;b.textContent='Copied!';setTimeout(function(){b.textContent='Copy link'},2000)}.bind(this))">
     Copy link
   </button>
 </div>
@@ -306,7 +317,7 @@ a:hover{text-decoration:underline}
       <span class="key-takeaways-label">Key Takeaways</span>
       <ul>
           <li>Effective studying requires active recall -- you must test yourself, not just review material (Karpicke & Roediger, 2008)</li>
-          <li>Spaced repetition distributes review sessions over time instead of cramming -- this produces 2-3x better retention</li>
+          <li>Spaced repetition distributes review sessions over time instead of cramming -- this produces substantially better long-term retention</li>
           <li>Interleaving (mixing topics in a single session) feels harder but produces stronger learning than blocked practice</li>
           <li>The illusion of competence: re-reading feels like learning but does not improve test performance -- familiarity is not recall</li>
           <li>Sleep is a non-negotiable part of an effective study system -- memory consolidation happens during slow-wave and REM sleep</li>
@@ -317,15 +328,11 @@ a:hover{text-decoration:underline}
 
     <p>This guide covers what <a href="/blog/study-techniques">effective study</a>ing actually is, the two research-backed techniques that produce the majority of results, and a concrete 5-step system you can apply starting tonight.</p>
 
-    <div class="callout">
-      <p><strong>The short version:</strong> Students who practiced retrieval (active recall) retained 50% more information after one week than students who re-read the same material, even when re-readers studied more total hours. (Roediger &amp; Karpicke, 2006)</p>
-    </div>
-
-    <div class="toc">
-      <div class="quick-answer" style="background:#EEF2FF;border-left:4px solid #3B61C4;border-radius:0 10px 10px 0;padding:16px 20px;margin:0 0 28px;">
-  <p style="font-size:13px;font-weight:700;color:#3B61C4;margin:0 0 6px;text-transform:uppercase;letter-spacing:0.06em;">Quick Answer</p>
-  <p style="font-size:15px;color:#111;margin:0;line-height:1.65;">Studying effectively means using retrieval practice (closing your notes and recalling from memory) instead of re-reading. Space sessions over multiple days rather than cramming. A 2006 study by Roediger and Karpicke found students who practiced retrieval retained 81% of material on a delayed test versus 28% for those who re-read.</p>
+    <div class="quick-answer">
+  <p class="quick-answer-label">Quick answer</p>
+  <p>Studying effectively means using retrieval practice (closing your notes and recalling from memory) instead of re-reading. Space sessions over multiple days rather than cramming. A 2006 study by Roediger and Karpicke found students who practiced retrieval retained about 61% after one week versus 40% for students who re-read.</p>
 </div>
+<div class="toc">
 <h2>In this article</h2>
       <ol>
         <li><a href="#what-is-effective-studying">What effective studying actually means</a></li>
@@ -539,9 +546,9 @@ a:hover{text-decoration:underline}
   <p style="font-size:13px;color:#555;margin:0;line-height:1.6;"><strong style="color:#111;">Chicago (17th ed.):</strong> StudyEdge AI. &ldquo;How to Study Effectively: A Science-Backed System That Actually Works.&rdquo; StudyEdge AI Blog. Last modified July 12, 2026. https://getstudyedge.com/blog/how-to-study-effectively.</p>
 </div>
 
-<section class="sources-section" style="margin-top:48px;padding-top:32px;border-top:1px solid rgba(0,0,0,.08);">
-  <h2 style="font-size:18px;font-weight:700;margin-bottom:16px;color:var(--text,#111);">Sources</h2>
-  <ol style="font-size:13px;line-height:1.7;color:var(--muted,#555);padding-left:20px;">
+<section class="sources-section">
+  <h2>Sources</h2>
+  <ol>
       <li>Dunlosky, J., Rawson, K. A., Marsh, E. J., Nathan, M. J., &amp; Willingham, D. T. (2013). Improving students&#39; learning with effective learning techniques. <em>Psychological Science in the Public Interest</em>, <em>14</em>(1), 4&#8211;58. <a href="https://doi.org/10.1177/1529100612453266" rel="noopener noreferrer" target="_blank">doi:10.1177/1529100612453266</a></li>
       <li>Roediger, H. L., &amp; Karpicke, J. D. (2006). The power of testing memory: Basic research and implications for educational practice. <em>Perspectives on Psychological Science</em>, <em>1</em>(3), 181&#8211;210. <a href="https://doi.org/10.1111/j.1745-6924.2006.00012.x" rel="noopener noreferrer" target="_blank">doi:10.1111/j.1745-6924.2006.00012.x</a></li>
       <li>Cepeda, N. J., Pashler, H., Vul, E., Wixted, J. T., &amp; Rohrer, D. (2006). Distributed practice in verbal recall tasks: A review and quantitative synthesis. <em>Psychological Bulletin</em>, <em>132</em>(3), 354&#8211;380. <a href="https://doi.org/10.1037/0033-2909.132.3.354" rel="noopener noreferrer" target="_blank">doi:10.1037/0033-2909.132.3.354</a></li>
@@ -571,24 +578,22 @@ a:hover{text-decoration:underline}
     </div>
     <div class="faq-item">
       <h3>Why is re-reading an ineffective study method?</h3>
-      <p>Re-reading creates a feeling of fluency and familiarity that students often mistake for learning. When you read material a second time, it feels easier because your brain recognizes patterns, but recognition is not the same as recall. On an exam, you need to produce information without prompts. Roediger and Karpicke (2006) showed that students who re-read a passage four times scored 50% lower on a one-week delayed retention test than students who read it once and then practiced retrieval. Re-reading is useful for initial first-pass understanding but should not be used as a review strategy.</p>
+      <p>Re-reading creates a feeling of fluency and familiarity that students often mistake for learning. When you read material a second time, it feels easier because your brain recognizes patterns, but recognition is not the same as recall. On an exam, you need to produce information without prompts. Roediger and Karpicke (2006) showed that students who re-read a passage four times scored about a third lower (40% vs 61%) on a one-week delayed retention test than students who read it once and then practiced retrieval. Re-reading is useful for initial first-pass understanding but should not be used as a review strategy.</p>
     </div>
   </div>
 </section>
 
-<div class="inline-email-capture" style="background:#f0f4ff;border:1.5px solid rgba(59,97,196,.2);border-radius:12px;padding:24px 28px;margin:36px 0;text-align:center;">
-  <p style="font-size:12px;font-weight:700;letter-spacing:0.10em;text-transform:uppercase;color:#3B61C4;margin:0 0 8px;">Free from StudyEdge</p>
-  <p style="font-size:18px;font-weight:700;color:#111;margin:0 0 6px;">Get weekly study research in plain English</p>
-  <p style="font-size:14px;color:#555;margin:0 0 18px;">Evidence-based study tips, exam tactics, and cognitive science findings delivered once a week. No filler.</p>
-  <form class="inline-email-form" onsubmit="return inlineSubscribe(this, event)" style="display:flex;gap:8px;max-width:400px;margin:0 auto;">
-    <input type="email" placeholder="your@email.com" required
-      style="flex:1;padding:10px 13px;border:1.5px solid rgba(59,97,196,.3);border-radius:7px;font-size:14px;outline:none;background:#fff;color:#111;" />
-    <button type="submit"
-      style="padding:10px 18px;background:#3B61C4;color:#fff;border:none;border-radius:7px;font-size:14px;font-weight:600;cursor:pointer;white-space:nowrap;">
+<div class="inline-email-capture">
+  <p>Free from StudyEdge</p>
+  <p>Get weekly study research in plain English</p>
+  <p>Evidence-based study tips, exam tactics, and cognitive science findings delivered once a week. No filler.</p>
+  <form class="inline-email-form" onsubmit="return inlineSubscribe(this, event)">
+    <input type="email" placeholder="your@email.com" required />
+    <button type="submit">
       Subscribe
     </button>
   </form>
-  <p class="inline-email-msg" style="display:none;margin-top:10px;font-size:13px;font-weight:600;color:#3B61C4;"></p>
+  <p class="inline-email-msg"></p>
 </div>
 <script>
 function inlineSubscribe(form, e) {
@@ -630,19 +635,6 @@ function inlineSubscribe(form, e) {
     </div>
   </div>
 </section>
-
-<div style="background:var(--bg,#F7F6F3);padding:4px 24px 0;">
-  <div style="max-width:760px;margin:0 auto;">
-    <div class="proof-strip">
-      <div class="proof-item"><span class="proof-num">7-day</span> free trial</div>
-      <div class="proof-divider"></div>
-      <div class="proof-item"><span class="proof-num">2 min</span> to your first study plan</div>
-      <div class="proof-divider"></div>
-      <div class="proof-item"><span class="proof-num">AI</span> flashcards from your notes</div>
-      <div class="proof-divider"></div>
-      <div class="proof-item"><span class="proof-num">✓</span> cancel anytime</div>
-    </div>
-  </div>
 </div>
 <section class="blog-cta-section">
   <div class="container">
