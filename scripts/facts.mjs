@@ -376,10 +376,11 @@ export const RULES = [
             found: claim,
             expected: facts.audience.usersStat,
             message:
-              `"${claim}" is a retired audience claim. Real numbers: ` +
-              `${facts.audience.users}+ users ("${facts.audience.usersPhrase}") and ` +
-              `${facts.audience.followersStat} followers. Never label the follower ` +
-              `count as users.`,
+              `"${claim}" is a retired fabricated claim (user count, rating, ` +
+              `testimonial, award or team). Real numbers: ` +
+              `${facts.audience.users}+ users ("${facts.audience.usersPhrase}"), ` +
+              `${facts.audience.followersStat} TikTok followers, no App Store rating yet. ` +
+              `Never label the follower count as users. Real testimonials: index.html marquee only.`,
           })
         }
       }

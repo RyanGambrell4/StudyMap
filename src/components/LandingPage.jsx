@@ -1978,40 +1978,34 @@ export default function LandingPage({ onGetStarted }) {
         }}>
           {[
             {
-              quote: "I went from a C+ to a B+ in Organic Chemistry. Having a session plan every time I sat down made the difference - I stopped wasting time figuring out what to study.",
-              name: 'Maya R.',
-              role: '3rd year · Pre-Med',
+              quote: "I've always struggled to stay consistent. StudyEdge AI just plans it for me. Seeing my hours and progress tracked has genuinely helped bring my grades up.",
+              name: 'Andy G.',
+              role: 'UCLA',
               color: '#6366f1',
             },
             {
-              quote: "Finals week used to be pure panic. This semester I had everything mapped out 3 weeks before. I actually slept the night before my Calc exam.",
-              name: 'Jordan T.',
-              role: '2nd year · Engineering',
+              quote: "If you want to stay mediocre at studying, don't use this. Scheduling, coaching, daily organization: it has everything you need to take your marks to the next level with less effort.",
+              name: 'Danny K.',
+              role: 'Stanford · PhD Program',
               color: '#8b5cf6',
             },
             {
-              quote: "The flashcards it generates from my notes are way better than what I'd make myself. I just do a session and it handles the rest.",
-              name: 'Priya S.',
-              role: '1st year · Business',
+              quote: "First AI study platform I can confidently say has it all. Week-by-week study plans, progress tracking, flashcards, quizzes, and it cuts all the prep time so you can just focus on actually learning.",
+              name: 'Charlotte B.',
+              role: 'NYU',
               color: '#ec4899',
             },
             {
-              quote: "I have 5 courses and a part-time job. Before this I was always behind. Now I actually know what to do every day and I'm keeping up.",
-              name: 'Marcus L.',
-              role: '4th year · Psychology',
+              quote: "It does an amazing job of meeting you where you're at and taking you where you want to go academically.",
+              name: 'Gavin D.',
+              role: 'University of Michigan · Grad Student',
               color: '#f59e0b',
             },
             {
-              quote: "The Study Coach is what got me. It knows which topics I'm weak on and focuses my sessions there. My GPA went from 2.8 to 3.4 in one semester.",
-              name: 'Aisha K.',
-              role: '2nd year · Biology',
+              quote: "Right when you log in you see a beautifully structured dashboard that makes you want to get to work. Personalized schedule, flashcards, quizzes: there's so much you can do, how can you not be excited?",
+              name: 'Alex G.',
+              role: 'Ohio State',
               color: '#10b981',
-            },
-            {
-              quote: "I was skeptical about another study app but the AI session blueprints are genuinely useful. It's the only app I've used for more than a week.",
-              name: 'Chris M.',
-              role: '3rd year · Computer Science',
-              color: '#22d3ee',
             },
           ].map(({ quote, name, role, color }) => (
             <div key={name} style={{

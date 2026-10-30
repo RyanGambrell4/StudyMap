@@ -153,7 +153,7 @@ function Testimonials(){
     <section className="testimonials">
       <div className="container">
         <div className="section-head">
-          <div className="section-kicker">Loved by students</div>
+          <div className="section-kicker">What students say</div>
           <h2 className="section-title">Study smarter.<br/><span className="grad-text">Stress less.</span></h2>
         </div>
       </div>

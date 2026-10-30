@@ -184,7 +184,7 @@ export default function SharedPlanView() {
             Get started free
           </a>
           <div style={{ fontSize: 12, color: '#94A3B8', marginTop: 10 }}>
-            Joined by thousands of students this semester
+            Join 1,500+ students using StudyEdge AI
           </div>
         </div>
       </div>

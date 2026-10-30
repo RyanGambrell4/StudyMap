@@ -1166,10 +1166,6 @@
       "destination": "/grad-school-gpa-requirements.html"
     },
     {
-      "source": "/how-students-study-report-2026",
-      "destination": "/how-students-study-report-2026.html"
-    },
-    {
       "source": "/pomodoro-timer",
       "destination": "/pomodoro-timer.html"
     },
@@ -1187,6 +1183,16 @@
     }
   ],
   "redirects": [
+    {
+      "source": "/how-students-study-report-2026",
+      "destination": "/study-statistics",
+      "permanent": true
+    },
+    {
+      "source": "/how-students-study-report-2026.html",
+      "destination": "/study-statistics",
+      "permanent": true
+    },
     {
       "source": "/r/:code",
       "destination": "/signup?ref=:code&utm_source=referral&utm_medium=user_share&utm_campaign=in_app_referral",

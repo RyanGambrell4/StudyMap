@@ -59,8 +59,8 @@ function StatsBar(){
               ))}
             </div>
             <div className="bento-rating">
-              <span className="bento-stars">{'★★★★★'}</span>
-              <span className="bento-rating-text">4.9 average rating</span>
+              
+              <span className="bento-rating-text">Built by students, for students</span>
             </div>
           </div>
 
