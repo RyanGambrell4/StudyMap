@@ -252,3 +252,59 @@ body .step-block .step-num { box-shadow: none !important; font-style: normal !im
 body .step-block:hover { box-shadow: none !important; border-color: var(--ed-rule) !important; }
 body .key-takeaways li { display: block !important; }
 body .key-takeaways li::before { background-image: none !important; min-width: 0 !important; margin: 0 !important; border-radius: 50% !important; }
+
+/* ---------- Blog index + topic hubs ---------- */
+body .blog-index-hero { background: var(--ed-bg) !important; border-bottom: 1px solid var(--ed-rule) !important; text-align: left !important; padding: 64px 24px 40px !important; }
+body .blog-index-hero > .container { max-width: 1040px !important; margin: 0 auto; }
+body .blog-index-hero h1 { font: 600 clamp(34px, 5vw, 52px)/1.1 var(--ed-serif) !important; letter-spacing: -0.015em !important; color: var(--ed-ink) !important; max-width: 760px; margin: 0 0 14px !important; }
+body .blog-index-hero .sub { margin: 0 !important; max-width: 620px !important; font-size: 18px !important; color: var(--ed-muted) !important; }
+
+body .category-row { display: flex; flex-wrap: wrap; gap: 6px 22px !important; margin-bottom: 36px !important; border-bottom: 1px solid var(--ed-rule); padding-bottom: 14px; }
+body .cat-pill { background: none !important; border: 0 !important; box-shadow: none !important; padding: 0 !important; border-radius: 0 !important; font: 500 14.5px var(--ed-sans) !important; color: var(--ed-muted) !important; }
+body .cat-pill:hover, body .cat-pill.active { color: var(--ed-ink) !important; text-decoration: underline; text-underline-offset: 6px; }
+body .cat-pill-dot { display: none !important; }
+
+body .featured-article { background: none !important; border: 0 !important; box-shadow: none !important; border-radius: 0 !important; transform: none !important; gap: 32px !important; }
+body .featured-article-img { border-radius: 10px !important; overflow: hidden; }
+body .featured-article-img-overlay { display: none !important; }
+body .featured-article-body { padding: 4px 0 !important; background: none !important; }
+body .featured-label { background: none !important; border: 0 !important; padding: 0 !important; color: var(--ed-blue) !important; font: 600 12px var(--ed-sans) !important; letter-spacing: 0.08em !important; text-transform: uppercase; }
+body .featured-label::before { display: none !important; }
+body .featured-article h2 { font: 600 clamp(26px, 3.4vw, 34px)/1.18 var(--ed-serif) !important; color: var(--ed-ink) !important; letter-spacing: -0.01em !important; }
+body .featured-article p { color: var(--ed-muted) !important; font-size: 17px !important; }
+body .featured-read-more { color: var(--ed-blue) !important; }
+
+body .section-header h2 { font: 600 28px var(--ed-serif) !important; color: var(--ed-ink) !important; }
+body .section-header-count { color: var(--ed-dim) !important; background: none !important; }
+
+/* Cards: the gradient cover + clipboard icon becomes a plain category label */
+body .blog-grid { gap: 0 32px !important; }
+body .b-card { background: none !important; border: 0 !important; border-top: 1px solid var(--ed-rule) !important; border-radius: 0 !important; box-shadow: none !important; transform: none !important; padding: 0 !important; overflow: visible !important; }
+body .b-card:hover h3 { color: var(--ed-blue) !important; }
+body .b-cover { height: auto !important; min-height: 0 !important; background: none !important; padding: 18px 0 0 !important; display: block !important; }
+body .b-cover::before, body .b-cover::after, body .b-cover svg { display: none !important; }
+body .b-cover-tag { position: static !important; background: none !important; border: 0 !important; padding: 0 !important; color: var(--ed-dim) !important; font: 600 11.5px var(--ed-sans) !important; letter-spacing: 0.08em !important; text-transform: uppercase; backdrop-filter: none !important; }
+body .b-body { padding: 8px 0 26px !important; }
+body .b-body h3 { font: 600 20px/1.3 var(--ed-serif) !important; color: var(--ed-ink) !important; margin: 0 0 8px !important; transition: color .15s; }
+body .b-body p { font-size: 15px !important; color: var(--ed-muted) !important; line-height: 1.55 !important; }
+body .b-meta { color: var(--ed-dim) !important; }
+body .b-read { color: var(--ed-blue) !important; }
+
+body .index-cta { background: var(--ed-tint) !important; border: 0 !important; box-shadow: none !important; border-radius: 12px !important; text-align: left !important; }
+body .index-cta h2 { font: 600 28px/1.2 var(--ed-serif) !important; color: var(--ed-ink) !important; }
+body .index-cta h2 .italic, body h2 .italic, body h1 .italic { font-family: inherit !important; font-style: normal !important; color: inherit !important; }
+body .index-cta p { color: var(--ed-muted) !important; }
+body .index-cta .fine { color: var(--ed-dim) !important; }
+body input#blog-search { border: 1px solid rgba(0,0,0,0.14) !important; border-radius: 8px !important; }
+
+body .b-cover { aspect-ratio: auto !important; }
+body .grad-indigo, body .grad-cyan, body .grad-blue { font-weight: inherit !important; background: none !important; -webkit-text-fill-color: currentColor !important; color: inherit !important; font-family: inherit !important; font-style: normal !important; }
+/* Topic hubs reuse .hero with a centred CTA row and a full-bleed photo */
+body .hero .cta-row { justify-content: flex-start !important; margin-top: 8px; }
+body .hero .btn-ghost { background: none !important; border: 1px solid rgba(0,0,0,0.14) !important; color: var(--ed-ink) !important; border-radius: 8px !important; box-shadow: none !important; }
+body .hero + img, body .hero + div > img, body .hero + figure img { display: block; max-width: 1040px; width: calc(100% - 48px); margin: 24px auto 0; border-radius: 10px; height: auto; max-height: 420px; object-fit: cover; }
+body > .toc, body > .key-takeaways { max-width: var(--ed-measure); margin-left: auto !important; margin-right: auto !important; }
+
+/* Hub intro wrapper (photo + TOC): was a full-bleed blue band */
+body .hub-intro { max-width: var(--ed-measure); margin: 24px auto 0; padding: 0 24px; background: none; }
+body .hub-intro > img { width: 100% !important; max-height: 340px !important; border-radius: 10px; }
