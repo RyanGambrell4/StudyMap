@@ -1,0 +1,53 @@
+{
+  "order": 3,
+  "slug": "studyedge-vs-knowt",
+  "competitor": "Knowt",
+  "checked": "2026-10-30",
+  "title": "StudyEdge AI vs Knowt (2026): Honest Comparison | StudyEdge AI",
+  "description": "StudyEdge AI vs Knowt compared honestly: free features, AI flashcards, AP and SAT prep, study planning and price, with sources for every Knowt claim.",
+  "hub_blurb": "Knowt has a generous free tier and deep AP and SAT prep. StudyEdge AI is built for college students juggling a full semester.",
+  "deck": "Knowt is a flashcard and notes tool with a generous free plan, a Quizlet importer, and deep AP, SAT and ACT prep. StudyEdge AI is a study planner for college students: it schedules your weeks around exam dates and tracks your grades.",
+  "short_answer": "    <p>If you are in high school preparing for AP exams or the SAT, or you want the most you can get for free, Knowt is hard to beat, and its one-click Quizlet import is something we do not offer. If you are in college with several courses, midterms and finals stacking up, StudyEdge AI is the better fit: it plans each week around your exam dates, runs your study sessions, and tracks your grades.</p>",
+  "pick_them_title": "You want free and exam prep",
+  "pick_them_short": ["You are studying for AP, SAT, ACT or IB exams", "You want unlimited files and collaboration for free", "You want to bring your Quizlet sets with you", "You need a native iPhone or Android app today"],
+  "pick_us_title": "You are juggling a college semester",
+  "pick_us_short": ["You have several courses with exams on different dates", "You want each day's study planned for you", "You want to track grades and what you need on the final", "You want cards made from your own lectures and slides"],
+  "table": [
+    {"group": "Studying"},
+    {"topic": "Flashcards", "them": "Make by hand or with AI from files; Learn mode, spaced repetition, matching and sorting modes", "us": "Generated from your notes, PDFs, slides or recordings, with spaced-repetition review (SM-2)"},
+    {"topic": "Bringing cards over", "them": "One-click Quizlet import via a Chrome extension; Kahoot and Wayground imports", "us": "No imports; cards are generated from your own material"},
+    {"topic": "Practice tests", "them": "Practice tests, FRQs and mock exams; AP score calculator", "us": "Practice exams written from your course material"},
+    {"topic": "AI tutor", "them": "Kai voice tutor (on all files with Ultra)", "us": "AI Tutor that knows your courses and syllabus; remembers past sessions on Unlimited"},
+    {"topic": "Standardized tests", "them": "AP, SAT and ACT prep (full prep on Ultra) and IB content", "us": "Not a focus; built for college coursework"},
+    {"group": "Planning"},
+    {"topic": "Study plan", "them": "Exam Predictor builds predicted exams and an individualised study plan from your materials", "us": "Weekly schedule across all your courses from exam dates and free time; syllabus PDF import pulls the dates in"},
+    {"topic": "Session plans", "them": "Not stated", "us": "Session Blueprint plans each sitting; Focus Mode runs it with a timer and recall prompts"},
+    {"topic": "Grade tracking", "them": "Stats on questions, accuracy and study time; grade tracking not stated", "us": "Grade Hub: current grade, what you need on remaining work, semester GPA projection"},
+    {"group": "Everything else"},
+    {"topic": "Free plan", "them": "Unlimited file creation, live collaboration and storage; 5 million resources to browse", "us": "1 course, 5 AI actions a month, one try of each premium tool"},
+    {"topic": "Platforms", "them": "Web, iOS, Android and a Chrome extension", "us": "Web app that works on phones; native iOS app coming soon"}
+  ],
+  "pick_them": "    <p>Pick Knowt if price is the deciding factor. Its free plan includes unlimited file creation, live collaboration and storage, which is more than our free plan gives you. If you have years of Quizlet sets, its Chrome extension brings them over in one click.</p>\n    <p>Knowt is also the stronger choice for standardized tests: it has AP, SAT and ACT prep, FRQs, mock exams and an AP score calculator. And it has native iOS and Android apps today.</p>",
+  "pick_us": "    <p>Pick StudyEdge AI if you are in college and the problem is the semester as a whole. It builds a weekly schedule across all your courses from your exam dates and free time, and each session comes with a plan for what to cover. Flashcards and practice exams are made from your own lectures and slides, so they match what your professor covered.</p>\n    <p>Grade Hub tracks where you stand in every course and what you need on the work that is left, which Knowt's site does not describe.</p>",
+  "pricing_intro": "    <p>Knowt's plans page lists prices in dollars without naming a currency. Its App Store listing shows several different in-app prices, so what you pay may depend on where you subscribe.</p>",
+  "their_prices": [["Basic", "Free"], ["Ultra (annual)", "$149.99 a year ($12.99/mo)"], ["Ultra (monthly)", "$24.99/mo"], ["Free trial", "3 days, on the annual plan"]],
+  "their_price_note": "From knowt.com/plans on October 30, 2026.",
+  "deep_dives": [
+    {"id": "high-school-vs-college", "h": "Who each one is really built for", "html": "    <p>Knowt's strongest material is for exams that are the same for everyone: AP, SAT, ACT and IB. Its library and practice tests work because thousands of students are preparing for the same test.</p>\n    <p>College is different. Your Organic Chemistry midterm is written by your professor, on your syllabus, on a date that collides with three other deadlines. StudyEdge AI is built for that: it works from your own course material and your own calendar, and spends its effort on deciding what you should study this week rather than on a shared library.</p>"}
+  ],
+  "both": "    <p>Yes. A student could keep Knowt for free flashcards and shared sets, and use StudyEdge AI to plan the semester and track grades. There is no import between them, so StudyEdge AI makes its own cards from your notes.</p>",
+  "faq": [
+    {"q": "Is Knowt free?", "a": "Knowt has a free Basic plan with unlimited file creation, live collaboration and storage, according to knowt.com/plans. Its Ultra plan was $24.99 a month or $149.99 a year when we checked on October 30, 2026, with a trial of three days on the annual plan."},
+    {"q": "Is StudyEdge AI free?", "a": "StudyEdge AI has a free plan with 1 course, 5 AI actions a month and one try of each premium tool, no card needed. Pro is $9.99 a month or $69.99 a year, with a 7-day free trial."},
+    {"q": "Can I import my Quizlet sets?", "a": "Knowt can, with a one-click import through its Chrome extension. StudyEdge AI cannot; it generates flashcards from your own notes, slides and recordings instead."},
+    {"q": "Which is better for AP exams?", "a": "Knowt. It has dedicated AP, SAT and ACT prep, FRQs and mock exams. StudyEdge AI is built for college courses and does not offer standardized-test prep material."}
+  ],
+  "sources": [
+    {"label": "Knowt plans and prices (knowt.com/plans)", "url": "https://knowt.com/plans"},
+    {"label": "Knowt homepage", "url": "https://knowt.com/"},
+    {"label": "Knowt Exam Predictor and Study Plan", "url": "https://knowt.com/exam-predictor-and-plan"},
+    {"label": "Knowt Quizlet import", "url": "https://knowt.com/free-quizlet-alternative"},
+    {"label": "Knowt mobile apps", "url": "https://knowt.com/mobile"},
+    {"label": "Knowt on the App Store", "url": "https://apps.apple.com/us/app/knowt-ai-flashcards-notes/id6463744184"}
+  ]
+}

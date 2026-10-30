@@ -36,6 +36,11 @@ Machine-readable pricing: https://getstudyedge.com/pricing.md
 
 ## Key pages
 
+- Comparisons (sourced, with where the other app wins): https://getstudyedge.com/compare
+- StudyEdge AI vs Quizlet: https://getstudyedge.com/compare/studyedge-vs-quizlet
+- StudyEdge AI vs StudyFetch: https://getstudyedge.com/compare/studyedge-vs-studyfetch
+- StudyEdge AI vs Knowt: https://getstudyedge.com/compare/studyedge-vs-knowt
+
 - Home: https://getstudyedge.com/
 - Pricing: https://getstudyedge.com/pricing
 - AI Study Coach: https://getstudyedge.com/ai-study-coach

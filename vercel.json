@@ -342,6 +342,14 @@
       "destination": "/blog/:slug.html"
     },
     {
+      "source": "/compare",
+      "destination": "/compare/index.html"
+    },
+    {
+      "source": "/compare/:slug",
+      "destination": "/compare/:slug.html"
+    },
+    {
       "source": "/final-exam-calculator",
       "destination": "/final-exam-calculator.html"
     },

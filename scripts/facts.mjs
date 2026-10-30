@@ -27,6 +27,7 @@ export const TARGET_GLOBS = [
   'public/*.md',
   'public/llms.txt',
   'public/blog/*.html',
+  'public/compare/*.html',
   'public/v2/**/*.jsx',
   'src/components/*.jsx',
   'index.html',
