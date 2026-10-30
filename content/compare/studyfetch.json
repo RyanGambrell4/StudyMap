@@ -3,50 +3,155 @@
   "slug": "studyedge-vs-studyfetch",
   "competitor": "StudyFetch",
   "checked": "2026-10-30",
-  "title": "StudyEdge AI vs StudyFetch (2026): Honest Comparison | StudyEdge AI",
+  "title": "StudyEdge AI vs StudyFetch: Honest 2026 Comparison",
   "description": "StudyEdge AI vs StudyFetch compared honestly: AI tutor, flashcards, lecture tools, study planning and price, with sources for every StudyFetch claim.",
   "hub_blurb": "Both turn your course material into AI study tools. StudyFetch leans into its tutor and media; StudyEdge AI into scheduling and grades.",
   "deck": "Both turn your notes, slides and lectures into flashcards, quizzes and an AI tutor. StudyFetch leans into the tutor and into audio and video. StudyEdge AI leans into planning your weeks around exam dates and tracking your grades.",
   "short_answer": "    <p>These two overlap more than most. If you want an AI tutor you can talk to, live lecture notes, and study material as audio or video, StudyFetch offers more of that than we do, and it has native iOS and Android apps. If your problem is organisation across several courses, StudyEdge AI is the better fit: it builds a weekly schedule from your exam dates, plans each session, and tracks your grades.</p>",
   "pick_them_title": "You want a tutor and media tools",
-  "pick_them_short": ["You want a voice AI tutor, or help over iMessage", "You want live notes during a lecture", "You learn well from audio recaps or explainer videos", "You need a native iPhone or Android app today"],
+  "pick_them_short": [
+    "You want a voice AI tutor, or help over iMessage",
+    "You want live notes during a lecture",
+    "You learn well from audio recaps or explainer videos",
+    "You need a native iPhone or Android app today"
+  ],
   "pick_us_title": "You need the semester organised",
-  "pick_us_short": ["You want a schedule built from your exam dates", "You want each session planned for you", "You want to track grades and what you need on the final", "You want published prices before you sign up"],
+  "pick_us_short": [
+    "You want a schedule built from your exam dates",
+    "You want each session planned for you",
+    "You want to track grades and what you need on the final",
+    "You want published prices before you sign up"
+  ],
   "table": [
-    {"group": "Studying"},
-    {"topic": "From your material", "them": "PDFs, PowerPoints, videos, lecture recordings, photos of notes and YouTube links", "us": "PDFs, Word and PowerPoint files, images, audio or video recordings, and YouTube links"},
-    {"topic": "Flashcards and quizzes", "them": "Generated flashcards, QuizFetch quizzes, practice tests and exam-specific questions", "us": "Generated flashcards with spaced-repetition review (SM-2), quizzes and practice exams"},
-    {"topic": "AI tutor", "them": "Spark.E tutor, including voice and a text-over-iMessage option", "us": "AI Tutor that knows your courses and syllabus; remembers past sessions on Unlimited"},
-    {"topic": "Lectures", "them": "Live Lecture for real-time notes; Record Lecture", "us": "Upload a recording or YouTube link; no live note-taking"},
-    {"topic": "Audio and video", "them": "Audio Recap and AI Explainer Videos", "us": "Not offered"},
-    {"group": "Planning"},
-    {"topic": "Study plan", "them": "Study Plan breaks material into focused chunks with a cram mode; a separate Calendar feature", "us": "Weekly schedule from your courses, exam dates and free time; syllabus PDF import pulls the dates in"},
-    {"topic": "Session plans", "them": "Not stated", "us": "Session Blueprint plans each sitting; Focus Mode runs it with a timer and recall prompts"},
-    {"topic": "Grade tracking", "them": "Progress tracking, streaks and achievements; grade tracking not stated", "us": "Grade Hub: current grade, what you need on remaining work, semester GPA projection"},
-    {"group": "Everything else"},
-    {"topic": "Games", "them": "Arcade study games", "us": "None"},
-    {"topic": "Platforms", "them": "Web, iOS and Android", "us": "Web app that works on phones; native iOS app coming soon"},
-    {"topic": "Pricing page", "them": "No public pricing page; prices shown as App Store in-app purchases", "us": "Published on getstudyedge.com/pricing"}
+    {
+      "group": "Studying"
+    },
+    {
+      "topic": "From your material",
+      "them": "PDFs, PowerPoints, videos, lecture recordings, photos of notes and YouTube links",
+      "us": "PDFs, Word and PowerPoint files, images, audio or video recordings, and YouTube links"
+    },
+    {
+      "topic": "Flashcards and quizzes",
+      "them": "Generated flashcards, QuizFetch quizzes, practice tests and exam-specific questions",
+      "us": "Generated flashcards with spaced-repetition review (SM-2), quizzes and practice exams"
+    },
+    {
+      "topic": "AI tutor",
+      "them": "Spark.E tutor, including voice and a text-over-iMessage option",
+      "us": "AI Tutor that knows your courses and syllabus; remembers past sessions on Unlimited"
+    },
+    {
+      "topic": "Lectures",
+      "them": "Live Lecture for real-time notes; Record Lecture",
+      "us": "Upload a recording or YouTube link; no live note-taking"
+    },
+    {
+      "topic": "Audio and video",
+      "them": "Audio Recap and AI Explainer Videos",
+      "us": "Not offered"
+    },
+    {
+      "group": "Planning"
+    },
+    {
+      "topic": "Study plan",
+      "them": "Study Plan breaks material into focused chunks with a cram mode; a separate Calendar feature",
+      "us": "Weekly schedule from your courses, exam dates and free time; syllabus PDF import pulls the dates in"
+    },
+    {
+      "topic": "Session plans",
+      "them": "Not stated",
+      "us": "Session Blueprint plans each sitting; Focus Mode runs it with a timer and recall prompts"
+    },
+    {
+      "topic": "Grade tracking",
+      "them": "Progress tracking, streaks and achievements; grade tracking not stated",
+      "us": "Grade Hub: current grade, what you need on remaining work, semester GPA projection"
+    },
+    {
+      "group": "Everything else"
+    },
+    {
+      "topic": "Games",
+      "them": "Arcade study games",
+      "us": "None"
+    },
+    {
+      "topic": "Platforms",
+      "them": "Web, iOS and Android",
+      "us": "Web app that works on phones; native iOS app coming soon"
+    },
+    {
+      "topic": "Pricing page",
+      "them": "No public pricing page; prices shown as App Store in-app purchases",
+      "us": "Published on getstudyedge.com/pricing"
+    }
   ],
   "pick_them": "    <p>Pick StudyFetch if you learn best by talking a topic through. Its tutor works by voice in the app and even over iMessage, and it can turn your material into audio recaps and explainer videos for when you are commuting or tired of reading. Live Lecture writes notes while the class is happening, which we do not do.</p>\n    <p>It also has native iOS and Android apps today, plus arcade-style study games. If those matter to you, StudyFetch has more of them.</p>",
   "pick_us": "    <p>Pick StudyEdge AI if the hard part is keeping five courses moving at once. It starts from your exam dates and free time, builds the week, and tells each session what to cover, with flashcards and practice exams generated from your own material. Grade Hub shows where you stand in every course and what you need on the work that is left.</p>\n    <p>Our prices are also published up front, with a free plan you can use without a card. StudyFetch does not have a public pricing page; the prices below come from its App Store listing.</p>",
   "pricing_intro": "    <p>StudyFetch's website has no pricing page (studyfetch.com/pricing returned a 404 when we checked). These are the in-app purchase prices on its US App Store listing; web prices may differ.</p>",
-  "their_prices": [["Free", "Free to start; limits not stated"], ["Premium Monthly", "$19.99"], ["Premium Quarterly", "$29.00"], ["Premium Yearly", "$96.00"]],
+  "their_prices": [
+    [
+      "Free",
+      "Free to start; limits not stated"
+    ],
+    [
+      "Premium Monthly",
+      "$19.99 USD"
+    ],
+    [
+      "Premium Quarterly",
+      "$29.00 USD"
+    ],
+    [
+      "Premium Yearly",
+      "$96.00 USD"
+    ]
+  ],
   "their_price_note": "From StudyFetch's US App Store listing on October 30, 2026. Add-ons listed there include Explainer videos and hourly Spark.E calls.",
   "deep_dives": [
-    {"id": "tutor-vs-planner", "h": "Where they really differ: tutor-first or plan-first", "html": "    <p>Both products will take a lecture deck and give you flashcards, a quiz and an AI to ask questions. The difference is what sits at the centre. StudyFetch puts the tutor at the centre: you bring material, and Spark.E helps you work through it, by text, voice or iMessage.</p>\n    <p>StudyEdge AI puts the calendar at the centre. It is built for the student who has the material and the tools but keeps running out of week: it decides what today's session covers based on how close each exam is, and Grade Hub tells you which course needs the time most.</p>"}
+    {
+      "id": "tutor-vs-planner",
+      "h": "Where they really differ: tutor-first or plan-first",
+      "html": "    <p>Both products will take a lecture deck and give you flashcards, a quiz and an AI to ask questions. The difference is what sits at the centre. StudyFetch puts the tutor at the centre: you bring material, and Spark.E helps you work through it, by text, voice or iMessage.</p>\n    <p>StudyEdge AI puts the calendar at the centre. It is built for the student who has the material and the tools but keeps running out of week: it decides what today's session covers based on how close each exam is, and Grade Hub tells you which course needs the time most.</p>"
+    }
   ],
   "both": "    <p>You can. Some students would use StudyFetch's tutor or audio recaps for explanations and StudyEdge AI to plan the week and track grades. Both have free tiers, so trying the combination costs nothing up front.</p>",
   "faq": [
-    {"q": "Is StudyEdge AI the same company as StudyFetch?", "a": "No. StudyEdge AI (getstudyedge.com) and StudyFetch (studyfetch.com) are separate, unrelated companies. StudyEdge AI is also not affiliated with Study Edge (studyedge.com), a tutoring company."},
-    {"q": "How much does StudyFetch cost?", "a": "StudyFetch does not publish prices on its website. Its US App Store listing showed Premium at $19.99 a month, $29.00 a quarter or $96.00 a year on October 30, 2026. StudyEdge AI Pro is $9.99 a month or $69.99 a year."},
-    {"q": "Which one has a better AI tutor?", "a": "They are built differently. StudyFetch's tutor is central to the product and supports voice and iMessage. StudyEdge AI's tutor knows your enrolled courses and syllabus, and on the Unlimited plan it remembers past sessions. Try both on their free tiers with your own course material."},
-    {"q": "Does StudyFetch build a study schedule from exam dates?", "a": "StudyFetch's site describes a Study Plan that breaks material into focused chunks, and a separate Calendar feature. It does not say the plan is built from your exam dates. Building the schedule from exam dates is StudyEdge AI's core feature."}
+    {
+      "q": "Is StudyEdge AI the same company as StudyFetch?",
+      "a": "No. StudyEdge AI (getstudyedge.com) and StudyFetch (studyfetch.com) are separate, unrelated companies. StudyEdge AI is also not affiliated with Study Edge (studyedge.com), a tutoring company."
+    },
+    {
+      "q": "How much does StudyFetch cost?",
+      "a": "StudyFetch does not publish prices on its website. Its US App Store listing showed Premium at $19.99 a month, $29.00 a quarter or $96.00 a year on October 30, 2026. StudyEdge AI Pro is $9.99 a month or $69.99 a year."
+    },
+    {
+      "q": "Which one has a better AI tutor?",
+      "a": "They are built differently. StudyFetch's tutor is central to the product and supports voice and iMessage. StudyEdge AI's tutor knows your enrolled courses and syllabus, and on the Unlimited plan it remembers past sessions. Try both on their free tiers with your own course material."
+    },
+    {
+      "q": "Does StudyFetch build a study schedule from exam dates?",
+      "a": "StudyFetch's site describes a Study Plan that breaks material into focused chunks, and a separate Calendar feature. It does not say the plan is built from your exam dates. Building the schedule from exam dates is StudyEdge AI's core feature."
+    }
   ],
   "sources": [
-    {"label": "StudyFetch homepage", "url": "https://www.studyfetch.com/"},
-    {"label": "StudyFetch support and feature navigation", "url": "https://www.studyfetch.com/support"},
-    {"label": "StudyFetch Study Plan feature", "url": "https://www.studyfetch.com/features/study-plan"},
-    {"label": "StudyFetch on the App Store (in-app purchase prices)", "url": "https://apps.apple.com/us/app/studyfetch-make-learning-easy/id6663574866"}
+    {
+      "label": "StudyFetch homepage",
+      "url": "https://www.studyfetch.com/"
+    },
+    {
+      "label": "StudyFetch support and feature navigation",
+      "url": "https://www.studyfetch.com/support"
+    },
+    {
+      "label": "StudyFetch Study Plan feature",
+      "url": "https://www.studyfetch.com/features/study-plan"
+    },
+    {
+      "label": "StudyFetch on the App Store (in-app purchase prices)",
+      "url": "https://apps.apple.com/us/app/studyfetch-make-learning-easy/id6663574866"
+    }
   ]
 }

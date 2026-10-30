@@ -61,7 +61,7 @@ FOOTER = '''<footer class="site-footer">
     <a href="/privacy">Privacy</a>
     <a href="/terms">Terms</a>
   </div>
-  <p class="footer-copy">&copy; 2026 StudyEdge AI &mdash; getstudyedge.com. Not affiliated with Study Edge (studyedge.com).</p>
+  <p class="footer-copy">&copy; 2026 StudyEdge AI, getstudyedge.com. Not affiliated with Study Edge (studyedge.com).</p>
 </footer>'''
 
 
@@ -262,7 +262,7 @@ def render(d, others):
 
 def render_hub(pages):
     url = f'{ORIGIN}/compare'
-    title = 'StudyEdge AI Comparisons: How It Stacks Up | StudyEdge AI'
+    title = 'StudyEdge AI Comparisons: How It Stacks Up'
     desc = 'Honest head-to-head comparisons of StudyEdge AI with other study apps, with sources for every claim and the cases where the other app is the better pick.'
     jsonld = {'@context': 'https://schema.org', '@type': 'CollectionPage', 'name': 'StudyEdge AI comparisons', 'url': url,
               'hasPart': [{'@type': 'Article', 'name': f'StudyEdge AI vs {p["competitor"]}', 'url': f'{url}/{p["slug"]}'} for p in pages]}
@@ -292,6 +292,9 @@ def render_hub(pages):
 
 
 pages = [json.load(open(f)) for f in sorted(glob.glob(os.path.join(SRC, '*.json')))]
+for p in pages:
+    assert len(p['title']) <= 60, f"title over 60 chars: {p['title']}"
+    assert '\u2014' not in json.dumps(p, ensure_ascii=False), f"em dash in {p['slug']}"
 pages.sort(key=lambda p: p.get('order', 99))
 os.makedirs(OUT, exist_ok=True)
 for p in pages:
