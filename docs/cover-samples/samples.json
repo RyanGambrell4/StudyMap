@@ -1,0 +1,32 @@
+[
+  {
+    "page": "is-a-3-5-gpa-good.html",
+    "template": "number",
+    "alt": "Cover for \"Is a 3.5 GPA good?\": the number 3.5 on a GPA scale from 0.0 to 4.0, with a marker at that point."
+  },
+  {
+    "page": "what-gpa-do-you-need-for-ucla.html",
+    "template": "number",
+    "alt": "Cover for \"What GPA do you need for UCLA?\": the number 3.85 on a GPA scale from 2.0 to 4.0, with the 3.85 to 4 range highlighted."
+  },
+  {
+    "page": "compare/studyedge-vs-quizlet.html",
+    "template": "product",
+    "alt": "Cover for \"StudyEdge AI vs Quizlet\": the StudyEdge AI Today screen shown on a phone, beside the page title."
+  },
+  {
+    "page": "ai-study-coach.html",
+    "template": "product",
+    "alt": "Cover for \"The AI study coach that actually tells you what to study.\": the StudyEdge AI AI Coach screen shown on a phone, beside the page title."
+  },
+  {
+    "page": "blog/how-to-study-effectively.html",
+    "template": "editorial",
+    "alt": "Cover for \"How to Study Effectively: A Science-Backed System That Actually Works\": the title in serif type with a line drawing of a target."
+  },
+  {
+    "page": "blog/pomodoro-technique-for-studying.html",
+    "template": "editorial",
+    "alt": "Cover for \"The Pomodoro Technique for College Students: A No-BS Guide (2026)\": the title in serif type with a line drawing of a timer."
+  }
+]
