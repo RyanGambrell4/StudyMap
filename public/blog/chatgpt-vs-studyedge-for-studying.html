@@ -231,16 +231,25 @@ a:hover{text-decoration:underline}
 <script>
 (function(){var r=document.getElementById('rp');window.addEventListener('scroll',function(){var d=document.documentElement;r.style.width=Math.min(100,d.scrollTop/(d.scrollHeight-d.clientHeight)*100)+'%';},{passive:true});})();
 </script>
-<nav class="site-nav">
-  <a href="/" class="logo">StudyEdge <span>AI</span></a>
-  <a href="/blog">Blog</a>
-  <a href="/gpa-calculator">GPA Calculator</a>
-  <a href="/app?signup=1" style="margin-left:auto;background:var(--brand);color:#fff;padding:8px 18px;border-radius:8px;font-weight:600;font-size:14px">Try Free</a>
-</nav>
+<header class="site-header">
+  <nav class="site-nav">
+    <a class="nav-logo" href="/">
+      <img src="/favicon.png" alt="StudyEdge AI" />
+      StudyEdge AI
+    </a>
+    <div class="nav-links">
+      <a href="/#features">Features</a>
+      <a href="/studyedge-ai#pricing">Pricing</a>
+      <a href="/blog">Blog</a>
+      <a href="/app?signup=1" class="nav-cta">Try Free</a>
+    </div>
+  </nav>
+</header>
 
 <div class="hero">
   <div class="container">
     <div class="breadcrumb"><a href="/">Home</a> › <a href="/blog">Blog</a> › ChatGPT vs StudyEdge AI</div>
+    <p class="ed-kicker"><a href="/blog">AI &amp; Tools</a></p>
     <h1>ChatGPT vs StudyEdge AI for Studying (2026): Which Is Better for College?</h1>
     <div class="meta">Published June 2026 &nbsp;·&nbsp; 9 min read &nbsp;·&nbsp; StudyEdge AI</div>
 <div class="share-bar">
@@ -256,7 +265,7 @@ a:hover{text-decoration:underline}
   </div>
 </div>
 
-<img src="https://images.unsplash.com/photo-1461749280684-dccba630e2f6?w=1260&h=750&fit=crop&q=80&auto=format" alt="Code and AI interface open on a MacBook laptop screen" style="width:100%;max-height:420px;object-fit:cover;display:block;border-radius:12px;margin:0 0 32px;" loading="eager" fetchpriority="high" />
+<img class="ed-cover" src="https://images.unsplash.com/photo-1461749280684-dccba630e2f6?w=1260&h=750&fit=crop&q=80&auto=format" alt="Code and AI interface open on a MacBook laptop screen" loading="eager" fetchpriority="high" />
 
     <div class="toc">
       <span class="toc-label">In This Article</span>
@@ -654,5 +663,6 @@ document.addEventListener('DOMContentLoaded',function(){
   },{passive:true});
 })();
 </script>
+<script src="/blog/editorial.js" defer></script>
 </body>
 </html>

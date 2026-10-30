@@ -308,3 +308,110 @@ body > .toc, body > .key-takeaways { max-width: var(--ed-measure); margin-left: 
 /* Hub intro wrapper (photo + TOC): was a full-bleed blue band */
 body .hub-intro { max-width: var(--ed-measure); margin: 24px auto 0; padding: 0 24px; background: none; }
 body .hub-intro > img { width: 100% !important; max-height: 340px !important; border-radius: 10px; }
+
+/* =====================================================================
+   v2: magazine layer
+   ===================================================================== */
+body .article h2, body .post-body h2, body .article-body h2 { scroll-margin-top: 84px; }
+
+/* Hero: kicker -> headline -> deck -> byline/meta -> share, on both templates */
+body .post-hero > .container, body .hero > .container { display: flex; flex-direction: column; }
+body .hero .breadcrumb, body .hero .eyebrow { order: 0; }
+body .post-hero .ed-kicker, body .hero .ed-kicker { order: 1; }
+body .post-hero h1, body .hero h1 { order: 2; }
+body .post-hero .post-intro, body .hero .hero-sub { order: 3; }
+body .post-hero .post-meta, body .hero .meta { order: 4; }
+body .post-hero .share-bar, body .hero .share-bar { order: 5; }
+body .hero .cta-row { order: 6; }
+body .hero .breadcrumb { margin-bottom: 18px !important; }
+body .ed-kicker { margin: 0 0 4px !important; font: 600 13px var(--ed-sans) !important; letter-spacing: 0.08em; text-transform: uppercase; }
+body .ed-kicker a { color: var(--ed-blue) !important; text-decoration: none !important; }
+body .hero h1, body .post-hero h1 { font-size: clamp(34px, 5.2vw, 54px) !important; line-height: 1.08 !important; margin: 6px 0 18px !important; text-wrap: balance; }
+body .post-intro, body .hero-sub { font-size: clamp(18px, 2.2vw, 21px) !important; line-height: 1.55 !important; text-wrap: pretty; }
+body .post-meta, body .hero .meta { padding-top: 16px; border-top: 1px solid var(--ed-rule); margin-top: 4px !important; }
+body .post-meta::before, body .hero .meta::before {
+  content: ''; display: inline-block; width: 22px; height: 22px; border-radius: 6px; vertical-align: -6px; margin-right: 9px;
+  background: url(/favicon.png) center / cover no-repeat;
+}
+body .share-bar { margin-top: 10px !important; }
+
+/* Cover photo: wider than the text column */
+body img.ed-cover {
+  display: block; width: min(1040px, calc(100vw - 48px)) !important; max-width: none !important; height: auto !important; max-height: none !important;
+  aspect-ratio: 16 / 8; object-fit: cover; border-radius: 12px !important;
+  position: relative; left: 50%; transform: translateX(-50%); margin: 12px 0 44px !important;
+}
+
+/* Body rhythm */
+body .article p, body .post-body p, body .article-body p { text-wrap: pretty; }
+body .post-body ol > li::marker, body .article ol > li::marker, body .article-body ol > li::marker { color: var(--ed-blue); font-weight: 600; }
+body .post-body ul > li::marker, body .article ul > li::marker, body .article-body ul > li::marker { color: var(--ed-dim); }
+body .article blockquote, body .post-body blockquote { margin: 32px 0; padding: 0 0 0 24px; border-left: 3px solid var(--ed-blue); font: italic 21px/1.5 var(--ed-serif); color: var(--ed-ink); }
+body .article p a, body .article li a, body .post-body p a, body .post-body li a {
+  text-decoration: underline; text-decoration-color: rgba(52, 82, 217, 0.35); text-underline-offset: 3px; text-decoration-thickness: 1px;
+}
+body .article p a:hover, body .post-body p a:hover { text-decoration-color: currentColor; }
+body .toc a, body .key-takeaways a { text-decoration: none !important; }
+body .key-takeaways { border-top: 3px solid var(--ed-ink) !important; border-radius: 0 0 10px 10px !important; }
+
+/* Ranked app cards and their tags */
+body .app-card { background: #fff !important; border: 1px solid var(--ed-rule) !important; border-radius: 12px !important; box-shadow: none !important; padding: 26px 28px !important; margin: 24px 0 !important; }
+body .app-card h3 { margin-top: 0 !important; }
+body .ranked-badge { background: var(--ed-ink) !important; color: #fff !important; border-radius: 6px !important; font: 600 12px var(--ed-sans) !important; padding: 3px 8px !important; box-shadow: none !important; }
+body .pills { display: flex; flex-wrap: wrap; gap: 6px 14px; margin: 8px 0 14px; }
+body .pill, body .pill.green, body .pill.orange, body .price-tag, body .tagline {
+  background: none !important; border: 0 !important; padding: 0 !important; border-radius: 0 !important;
+  font: 500 13px var(--ed-sans) !important; color: var(--ed-dim) !important;
+}
+body .pros-cons-col, body .pros, body .cons { background: none !important; border: 0 !important; }
+
+@media (max-width: 760px) {
+  body .post-body table, body .article table, body .comparison-table { display: block; overflow-x: auto; -webkit-overflow-scrolling: touch; }
+  body img.ed-cover { width: calc(100vw - 32px) !important; aspect-ratio: 16 / 10; border-radius: 10px !important; margin-bottom: 32px !important; }
+}
+
+/* Sticky "On this page" rail (built by editorial.js) */
+.ed-rail {
+  position: fixed; top: 96px; width: 230px; max-height: calc(100vh - 140px); overflow: auto;
+  opacity: 0; visibility: hidden; transform: translateY(6px); transition: opacity .2s, transform .2s, visibility .2s; z-index: 20;
+}
+.ed-rail.is-on { opacity: 1; visibility: visible; transform: none; }
+.ed-rail-label { font: 600 11.5px var(--ed-sans); letter-spacing: 0.08em; text-transform: uppercase; color: var(--ed-dim); margin: 0 0 12px; }
+.ed-rail ol { list-style: none; margin: 0; padding: 0; border-left: 1px solid var(--ed-rule); }
+.ed-rail li { margin: 0; }
+.ed-rail ol a { display: block; padding: 6px 0 6px 14px; margin-left: -1px; border-left: 2px solid transparent; font: 400 13.5px/1.4 var(--ed-sans); color: var(--ed-muted); text-decoration: none; }
+.ed-rail ol a:hover { color: var(--ed-ink); }
+.ed-rail ol a.is-active { color: var(--ed-ink); font-weight: 600; border-left-color: var(--ed-blue); }
+.ed-rail-cta { display: block; margin-top: 22px; padding-top: 16px; border-top: 1px solid var(--ed-rule); font: 600 13.5px/1.4 var(--ed-sans); color: var(--ed-blue) !important; text-decoration: none; }
+@media (max-width: 1199px) { .ed-rail { display: none; } }
+
+/* Keep reading: three photo cards */
+body .keep-reading { background: var(--ed-tint); padding: 56px 24px 64px; border-top: 1px solid var(--ed-rule); }
+body .kr-inner { max-width: 1040px; margin: 0 auto; }
+body .keep-reading h2 { font: 600 30px/1.2 var(--ed-serif) !important; color: var(--ed-ink) !important; margin: 0 0 26px !important; }
+body .kr-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 28px; }
+body .kr-card { display: flex; flex-direction: column; gap: 8px; text-decoration: none !important; color: inherit; }
+body .kr-card img { width: 100%; height: auto; aspect-ratio: 16 / 10; object-fit: cover; border-radius: 10px; margin-bottom: 6px; background: #e9ebef; transition: opacity .2s; }
+body .kr-card:hover img { opacity: .9; }
+body .kr-cat { font: 600 11.5px var(--ed-sans); letter-spacing: 0.08em; text-transform: uppercase; color: var(--ed-dim); }
+body .kr-title { font: 600 19px/1.3 var(--ed-serif); color: var(--ed-ink); }
+body .kr-card:hover .kr-title { color: var(--ed-blue); }
+@media (max-width: 760px) { body .kr-grid { grid-template-columns: 1fr; gap: 24px; } body .keep-reading { padding: 40px 16px 48px; } }
+body .keep-reading + .related-links { background: var(--ed-bg) !important; }
+
+/* Index cards with real cover photos */
+body .b-cover { position: relative !important; padding: 0 !important; }
+body .b-cover img { display: block; width: 100%; height: auto; aspect-ratio: 16 / 10; object-fit: cover; border-radius: 10px; background: #e9ebef; margin: 0 0 14px; }
+body .b-card { border-top: 0 !important; padding-bottom: 8px !important; }
+body .b-card:hover .b-cover img { opacity: .9; }
+body .blog-grid { gap: 12px 32px !important; }
+
+/* Mobile tables: an earlier rule forced overflow visible; scroll inside the table instead */
+@media (max-width: 760px) {
+  body table.comparison-table, body .compare-table, body .post-body table, body .article table, body .article-body table {
+    display: block !important; overflow-x: auto !important; max-width: 100% !important;
+  }
+}
+body .hero .quick-answer { order: 3; margin-top: 4px !important; }
+
+@media (max-width: 760px) { body .app-card { padding: 18px 16px !important; } body .blog-index-hero { padding: 40px 20px 28px !important; } }

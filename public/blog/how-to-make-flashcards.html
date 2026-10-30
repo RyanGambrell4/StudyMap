@@ -225,23 +225,27 @@
 (function(){var r=document.getElementById('rp');window.addEventListener('scroll',function(){var d=document.documentElement;r.style.width=Math.min(100,d.scrollTop/(d.scrollHeight-d.clientHeight)*100)+'%';},{passive:true});})();
 </script>
 
-<nav class="site-nav">
-  <div class="nav-inner">
-    <a href="/" class="nav-logo">StudyEdge AI</a>
+<header class="site-header">
+  <nav class="site-nav">
+    <a class="nav-logo" href="/">
+      <img src="/favicon.png" alt="StudyEdge AI" />
+      StudyEdge AI
+    </a>
     <div class="nav-links">
+      <a href="/#features">Features</a>
+      <a href="/studyedge-ai#pricing">Pricing</a>
       <a href="/blog">Blog</a>
-      <a href="/ai-flashcard-maker">AI Flashcards</a>
-      <a href="/ai-study-coach">Study Coach</a>
       <a href="/app?signup=1" class="nav-cta">Try Free</a>
     </div>
-  </div>
-</nav>
+  </nav>
+</header>
 
 <article class="blog-article">
   <div class="article-header">
     <div class="container" style="max-width:760px;">
       <div class="article-eyebrow">Study Techniques</div>
-      <h1>How to Make Flashcards That Actually Work: The Evidence-Based Method</h1>
+      <p class="ed-kicker"><a href="/blog/study-techniques">Study Techniques</a></p>
+    <h1>How to Make Flashcards That Actually Work: The Evidence-Based Method</h1>
       <p class="article-subtitle">Most students make flashcards the wrong way: too long, too passive, never reviewed with spacing. Here is the method that produces durable retention.</p>
       <div class="article-meta">
         <span>By StudyEdge AI</span>
@@ -528,6 +532,30 @@ function inlineSubscribe(form, e) {
   </div>
 </section>
 
+<!-- ed:keep-reading -->
+<section class="keep-reading" aria-labelledby="kr-h">
+  <div class="kr-inner">
+    <h2 id="kr-h">Keep reading</h2>
+    <div class="kr-grid">
+      <a class="kr-card" href="/blog/active-recall-study-technique">
+        <img src="https://images.unsplash.com/photo-1503676260728-1c00da094a0b?w=720&h=450&fit=crop&q=80&auto=format" alt="" loading="lazy" width="720" height="450">
+        <span class="kr-cat">Study Techniques</span>
+        <span class="kr-title">Active Recall: The Study Technique That Actually Improves Grades (Science Explained)</span>
+      </a>
+      <a class="kr-card" href="/blog/best-study-techniques-science">
+        <img src="https://images.unsplash.com/photo-1513258496099-48168024aec0?w=720&h=450&fit=crop&q=80&auto=format" alt="" loading="lazy" width="720" height="450">
+        <span class="kr-cat">Study Techniques</span>
+        <span class="kr-title">The 5 Study Techniques That Actually Work (According to Research)</span>
+      </a>
+      <a class="kr-card" href="/blog/cornell-note-taking-method">
+        <img src="https://images.unsplash.com/photo-1517842645767-c639042777db?w=720&h=450&fit=crop&q=80&auto=format" alt="" loading="lazy" width="720" height="450">
+        <span class="kr-cat">Study Techniques</span>
+        <span class="kr-title">Cornell Note Taking Method</span>
+      </a>
+    </div>
+  </div>
+</section>
+<!-- /ed:keep-reading -->
 <section class="related-links">
   <div class="container">
     <h2>Further Reading</h2>
@@ -584,5 +612,6 @@ document.addEventListener('DOMContentLoaded',function(){
   },{passive:true});
 })();
 </script>
+<script src="/blog/editorial.js" defer></script>
 </body>
 </html>

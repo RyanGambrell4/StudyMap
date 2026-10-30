@@ -225,23 +225,27 @@
 (function(){var r=document.getElementById('rp');window.addEventListener('scroll',function(){var d=document.documentElement;r.style.width=Math.min(100,d.scrollTop/(d.scrollHeight-d.clientHeight)*100)+'%';},{passive:true});})();
 </script>
 
-<nav class="site-nav">
-  <div class="nav-inner">
-    <a href="/" class="nav-logo">StudyEdge AI</a>
+<header class="site-header">
+  <nav class="site-nav">
+    <a class="nav-logo" href="/">
+      <img src="/favicon.png" alt="StudyEdge AI" />
+      StudyEdge AI
+    </a>
     <div class="nav-links">
+      <a href="/#features">Features</a>
+      <a href="/studyedge-ai#pricing">Pricing</a>
       <a href="/blog">Blog</a>
-      <a href="/ai-flashcard-maker">AI Flashcards</a>
-      <a href="/ai-study-coach">Study Coach</a>
       <a href="/app?signup=1" class="nav-cta">Try Free</a>
     </div>
-  </div>
-</nav>
+  </nav>
+</header>
 
 <article class="blog-article">
   <div class="article-header">
     <div class="container" style="max-width:760px;">
       <div class="article-eyebrow">Exam Prep</div>
-      <h1>How to Study for Multiple Choice Exams: The System That Works</h1>
+      <p class="ed-kicker"><a href="/blog/exam-prep">Exam Prep</a></p>
+    <h1>How to Study for Multiple Choice Exams: The System That Works</h1>
       <p class="article-subtitle">Multiple choice exams test recognition in a distractor set -- not free recall. The difference in how you study for them matters more than hours logged.</p>
       <div class="article-meta">
         <span>By StudyEdge AI</span>
@@ -523,6 +527,30 @@ function inlineSubscribe(form, e) {
   </div>
 </section>
 
+<!-- ed:keep-reading -->
+<section class="keep-reading" aria-labelledby="kr-h">
+  <div class="kr-inner">
+    <h2 id="kr-h">Keep reading</h2>
+    <div class="kr-grid">
+      <a class="kr-card" href="/blog/how-to-study-for-the-bar-exam">
+        <img src="https://images.unsplash.com/photo-1589391886645-d51941baf7fb?w=720&h=450&fit=crop&q=80&auto=format" alt="" loading="lazy" width="720" height="450">
+        <span class="kr-cat">Exam Prep</span>
+        <span class="kr-title">How to Study for the Bar Exam: A 10-Week Study Plan</span>
+      </a>
+      <a class="kr-card" href="/blog/how-to-overcome-test-anxiety">
+        <img src="https://images.unsplash.com/photo-1427504494785-3a9ca7044f45?w=720&h=450&fit=crop&q=80&auto=format" alt="" loading="lazy" width="720" height="450">
+        <span class="kr-cat">Exam Prep</span>
+        <span class="kr-title">How to Overcome Test Anxiety</span>
+      </a>
+      <a class="kr-card" href="/blog/how-to-prepare-for-midterms">
+        <img src="https://images.unsplash.com/photo-1519452635265-7b1fbfd1e4e0?w=720&h=450&fit=crop&q=80&auto=format" alt="" loading="lazy" width="720" height="450">
+        <span class="kr-cat">Exam Prep</span>
+        <span class="kr-title">How to Prepare for Midterms</span>
+      </a>
+    </div>
+  </div>
+</section>
+<!-- /ed:keep-reading -->
 <section class="related-links">
   <div class="container">
     <h2>Further Reading</h2>
@@ -580,5 +608,6 @@ document.addEventListener('DOMContentLoaded',function(){
   },{passive:true});
 })();
 </script>
+<script src="/blog/editorial.js" defer></script>
 </body>
 </html>
