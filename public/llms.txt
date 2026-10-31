@@ -190,6 +190,7 @@ Machine-readable pricing: https://getstudyedge.com/pricing.md
 - MCAT Study Schedule: How to Plan 6 Months Out: https://getstudyedge.com/blog/mcat-study-schedule-6-months
 - Mind Mapping for Studying: Does It Actually Work?: https://getstudyedge.com/blog/mind-mapping-for-studying
 - Retrieval Practice vs. Re-Reading: Why One Works and One Doesn't: https://getstudyedge.com/blog/retrieval-practice-vs-rereading
+- Interleaving: What the Research Shows (four key studies, their limits, and how to apply it): https://getstudyedge.com/blog/interleaving-study-technique
 - Spaced Repetition: The Science Behind Why It Works (and How to Use It): https://getstudyedge.com/blog/spaced-repetition-study-technique
 - Study Groups vs. Solo Studying: What the Research Says: https://getstudyedge.com/blog/study-groups-vs-solo-studying
 - Study Schedule Tips: How to Build a Schedule That Survives Week 2: https://getstudyedge.com/blog/study-schedule-tips
