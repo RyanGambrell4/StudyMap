@@ -1,0 +1,527 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Finals Week Study Schedule Planner | StudyEdge AI</title>
+  <meta name="description" content="Plan finals week day by day. Enter up to 6 finals, how ready you feel and your hours per day, and get a schedule that ends each course with a practice test." />
+  <meta name="robots" content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1" />
+  <link rel="canonical" href="https://getstudyedge.com/finals-week-study-schedule" />
+  <link rel="alternate" hreflang="en" href="https://getstudyedge.com/finals-week-study-schedule" />
+  <link rel="alternate" hreflang="x-default" href="https://getstudyedge.com/finals-week-study-schedule" />
+  <link rel="icon" type="image/png" href="/favicon.png" />
+
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content="https://getstudyedge.com/finals-week-study-schedule" />
+  <meta property="og:title" content="Finals Week Study Schedule Planner | StudyEdge AI" />
+  <meta property="og:description" content="Plan finals week day by day. Enter up to 6 finals, how ready you feel and your hours per day, and get a schedule that ends each course with a practice test." />
+<meta property="og:site_name" content="StudyEdge AI" />
+
+<meta name="twitter:title" content="Finals Week Study Schedule Planner | StudyEdge AI" />
+  <meta name="twitter:description" content="Plan finals week day by day. Enter up to 6 finals, how ready you feel and your hours per day, and get a schedule that ends each course with a practice test." />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/seo.css" />
+
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "WebApplication",
+    "name": "Finals Week Study Schedule Planner",
+    "url": "https://getstudyedge.com/finals-week-study-schedule",
+    "applicationCategory": "EducationalApplication",
+    "operatingSystem": "Any",
+    "description": "Builds a day-by-day finals week study plan from up to six exam dates, how ready you feel for each, and your study hours per day. The last session before each final is a timed practice test.",
+    "offers": {
+      "@type": "Offer",
+      "price": "0",
+      "priceCurrency": "USD"
+    },
+    "publisher": {
+      "@type": "Organization",
+      "name": "StudyEdge AI",
+      "url": "https://getstudyedge.com"
+    }
+  }
+  </script>
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "mainEntity": [
+      {
+        "@type": "Question",
+        "name": "How does the finals week planner split my hours?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Each day, your hours go only to finals that have not happened yet. Every final gets a weight equal to its readiness gap (lost = 3, shaky = 2, solid = 1) divided by the number of days until the exam, and the hours are split in half-hour blocks in proportion to those weights. The day before each final, that course gets at least one hour for a timed practice test."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "What if two finals are on the same day?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Both get a practice test the day before. The planner sets aside one hour for each before splitting the rest of that day's hours, so neither one loses its last session."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Should I study on the day of a final?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "The planner never schedules study for a final on or after its exam date. On a day when you sit a final, it plans half your usual hours and gives them to the finals still ahead, since the exam itself takes most of that day."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Why does the exam I feel worst about get the most time?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Because it has the most room to improve. A course you already feel solid in gets a third of the weight of one you feel lost in on the same date. If the solid course still has a lot riding on the final, mark it shaky instead. The final exam calculator shows what score each final needs."
+        }
+      }
+    ]
+  }
+  </script>
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    "itemListElement": [
+      {
+        "@type": "ListItem",
+        "position": 1,
+        "name": "Home",
+        "item": "https://getstudyedge.com/"
+      },
+      {
+        "@type": "ListItem",
+        "position": 2,
+        "name": "Study Schedule Generator",
+        "item": "https://getstudyedge.com/study-schedule-generator"
+      },
+      {
+        "@type": "ListItem",
+        "position": 3,
+        "name": "Finals Week Study Schedule",
+        "item": "https://getstudyedge.com/finals-week-study-schedule"
+      }
+    ]
+  }
+  </script>
+  <style>
+    .calc-wrap { background: #fff; border: 1px solid var(--border); border-radius: 14px; padding: 28px; max-width: 820px; margin: 0 auto; box-shadow: 0 1px 3px rgba(0,0,0,0.06); }
+    .fw-settings { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 14px; margin-bottom: 20px; }
+    .fw-settings label, .fw-row label { display: flex; flex-direction: column; gap: 6px; font-size: 13px; font-weight: 600; color: var(--text-muted); }
+    .calc-wrap input, .calc-wrap select { width: 100%; padding: 10px 12px; border: 1px solid var(--border-h); border-radius: 8px; font: inherit; font-weight: 400; background: #fff; color: var(--text); }
+    .fw-rows-head { font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: var(--text-muted); margin: 4px 0 10px; }
+    .fw-row { display: grid; grid-template-columns: 2fr 1.3fr 1.3fr auto; gap: 10px; align-items: end; padding: 12px 0; border-top: 1px solid var(--border); }
+    .fw-remove { background: none; border: 1px solid var(--border-h); color: var(--text-muted); border-radius: 8px; padding: 10px 12px; font: inherit; font-size: 13px; cursor: pointer; }
+    .fw-remove:hover { color: var(--text); border-color: var(--text-muted); }
+    .fw-add { margin-top: 10px; background: none; border: 1px dashed var(--border-h); color: var(--accent); border-radius: 8px; padding: 10px 14px; font: inherit; font-size: 14px; font-weight: 600; cursor: pointer; width: 100%; }
+    .fw-add[disabled] { color: var(--text-dim); cursor: default; }
+    .fw-msg { margin: 18px 0 0; padding: 14px 16px; background: #F7F8FA; border-radius: 10px; font-size: 15px; color: var(--text); }
+    .fw-out { margin-top: 22px; }
+    .fw-totals { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 18px; }
+    .fw-total { background: #F7F8FA; border-radius: 10px; padding: 10px 14px; font-size: 14px; color: var(--text); }
+    .fw-total strong { font-size: 18px; color: #3452D9; margin-right: 4px; }
+    .fw-day { border: 1px solid var(--border); border-radius: 12px; padding: 14px 16px; margin-bottom: 10px; }
+    .fw-day-head { display: flex; justify-content: space-between; gap: 12px; flex-wrap: wrap; font-weight: 700; font-size: 15px; color: var(--text); margin-bottom: 6px; }
+    .fw-exam { font-size: 13px; font-weight: 600; color: #D64545; }
+    .fw-day ul { list-style: none; padding: 0; margin: 0; }
+    .fw-day li { display: grid; grid-template-columns: 64px 1fr; gap: 10px; padding: 6px 0; font-size: 14.5px; color: var(--text); border-top: 1px solid var(--border); }
+    .fw-day li:first-child { border-top: 0; }
+    .fw-hrs { font-weight: 700; color: #3452D9; }
+    .fw-kind { display: block; font-size: 13px; color: var(--text-muted); }
+    .fw-rest { font-size: 14px; color: var(--text-muted); }
+    .fw-note { margin: 14px 0 0; font-size: 13px; color: var(--text-muted); }
+    .fw-sync { margin-top: 22px; padding: 18px 20px; border: 1px solid rgba(52,82,217,0.25); background: rgba(52,82,217,0.06); border-radius: 12px; font-size: 15px; color: var(--text); }
+    .fw-sync a { font-weight: 600; }
+    .rg-table { width: 100%; border-collapse: collapse; margin: 16px 0 24px; font-size: 15px; }
+    .rg-table th, .rg-table td { border-bottom: 1px solid var(--border); padding: 10px 8px; text-align: left; vertical-align: top; }
+    .rg-table th { font-size: 12px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--text-muted); }
+    .fw-sources { font-size: 14px; color: var(--text-muted); padding-left: 20px; }
+    .fw-sources li { margin-bottom: 8px; }
+    @media (max-width: 640px) {
+      .calc-wrap { padding: 18px; }
+      .fw-row { grid-template-columns: 1fr 1fr; }
+      .fw-row label:first-child { grid-column: 1 / -1; }
+      .rg-table { font-size: 13.5px; }
+    }
+  </style>
+  <script src="/ph-init.js"></script>
+  <script src="/utm-propagate.js" defer></script>
+  <!-- cover:meta -->
+  <meta property="og:image" content="https://getstudyedge.com/covers/finals-week-study-schedule.png" />
+  <meta property="og:image:width" content="1200" />
+  <meta property="og:image:height" content="630" />
+  <meta property="og:image:alt" content="Cover for &quot;Finals Week Study Schedule&quot;: the title in serif type with a line drawing of a calendar." />
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:image" content="https://getstudyedge.com/covers/finals-week-study-schedule.png" />
+  <meta name="twitter:image:alt" content="Cover for &quot;Finals Week Study Schedule&quot;: the title in serif type with a line drawing of a calendar." />
+  <!-- /cover:meta -->
+</head>
+<body>
+
+<header class="site-header">
+  <nav class="site-nav">
+    <a class="nav-logo" href="/">
+      <img src="/favicon.png" alt="StudyEdge AI" />
+      StudyEdge AI
+    </a>
+    <div class="nav-links">
+      <a href="/#features">Features</a>
+      <a href="/studyedge-ai#pricing">Pricing</a>
+      <a href="/blog">Blog</a>
+      <a href="/app?signup=1" class="nav-cta">Try Free</a>
+    </div>
+  </nav>
+</header>
+
+<section class="hero">
+  <div class="container">
+    <div class="eyebrow eyebrow-indigo">Finals Week Planner</div>
+    <h1>Finals Week Study Schedule</h1>
+    <p class="hero-sub">Add your finals, say how ready you feel for each one, and set the hours you can study per day. You get a day-by-day plan where every final ends with a timed practice test, and nothing gets studied after its exam is over.</p>
+  </div>
+</section>
+
+<section class="section" style="padding-top: 24px;">
+  <div class="container">
+    <div class="calc-wrap">
+      <div class="fw-settings">
+        <label>Start date<input type="date" id="fw-start" /></label>
+        <label>Study hours per day<input type="number" id="fw-hours" min="1" max="14" step="0.5" value="6" /></label>
+      </div>
+      <div class="fw-rows-head">Your finals (up to 6)</div>
+      <div id="fw-rows"></div>
+      <button type="button" class="fw-add" id="fw-add">+ Add a final</button>
+      <div id="fw-result" aria-live="polite"></div>
+      <p class="fw-note">Readiness: 1 = lost, 2 = shaky, 3 = solid. Hours are planned in half-hour blocks. The plan stays in this browser tab and is not saved anywhere.</p>
+      <div class="fw-sync">For a full semester plan, or to keep this plan in sync when dates change, use the <a href="/study-schedule-generator">study schedule generator</a> in StudyEdge AI. It builds your sessions from your exam dates and rebuilds them when you edit a course. To see what each final is worth to your grade before you mark readiness, use the <a href="/final-exam-calculator">final exam calculator</a>.</div>
+    </div>
+  </div>
+</section>
+
+<section class="section" style="padding-top: 0;">
+  <div class="container" style="max-width: 760px;">
+    <h2>How the planner decides</h2>
+    <p>There are four rules, and nothing else is going on behind them:</p>
+    <ol>
+      <li><strong>Only finals that haven't happened yet get time.</strong> No course is ever scheduled on or after its exam date.</li>
+      <li><strong>Hours follow readiness gap and how soon the exam is.</strong> Each open final gets a weight of <em>gap &divide; days until the exam</em>, where the gap is 3 for lost, 2 for shaky and 1 for solid. A day's hours are split in proportion to those weights, in half-hour blocks.</li>
+      <li><strong>The day before each final is a practice test for that course.</strong> The planner sets aside one hour for it first (more if the weights give it more), so the last session before every exam is a timed practice test or a full retrieval session.</li>
+      <li><strong>Exam days are lighter.</strong> On a day you sit a final, the planner plans half your usual hours and gives them to the finals still ahead.</li>
+    </ol>
+    <p>Here is rule 2 with numbers. Say it is Saturday, Organic Chemistry is on Tuesday (3 days away, shaky), Calculus II is on Thursday (5 days away, lost) and Intro Psychology is on Friday (6 days away, solid). The weights are 2 &divide; 3 = 0.67, 3 &divide; 5 = 0.60 and 1 &divide; 6 = 0.17. With 6 hours to spend, that works out to 3 hours, 2.5 hours and half an hour. As Tuesday gets closer, Organic Chemistry's weight climbs, and once it is over its hours move to the other two.</p>
+    <p>The planner can't know how much a final counts toward your grade. If a course you feel solid in still has a lot riding on the final, mark it shaky so it gets more time. The <a href="/final-exam-calculator">final exam calculator</a> tells you the score you need on each one.</p>
+
+    <h2>A finals-week method that fits the plan</h2>
+    <h3>1. Put every final in one list</h3>
+    <p>Course, date, time, room, and what the final is worth. Then run each course through the <a href="/final-exam-calculator">final exam calculator</a> so you know the score you need. That number, more than how scary the course feels, should decide your readiness marks. If you like paper, the <a href="/printable-finals-planner">printable finals planner</a> has a table for exactly this.</p>
+    <h3>2. Count the hours you actually have</h3>
+    <p>Take out class, work, meals, travel and sleep, then enter what is left as your hours per day. A plan you can follow at 5 hours beats one you abandon at 10. If some days are busier than others, plan for the busy ones.</p>
+    <h3>3. Spend the hours on recall, not rereading</h3>
+    <p>Every study block in the plan is meant for retrieval practice: closing the notes and answering questions, working problems, or writing out what you remember and then checking it. In Roediger and Karpicke's 2006 study, students who read a passage once and then took three recall tests remembered 61% of the ideas a week later, against 40% for students who read it four times. Restudying looked better on a test given five minutes after studying, and the restudy group expected to remember more, which is why rereading feels like it is working. A 2013 review by Dunlosky and colleagues rated practice testing and spreading study over time as "high utility" techniques, and rereading, highlighting and summarizing as "low utility".</p>
+    <h3>4. Mix problem types in math and science</h3>
+    <p>For problem-solving courses, don't do twenty of one problem type and then twenty of the next. Shuffle them so you have to figure out which method each problem needs, which is what the exam asks of you. In a small study by Rohrer and Taylor (2007), students who practiced mixed math problems scored 63% on a test a week later, against 20% for students who practiced one type at a time, even though the blocked group did better during practice itself (89% vs 60%).</p>
+    <h3>5. Make the last session a real practice test</h3>
+    <p>The day before each final, sit an old exam or a set of questions you haven't seen, timed, with no notes. Then spend the rest of that block on every question you missed or guessed. This tells you what is still weak while there is time to fix the worst of it, and it gets you used to working at exam pace.</p>
+    <h3>6. Keep sleep in the plan</h3>
+    <p>Set a stop time each night and keep it. Late-night hours during finals week tend to be slow and error-prone, and you pay for them in the exam room the next morning. If the plan only works by cutting sleep, lower your hours per day and let the weights decide what gets less.</p>
+
+    <h2>Example: three finals in one week</h2>
+    <p>This is what the planner produces for the example above, starting Saturday, December 5, 2026, with 6 hours a day.</p>
+    <table class="rg-table">
+      <thead><tr><th>Day</th><th>Exam</th><th>Plan</th></tr></thead>
+      <tbody>
+        <tr><td>Sat, Dec 5</td><td></td><td>Organic Chemistry 3h, Calculus II 2.5h, Intro Psychology 0.5h</td></tr>
+        <tr><td>Sun, Dec 6</td><td></td><td>Organic Chemistry 3h, Calculus II 2.5h, Intro Psychology 0.5h</td></tr>
+        <tr><td>Mon, Dec 7</td><td></td><td>Organic Chemistry 4h (practice test), Calculus II 1.5h, Intro Psychology 0.5h</td></tr>
+        <tr><td>Tue, Dec 8</td><td>Organic Chemistry</td><td>Calculus II 2.5h, Intro Psychology 0.5h (half day)</td></tr>
+        <tr><td>Wed, Dec 9</td><td></td><td>Calculus II 5.5h (practice test), Intro Psychology 0.5h</td></tr>
+        <tr><td>Thu, Dec 10</td><td>Calculus II</td><td>Intro Psychology 3h (practice test, half day)</td></tr>
+        <tr><td>Fri, Dec 11</td><td>Intro Psychology</td><td>Exam only</td></tr>
+      </tbody>
+    </table>
+    <p>Over the week that is 14.5 hours for Calculus II, 10 for Organic Chemistry and 5.5 for Intro Psychology. The course marked lost gets the most time even though its exam is later, and the solid course still gets a short daily touch plus a full practice-test session before its exam. If three of your finals land within two days of each other, read <a href="/blog/how-to-study-for-3-finals-in-2-days">how to study for 3 finals in 2 days</a>.</p>
+
+    <h2>Questions</h2>
+    <h3>How does the finals week planner split my hours?</h3>
+    <p>Each day, your hours go only to finals that have not happened yet. Every final gets a weight equal to its readiness gap (lost = 3, shaky = 2, solid = 1) divided by the number of days until the exam, and the hours are split in half-hour blocks in proportion to those weights. The day before each final, that course gets at least one hour for a timed practice test.</p>
+    <h3>What if two finals are on the same day?</h3>
+    <p>Both get a practice test the day before. The planner sets aside one hour for each before splitting the rest of that day's hours, so neither one loses its last session.</p>
+    <h3>Should I study on the day of a final?</h3>
+    <p>The planner never schedules study for a final on or after its exam date. On a day when you sit a final, it plans half your usual hours and gives them to the finals still ahead, since the exam itself takes most of that day.</p>
+    <h3>Why does the exam I feel worst about get the most time?</h3>
+    <p>Because it has the most room to improve. A course you already feel solid in gets a third of the weight of one you feel lost in on the same date. If the solid course still has a lot riding on the final, mark it shaky instead. The <a href="/final-exam-calculator">final exam calculator</a> shows what score each final needs.</p>
+
+    <h2>Sources</h2>
+    <ol class="fw-sources">
+      <li>Roediger, H. L., &amp; Karpicke, J. D. (2006). Test-enhanced learning: Taking memory tests improves long-term retention. <em>Psychological Science</em>, 17(3), 249-255. <a href="https://doi.org/10.1111/j.1467-9280.2006.01693.x" rel="noopener" target="_blank">doi:10.1111/j.1467-9280.2006.01693.x</a></li>
+      <li>Rohrer, D., &amp; Taylor, K. (2007). The shuffling of mathematics problems improves learning. <em>Instructional Science</em>, 35(6), 481-498. <a href="https://doi.org/10.1007/s11251-007-9015-8" rel="noopener" target="_blank">doi:10.1007/s11251-007-9015-8</a></li>
+      <li>Dunlosky, J., Rawson, K. A., Marsh, E. J., Nathan, M. J., &amp; Willingham, D. T. (2013). Improving students' learning with effective learning techniques. <em>Psychological Science in the Public Interest</em>, 14(1), 4-58. <a href="https://doi.org/10.1177/1529100612453266" rel="noopener" target="_blank">doi:10.1177/1529100612453266</a></li>
+    </ol>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <div class="cta-block">
+      <h2>Finals week is one week. Plan the whole semester.</h2>
+      <p>StudyEdge AI turns your exam dates into a study schedule, gives more sessions to the courses where you set a higher target grade, and tracks the score you need on what is left in Grade Hub.</p>
+      <a href="/app?signup=1" class="btn btn-primary btn-lg" data-seo-cta="finals-week-schedule">Try StudyEdge AI Free</a>
+      <p class="cta-fine">Free to start.</p>
+    </div>
+  </div>
+</section>
+
+
+<!-- Related links (internal) -->
+<section class="related-links" style="background:#FFFFFF;border-top:1px solid rgba(0,0,0,0.07);padding:48px 24px">
+  <div class="container" style="max-width:1100px;margin:0 auto">
+    <h2 style="font-size:20px;font-weight:600;color:#1C1B18;margin:0 0 18px;letter-spacing:-0.01em">Related on StudyEdge AI</h2>
+    <ul style="list-style:none;padding:0;margin:0;display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:10px 24px">
+      <li><a href="/study-schedule-generator">Study schedule generator</a></li>
+      <li><a href="/final-exam-calculator">Final exam calculator</a></li>
+      <li><a href="/printable-finals-planner">Printable finals planner</a></li>
+      <li><a href="/blog/how-to-study-for-3-finals-in-2-days">How to study for 3 finals in 2 days</a></li>
+      <li><a href="/how-to-study-for-finals">How to study for finals</a></li>
+      <li><a href="/blog/how-to-study-for-finals-week">How to study for finals week</a></li>
+      <li><a href="/blog/how-to-study-for-multiple-exams-in-one-week">How to study for multiple exams in one week</a></li>
+      <li><a href="/blog/retrieval-practice-vs-rereading">Retrieval practice vs rereading</a></li>
+      <li><a href="/printable-study-schedule-template">Printable study schedule template</a></li>
+    </ul>
+  </div>
+</section>
+<footer class="site-footer">
+<div class="footer-links">
+<strong style="display:block;width:100%;color:var(--muted);font-size:11px;letter-spacing:0.08em;text-transform:uppercase;margin-bottom:8px;margin-top:0;font-weight:700;">Tools</strong>
+<a href="/">Home</a>
+<a href="/free-study-tools">Free Study Tools</a>
+<a href="/best-study-app-by-university">By University</a>
+<a href="/best-study-app-by-major">By Major</a>
+<a href="/gpa-calculator">GPA Calculator</a>
+<a href="/cumulative-gpa-calculator">Cumulative GPA Calculator</a>
+<a href="/semester-gpa-calculator">Semester GPA Calculator</a>
+<a href="/grade-calculator">Grade Calculator</a>
+<a href="/grade-calculator-college">College Grade Calculator</a>
+<a href="/study-schedule-generator">Study Schedule Generator</a>
+<a href="/ai-flashcard-maker">AI Flashcard Maker</a>
+<strong style="display:block;width:100%;color:var(--muted);font-size:11px;letter-spacing:0.08em;text-transform:uppercase;margin:14px 0 8px;font-weight:700;">Guides</strong>
+<a href="/study-planner-for-college-students">Study Planner</a>
+<a href="/study-schedule-template">Schedule Template</a>
+<a href="/how-to-study-for-finals">How to Study for Finals</a>
+<a href="/pre-med-study-guide">Pre-Med Study Guide</a>
+<a href="/best-study-app-for-students">Best Study App</a>
+<strong style="display:block;width:100%;color:var(--muted);font-size:11px;letter-spacing:0.08em;text-transform:uppercase;margin:14px 0 8px;font-weight:700;">Compare</strong>
+<a href="/quizlet-alternative">Quizlet Alternative</a>
+<a href="/anki-alternative">Anki Alternative</a>
+<a href="/chegg-alternative">Chegg Alternative</a>
+<a href="/coursehero-alternative">Course Hero Alternative</a>
+<a href="/khan-academy-alternative">Khan Academy Alternative</a>
+<a href="/notion-for-studying">Notion for Studying</a>
+<a href="/ai-tutor">AI Tutor</a>
+<a href="/ai-study-coach">AI Study Coach</a>
+<strong style="display:block;width:100%;color:var(--muted);font-size:11px;letter-spacing:0.08em;text-transform:uppercase;margin:14px 0 8px;font-weight:700;">Articles</strong>
+<a href="/blog">All Articles</a>
+<a href="/blog/how-to-raise-your-gpa-after-a-bad-semester">Raise Your GPA</a>
+<a href="/blog/how-to-get-an-a-in-any-class">Get an A in Any Class</a>
+<a href="/blog/how-to-study-for-calculus">Study for Calculus</a>
+<a href="/blog/how-to-study-for-biology">Study for Biology</a>
+<strong style="display:block;width:100%;color:var(--muted);font-size:11px;letter-spacing:0.08em;text-transform:uppercase;margin:14px 0 8px;font-weight:700;">Company</strong>
+<a href="/about">About</a>
+<a href="/privacy">Privacy</a>
+<a href="/terms">Terms</a>
+</div>
+<p class="footer-copy">&copy; 2026 StudyEdge AI</p>
+</footer>
+
+<script>
+  // Day numbers count whole days since 1970-01-01 in UTC, so daylight saving never shifts a date.
+  function dayNumber(iso) {
+    const [y, m, d] = String(iso).split('-').map(Number);
+    if (!y || !m || !d) return NaN;
+    return Math.round(Date.UTC(y, m - 1, d) / 86400000);
+  }
+
+  function isoFromDay(n) {
+    return new Date(n * 86400000).toISOString().slice(0, 10);
+  }
+
+  // Readiness 1 = lost, 2 = shaky, 3 = solid. The gap is how far each one is from solid, plus one.
+  function gapWeight(readiness) {
+    return 4 - readiness;
+  }
+
+  // Weight of one final on one study day: readiness gap divided by days until the exam.
+  function sessionWeight(readiness, daysUntil) {
+    return gapWeight(readiness) / daysUntil;
+  }
+
+  // Split whole half-hour units in proportion to weights (largest remainder, ties to the earlier exam).
+  function splitUnits(units, weights) {
+    const total = weights.reduce((a, b) => a + b, 0);
+    if (units <= 0 || total <= 0) return weights.map(() => 0);
+    const raw = weights.map(w => units * w / total);
+    const out = raw.map(Math.floor);
+    let left = units - out.reduce((a, b) => a + b, 0);
+    const order = raw.map((r, i) => [r - Math.floor(r), i]).sort((a, b) => b[0] - a[0] || a[1] - b[1]);
+    for (let k = 0; left > 0; k++, left--) out[order[k % order.length][1]]++;
+    return out;
+  }
+
+  // One day of the plan. finals: [{ name, examDay, readiness }] sorted by examDay.
+  function planDay(finals, day, hoursPerDay) {
+    const open = finals.filter(f => day < f.examDay);
+    let units = Math.floor(hoursPerDay * 2);
+    if (finals.some(f => f.examDay === day)) units = Math.floor(units / 2);
+    if (!open.length || units <= 0) return [];
+    const isPractice = open.map(f => f.examDay - day === 1);
+    const practiceCount = isPractice.filter(Boolean).length;
+    const reserved = Math.min(units, practiceCount * 2);
+    const reserveSplit = splitUnits(reserved, isPractice.map(p => (p ? 1 : 0)));
+    const rest = splitUnits(units - reserved, open.map(f => sessionWeight(f.readiness, f.examDay - day)));
+    return open
+      .map((f, i) => ({ name: f.name, hours: (reserveSplit[i] + rest[i]) / 2, kind: isPractice[i] ? 'practice' : 'study' }))
+      .filter(s => s.hours > 0);
+  }
+
+  // The whole plan, from the start date to the last final.
+  function buildPlan(inputs, startIso, hoursPerDay) {
+    const start = dayNumber(startIso);
+    const finals = inputs
+      .map(f => ({ name: f.name, examDay: dayNumber(f.date), readiness: f.readiness }))
+      .filter(f => f.examDay >= start)
+      .sort((a, b) => a.examDay - b.examDay);
+    const days = [];
+    const totals = finals.map(f => ({ name: f.name, hours: 0 }));
+    const last = finals.length ? finals[finals.length - 1].examDay : start - 1;
+    for (let d = start; d <= last; d++) {
+      const sessions = planDay(finals, d, hoursPerDay);
+      sessions.forEach(s => { totals.find(t => t.name === s.name).hours += s.hours; });
+      days.push({ date: isoFromDay(d), exams: finals.filter(f => f.examDay === d).map(f => f.name), sessions });
+    }
+    return { days, totals };
+  }
+
+  // Returns '' when the inputs can be planned, or a message saying what to fix.
+  function planError(inputs, startIso, hoursPerDay) {
+    const start = dayNumber(startIso);
+    if (isNaN(start)) return 'Pick a start date.';
+    if (!(hoursPerDay >= 1 && hoursPerDay <= 14)) return 'Enter between 1 and 14 study hours per day.';
+    if (!inputs.length) return 'Add at least one final with a course name and an exam date.';
+    if (inputs.some(f => isNaN(dayNumber(f.date)))) return 'Every final needs an exam date.';
+    if (new Set(inputs.map(f => f.name.toLowerCase())).size !== inputs.length) return 'Give each final a different course name.';
+    const future = inputs.map(f => dayNumber(f.date)).filter(d => d > start);
+    if (!future.length) return 'All of these finals are on or before your start date, so there is nothing left to plan.';
+    if (Math.max(...future) - start > 21) return 'Your last final is more than 3 weeks after the start date. Move the start date closer, or use the study schedule generator for a longer plan.';
+    return '';
+  }
+
+  (function () {
+    var MAX = 6;
+    var rowsEl = document.getElementById('fw-rows');
+    var addBtn = document.getElementById('fw-add');
+    var startEl = document.getElementById('fw-start');
+    var hoursEl = document.getElementById('fw-hours');
+    var out = document.getElementById('fw-result');
+
+    function localIso(date) {
+      var m = String(date.getMonth() + 1).padStart(2, '0');
+      var d = String(date.getDate()).padStart(2, '0');
+      return date.getFullYear() + '-' + m + '-' + d;
+    }
+    function esc(s) {
+      return String(s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; });
+    }
+    function label(iso) {
+      return new Date(iso + 'T12:00:00Z').toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric', timeZone: 'UTC' });
+    }
+    function hrs(h) { return (h % 1 ? h.toFixed(1) : String(h)) + 'h'; }
+
+    function addRow(name, date, readiness) {
+      if (rowsEl.children.length >= MAX) return;
+      var row = document.createElement('div');
+      row.className = 'fw-row';
+      row.innerHTML =
+        '<label>Course<input type="text" class="fw-name" maxlength="40" placeholder="e.g. Calculus II" /></label>' +
+        '<label>Exam date<input type="date" class="fw-date" /></label>' +
+        '<label>How ready?<select class="fw-ready"><option value="1">1 - Lost</option><option value="2">2 - Shaky</option><option value="3">3 - Solid</option></select></label>' +
+        '<button type="button" class="fw-remove" aria-label="Remove this final">Remove</button>';
+      row.querySelector('.fw-name').value = name || '';
+      row.querySelector('.fw-date').value = date || '';
+      row.querySelector('.fw-ready').value = String(readiness || 2);
+      rowsEl.appendChild(row);
+      addBtn.disabled = rowsEl.children.length >= MAX;
+    }
+
+    function readInputs() {
+      var list = [];
+      Array.prototype.forEach.call(rowsEl.children, function (row) {
+        var name = row.querySelector('.fw-name').value.trim();
+        var date = row.querySelector('.fw-date').value;
+        if (!name && !date) return;
+        list.push({ name: name || 'Untitled final', date: date, readiness: Number(row.querySelector('.fw-ready').value) });
+      });
+      return list;
+    }
+
+    function render() {
+      var inputs = readInputs();
+      var start = startEl.value;
+      var hours = parseFloat(hoursEl.value);
+      var err = planError(inputs, start, hours);
+      if (err) { out.innerHTML = '<p class="fw-msg">' + esc(err) + '</p>'; return; }
+      var plan = buildPlan(inputs, start, hours);
+      var html = '<div class="fw-out"><div class="fw-totals">';
+      plan.totals.forEach(function (t) {
+        html += '<div class="fw-total"><strong>' + hrs(t.hours) + '</strong>' + esc(t.name) + '</div>';
+      });
+      html += '</div>';
+      plan.days.forEach(function (day) {
+        html += '<div class="fw-day"><div class="fw-day-head"><span>' + label(day.date) + '</span>';
+        if (day.exams.length) html += '<span class="fw-exam">Final: ' + esc(day.exams.join(', ')) + '</span>';
+        html += '</div>';
+        if (!day.sessions.length) {
+          html += '<p class="fw-rest">' + (day.exams.length ? 'Exam day. Nothing left to study after this one.' : 'No study planned.') + '</p>';
+        } else {
+          html += '<ul>';
+          day.sessions.forEach(function (s) {
+            var kind = s.kind === 'practice'
+              ? 'Timed practice test, no notes. Then go over every question you missed.'
+              : 'Retrieval practice: questions, problems, recall from memory.';
+            html += '<li><span class="fw-hrs">' + hrs(s.hours) + '</span><span>' + esc(s.name) + '<span class="fw-kind">' + kind + '</span></span></li>';
+          });
+          html += '</ul>';
+        }
+        html += '</div>';
+      });
+      html += '</div>';
+      out.innerHTML = html;
+    }
+
+    var today = new Date();
+    startEl.value = localIso(today);
+    function inDays(n) { var d = new Date(today); d.setDate(d.getDate() + n); return localIso(d); }
+    addRow('Organic Chemistry', inDays(3), 2);
+    addRow('Calculus II', inDays(5), 1);
+    addRow('Intro Psychology', inDays(6), 3);
+
+    addBtn.addEventListener('click', function () { addRow('', '', 2); render(); });
+    rowsEl.addEventListener('click', function (e) {
+      if (!e.target.classList.contains('fw-remove')) return;
+      e.target.closest('.fw-row').remove();
+      addBtn.disabled = rowsEl.children.length >= MAX;
+      render();
+    });
+    document.querySelector('.calc-wrap').addEventListener('input', render);
+    document.querySelector('.calc-wrap').addEventListener('change', render);
+    render();
+  })();
+</script>
+
+</body>
+</html>

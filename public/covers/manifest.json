@@ -1733,5 +1733,15 @@
   "sig": "1f2fd216ed96bfa1182922452d1d629a05049ba3",
   "template": "editorial",
   "alt": "Cover for \"Is a 3 on AP World History Good?\": the title in serif type with a line drawing of a book."
+ },
+ "blog/how-to-study-for-3-finals-in-2-days.html": {
+  "sig": "f1935c3058161c7b4d8fb0c8047ea625e47221c1",
+  "template": "editorial",
+  "alt": "Cover for \"How to Study for 3 Finals in 2 Days\": the title in serif type with a line drawing of a calendar."
+ },
+ "printable-finals-planner.html": {
+  "sig": "f438be89577283265977d4ea9b263c49aa129c28",
+  "template": "editorial",
+  "alt": "Cover for \"Printable Finals Planner\": the title in serif type with a line drawing of a calendar."
  }
 }

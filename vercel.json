@@ -422,6 +422,14 @@
       "destination": "/is-a-3-on-ap-microeconomics-good.html"
     },
     {
+      "source": "/finals-week-study-schedule",
+      "destination": "/finals-week-study-schedule.html"
+    },
+    {
+      "source": "/printable-finals-planner",
+      "destination": "/printable-finals-planner.html"
+    },
+    {
       "source": "/blog/:slug",
       "destination": "/blog/:slug.html"
     },

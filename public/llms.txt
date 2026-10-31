@@ -74,6 +74,8 @@ Machine-readable pricing: https://getstudyedge.com/pricing.md
 - Is a 3 on AP Macroeconomics Good? (2026 score distribution, 2027 exam date): https://getstudyedge.com/is-a-3-on-ap-macroeconomics-good
 - Is a 3 on AP Microeconomics Good? (2026 score distribution, 2027 exam date): https://getstudyedge.com/is-a-3-on-ap-microeconomics-good
 - Study Schedule Generator: https://getstudyedge.com/study-schedule-generator
+- Finals Week Study Schedule Planner (day-by-day plan for up to 6 finals, weighted by readiness and exam date): https://getstudyedge.com/finals-week-study-schedule
+- Printable Finals Planner (US Letter, 2 pages: finals overview, 7-day grid, per-exam checklists): https://getstudyedge.com/printable-finals-planner
 - Study Schedule Maker: https://getstudyedge.com/study-schedule-maker
 - Active Recall App: https://getstudyedge.com/active-recall-app
 - AI Homework Helper: https://getstudyedge.com/ai-homework-helper
@@ -146,6 +148,7 @@ Machine-readable pricing: https://getstudyedge.com/pricing.md
 - How to Study for Microeconomics: https://getstudyedge.com/blog/how-to-study-for-microeconomics
 - How to Study for Multiple Choice Exams: The System That Works: https://getstudyedge.com/blog/how-to-study-for-multiple-choice-exams
 - How to Study for Multiple Exams in One Week: https://getstudyedge.com/blog/how-to-study-for-multiple-exams-in-one-week
+- How to Study for 3 Finals in 2 Days (triage, a 48-hour block plan, retrieval practice): https://getstudyedge.com/blog/how-to-study-for-3-finals-in-2-days
 - How to Study for NCLEX: https://getstudyedge.com/blog/how-to-study-for-the-nclex
 - How to Study for Nursing School: https://getstudyedge.com/blog/how-to-study-for-nursing-school
 - How to Study for Organic Chemistry: https://getstudyedge.com/blog/how-to-study-for-organic-chemistry
