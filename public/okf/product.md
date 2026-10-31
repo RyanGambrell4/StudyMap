@@ -1,5 +1,5 @@
 ---
-title: StudyEdge AI — Product Details
+title: StudyEdge AI: Product Details
 description: Feature breakdown, differentiators, and comparisons for StudyEdge AI
 url: https://getstudyedge.com/
 last_updated: "2026-06-20"
@@ -13,7 +13,7 @@ last_updated: "2026-06-20"
 Automatically builds a personalized weekly study schedule based on your courses, exam dates, credit hours, and available time slots. Adapts to deadline changes and integrates with Google Calendar.
 
 ### Session Blueprint
-Before each study session, the AI generates a minute-by-minute plan specifying what to study, in what order, and for how long — based on your course material and upcoming exam dates.
+Before each study session, the AI generates a minute-by-minute plan specifying what to study, in what order, and for how long, based on your course material and upcoming exam dates.
 
 ### Focus Mode (Active Recall Sessions)
 Runs the actual study session: timed blocks, built-in AI flashcards, quizzes, and active recall prompts. All content is generated from your course material. No tab-switching needed.

@@ -1,5 +1,5 @@
 ---
-title: StudyEdge AI — Free Tools and Calculators
+title: StudyEdge AI: Free Tools and Calculators
 description: Free calculator and tool pages available at getstudyedge.com
 url: https://getstudyedge.com/
 last_updated: "2026-06-20"

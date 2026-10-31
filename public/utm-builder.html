@@ -105,7 +105,7 @@
       <div class="recent" id="recent"></div>
     </div>
 
-    <p class="small">Tip: any link with the same UTM tags gets the visitor a sticky <code>register_once</code> in PostHog, so every future event from that user carries the acquisition source — even months later. View live data: <a href="https://us.posthog.com/project/412740/dashboard/1686085" target="_blank">Daily Pulse</a>.</p>
+    <p class="small">Tip: any link with the same UTM tags gets the visitor a sticky <code>register_once</code> in PostHog, so every future event from that user carries the acquisition source, even months later. View live data: <a href="https://us.posthog.com/project/412740/dashboard/1686085" target="_blank">Daily Pulse</a>.</p>
   </div>
 
   <script>
@@ -128,7 +128,7 @@
 
     function render() {
       var url = build();
-      $('result').textContent = url || '—';
+      $('result').textContent = url || '…';
     }
 
     ['base'].concat(fields).forEach(function (id) {

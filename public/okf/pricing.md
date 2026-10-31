@@ -1,5 +1,5 @@
 ---
-title: StudyEdge AI — Pricing
+title: StudyEdge AI: Pricing
 description: Current pricing tiers for StudyEdge AI study planner app
 url: https://getstudyedge.com/pricing
 last_updated: "2026-06-20"
@@ -9,7 +9,7 @@ last_updated: "2026-06-20"
 
 ## Free Plan
 
-- **Price:** $0/month — no credit card required
+- **Price:** $0/month, no credit card required
 - **Courses:** 1 course
 - **AI actions:** 5 per month
 - **Session Blueprints:** 1 free use
