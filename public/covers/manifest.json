@@ -1435,9 +1435,9 @@
   "alt": "Cover for \"What GPA do you need for Georgetown University?\": the number 4.0 on a GPA scale from 2.0 to 4.0, with a marker at that point."
  },
  "what-gpa-do-you-need-for-georgia-tech.html": {
-  "sig": "06f159f685ee78967118a113a1daaa113da0a7e8",
-  "template": "number",
-  "alt": "Cover for \"What GPA do you need for Georgia Tech?\": the number 4.0 on a GPA scale from 2.0 to 4.0, with a marker at that point."
+  "sig": "1bda6c480893d5c5e0c9a35e370079340779b78c",
+  "template": "editorial",
+  "alt": "Cover for \"What GPA Do You Need for Georgia Tech?\": the title in serif type with a line drawing of a bar chart."
  },
  "what-gpa-do-you-need-for-harvard.html": {
   "sig": "a619f255df5fe91d153303f7f006560a6e83af4f",
@@ -1530,9 +1530,9 @@
   "alt": "Cover for \"What GPA do you need for UCLA?\": the number 3.85 on a GPA scale from 2.0 to 4.0, with the 3.85 to 4 range highlighted."
  },
  "what-gpa-do-you-need-for-unc-chapel-hill.html": {
-  "sig": "d3c0b0a5b52f53fbdfec7ed281d1cb52f641ccfc",
-  "template": "number",
-  "alt": "Cover for \"What GPA do you need for UNC Chapel Hill?\": the number 4.5 on a GPA scale from 2.0 to 4.0, with a marker at that point."
+  "sig": "5d68192a37ff9955d60627acc914ce059aca66be",
+  "template": "editorial",
+  "alt": "Cover for \"What GPA Do You Need for UNC Chapel Hill?\": the title in serif type with a line drawing of a bar chart."
  },
  "what-gpa-do-you-need-for-university-of-arizona.html": {
   "sig": "8beb8cc2dfe2ffd0b832268a62afd235cc8a1b62",
@@ -1540,14 +1540,14 @@
   "alt": "Cover for \"What GPA do you need for University of Arizona?\": the number 3.0 on a GPA scale from 2.0 to 4.0, with a marker at that point."
  },
  "what-gpa-do-you-need-for-university-of-florida.html": {
-  "sig": "346c849349b6478b3a54baabf63d414f82b8d8ac",
-  "template": "number",
-  "alt": "Cover for \"What GPA do you need for University of Florida?\": the number 3.85 on a GPA scale from 2.0 to 4.0, with a marker at that point."
+  "sig": "2f02d339e027a1ef04be04a1f9aa094efdb50d25",
+  "template": "editorial",
+  "alt": "Cover for \"What GPA Do You Need for University of Florida?\": the title in serif type with a line drawing of a bar chart."
  },
  "what-gpa-do-you-need-for-university-of-illinois-urbana-champaign.html": {
-  "sig": "8c5239fb8e06171cf45a128ee706f8a4eae6daaf",
-  "template": "number",
-  "alt": "Cover for \"What GPA do you need for University of Illinois Urbana-Champaign?\": the number 3.8 on a GPA scale from 2.0 to 4.0, with a marker at that point."
+  "sig": "0362568da87e4827afc6227a9223f12af1b759e0",
+  "template": "editorial",
+  "alt": "Cover for \"What GPA Do You Need for University of Illinois Urbana-Champaign?\": the title in serif type with a line drawing of a bar chart."
  },
  "what-gpa-do-you-need-for-university-of-michigan.html": {
   "sig": "e9bc1322b51b54d1e12f9a8f03e164ea6ce3e77d",
@@ -1570,9 +1570,9 @@
   "alt": "Cover for \"What GPA do you need for UT Austin?\": the title in serif type with a line drawing of a bar chart."
  },
  "what-gpa-do-you-need-for-university-of-virginia.html": {
-  "sig": "79304429d1928f63cb699f744016cdda0a28b50d",
-  "template": "number",
-  "alt": "Cover for \"What GPA do you need for University of Virginia?\": the number 4.3 on a GPA scale from 2.0 to 4.0, with a marker at that point."
+  "sig": "c75b0de5a7701b24a57ec30f90b1ffba0199a5ff",
+  "template": "editorial",
+  "alt": "Cover for \"What GPA Do You Need for University of Virginia?\": the title in serif type with a line drawing of a bar chart."
  },
  "what-gpa-do-you-need-for-university-of-washington.html": {
   "sig": "ebcaa7abc0f6b118e296ca9d4b3f0d3ffb2c29e8",
@@ -1605,9 +1605,9 @@
   "alt": "Cover for \"What GPA do you need for Wake Forest University?\": the number 3.8 on a GPA scale from 2.0 to 4.0, with a marker at that point."
  },
  "what-gpa-do-you-need-for-yale.html": {
-  "sig": "b9f998002cde86b6eb44c47bd6bf540420dd4c25",
-  "template": "number",
-  "alt": "Cover for \"What GPA do you need for Yale?\": the number 3.9 on a GPA scale from 2.0 to 4.0, with the 3.9 to 4 range highlighted."
+  "sig": "9046901d627f2ac4d42fa9a90a3610c8b5ded1d9",
+  "template": "editorial",
+  "alt": "Cover for \"What GPA Do You Need for Yale University?\": the title in serif type with a line drawing of a bar chart."
  },
  "what-is-studyedge-ai.html": {
   "sig": "e7dd4b2a4b5c65219831694333b233018d97e689",
@@ -1743,5 +1743,160 @@
   "sig": "f438be89577283265977d4ea9b263c49aa129c28",
   "template": "editorial",
   "alt": "Cover for \"Printable Finals Planner\": the title in serif type with a line drawing of a calendar."
+ },
+ "ap-biology-flashcards.html": {
+  "sig": "51051aad255cdb69b0f54b3cb9d948d6cc8887b9",
+  "template": "editorial",
+  "alt": "Cover for \"AP Biology Flashcards\": the title in serif type with a line drawing of a stack of flashcards."
+ },
+ "ap-calculus-ab-flashcards.html": {
+  "sig": "159995ea1ad2685e14bb7be3f98cb76a11c5c64d",
+  "template": "editorial",
+  "alt": "Cover for \"AP Calculus AB Flashcards\": the title in serif type with a line drawing of a stack of flashcards."
+ },
+ "ap-chemistry-flashcards.html": {
+  "sig": "dc5c829d3c79fbcb53bc1bffe7caf4a621fd3d10",
+  "template": "editorial",
+  "alt": "Cover for \"AP Chemistry Flashcards\": the title in serif type with a line drawing of a stack of flashcards."
+ },
+ "ap-english-language-flashcards.html": {
+  "sig": "2bc91f334c85388a926ddd72e035a30a478f34c5",
+  "template": "editorial",
+  "alt": "Cover for \"AP English Language Flashcards\": the title in serif type with a line drawing of a stack of flashcards."
+ },
+ "ap-physics-1-flashcards.html": {
+  "sig": "0ca4a77814e547b1d056d4c0a2d27c4e59e98f0c",
+  "template": "editorial",
+  "alt": "Cover for \"AP Physics 1 Flashcards\": the title in serif type with a line drawing of a stack of flashcards."
+ },
+ "ap-psychology-flashcards.html": {
+  "sig": "bc930b64ef66f26732263f2340522ad0d31a96cf",
+  "template": "editorial",
+  "alt": "Cover for \"AP Psychology Flashcards\": the title in serif type with a line drawing of a stack of flashcards."
+ },
+ "ap-statistics-flashcards.html": {
+  "sig": "823f7a4a4cc3ba99d46867bc45bed9b8cc74b524",
+  "template": "editorial",
+  "alt": "Cover for \"AP Statistics Flashcards\": the title in serif type with a line drawing of a stack of flashcards."
+ },
+ "ap-us-history-flashcards.html": {
+  "sig": "590b2880e2110d8a8ced0aea1ed5f48f9910b696",
+  "template": "editorial",
+  "alt": "Cover for \"AP US History Flashcards\": the title in serif type with a line drawing of a stack of flashcards."
+ },
+ "ap-world-history-flashcards.html": {
+  "sig": "62a9111163a3d5602ae28edf722c14438af7e8a2",
+  "template": "editorial",
+  "alt": "Cover for \"AP World History: Modern Flashcards\": the title in serif type with a line drawing of a stack of flashcards."
+ },
+ "blog/interleaving-study-technique.html": {
+  "sig": "84aa3c43a2a5f70239f3f0a3736e4de89430caa6",
+  "template": "editorial",
+  "alt": "Cover for \"Interleaving: What the Research Shows and How to Use It\": the title in serif type with a line drawing of a light bulb."
+ },
+ "what-gpa-do-you-need-for-auburn.html": {
+  "sig": "710b7a75f3ee46ba9ca4707bdddfe89e86682a5e",
+  "template": "editorial",
+  "alt": "Cover for \"What GPA Do You Need for Auburn University?\": the title in serif type with a line drawing of a bar chart."
+ },
+ "what-gpa-do-you-need-for-carnegie-mellon.html": {
+  "sig": "f70075f8aa0a6fe72325767c023587245be04e18",
+  "template": "editorial",
+  "alt": "Cover for \"What GPA Do You Need for Carnegie Mellon University?\": the title in serif type with a line drawing of a bar chart."
+ },
+ "what-gpa-do-you-need-for-cu-boulder.html": {
+  "sig": "9fad014173eef6d389146c03820da1e30a44bf7c",
+  "template": "editorial",
+  "alt": "Cover for \"What GPA Do You Need for University of Colorado Boulder?\": the title in serif type with a line drawing of a bar chart."
+ },
+ "what-gpa-do-you-need-for-florida-state.html": {
+  "sig": "7d83208fb86e345b9704abb4dc6d6011a3de8d0c",
+  "template": "editorial",
+  "alt": "Cover for \"What GPA Do You Need for Florida State University?\": the title in serif type with a line drawing of a bar chart."
+ },
+ "what-gpa-do-you-need-for-indiana-university.html": {
+  "sig": "a15500065c386e4540a163e2c2eda7a5e4bf3265",
+  "template": "editorial",
+  "alt": "Cover for \"What GPA Do You Need for Indiana University Bloomington?\": the title in serif type with a line drawing of a bar chart."
+ },
+ "what-gpa-do-you-need-for-iowa-state.html": {
+  "sig": "43aea7951ce36252f932ca2d5545439e7c8a6ab6",
+  "template": "editorial",
+  "alt": "Cover for \"What GPA Do You Need for Iowa State University?\": the title in serif type with a line drawing of a bar chart."
+ },
+ "what-gpa-do-you-need-for-nc-state.html": {
+  "sig": "649cae637432673eb091b9b202aec75909c54694",
+  "template": "editorial",
+  "alt": "Cover for \"What GPA Do You Need for NC State University?\": the title in serif type with a line drawing of a bar chart."
+ },
+ "what-gpa-do-you-need-for-syracuse.html": {
+  "sig": "d91e5e8eadc2bc56919531153317a86022663893",
+  "template": "editorial",
+  "alt": "Cover for \"What GPA Do You Need for Syracuse University?\": the title in serif type with a line drawing of a bar chart."
+ },
+ "what-gpa-do-you-need-for-uc-davis.html": {
+  "sig": "a94fcb84e205dd766d246b902d417d1319963d46",
+  "template": "editorial",
+  "alt": "Cover for \"What GPA Do You Need for UC Davis?\": the title in serif type with a line drawing of a bar chart."
+ },
+ "what-gpa-do-you-need-for-uc-san-diego.html": {
+  "sig": "59ef0d0bbedbc9f3dd06778e9612d9943e4a3844",
+  "template": "editorial",
+  "alt": "Cover for \"What GPA Do You Need for UC San Diego?\": the title in serif type with a line drawing of a bar chart."
+ },
+ "what-gpa-do-you-need-for-umass-amherst.html": {
+  "sig": "5f4528a24275637174dc48793a6520bd94a38d58",
+  "template": "editorial",
+  "alt": "Cover for \"What GPA Do You Need for UMass Amherst?\": the title in serif type with a line drawing of a bar chart."
+ },
+ "what-gpa-do-you-need-for-university-of-alabama.html": {
+  "sig": "d9029da0a9445784660c69caec036816d171f70a",
+  "template": "editorial",
+  "alt": "Cover for \"What GPA Do You Need for University of Alabama?\": the title in serif type with a line drawing of a bar chart."
+ },
+ "what-gpa-do-you-need-for-university-of-chicago.html": {
+  "sig": "0c2fad110cca75b5a4f3b76e0a2255057f2dba5b",
+  "template": "editorial",
+  "alt": "Cover for \"What GPA Do You Need for University of Chicago?\": the title in serif type with a line drawing of a bar chart."
+ },
+ "what-gpa-do-you-need-for-university-of-georgia.html": {
+  "sig": "5b68378586fccdb1e846364b232e2082f330f341",
+  "template": "editorial",
+  "alt": "Cover for \"What GPA Do You Need for University of Georgia?\": the title in serif type with a line drawing of a bar chart."
+ },
+ "what-gpa-do-you-need-for-university-of-iowa.html": {
+  "sig": "1f02c5b78f6bf892197e7d7886cd306291dddf96",
+  "template": "editorial",
+  "alt": "Cover for \"What GPA Do You Need for University of Iowa?\": the title in serif type with a line drawing of a bar chart."
+ },
+ "what-gpa-do-you-need-for-university-of-maryland.html": {
+  "sig": "5114708a9354e595a2820e8e4cd74d9d06815f8d",
+  "template": "editorial",
+  "alt": "Cover for \"What GPA Do You Need for University of Maryland?\": the title in serif type with a line drawing of a bar chart."
+ },
+ "what-gpa-do-you-need-for-university-of-oregon.html": {
+  "sig": "4d8e3a44de5d6fbe027ee2a37e2c04dd23348471",
+  "template": "editorial",
+  "alt": "Cover for \"What GPA Do You Need for University of Oregon?\": the title in serif type with a line drawing of a bar chart."
+ },
+ "what-gpa-do-you-need-for-university-of-pennsylvania.html": {
+  "sig": "a4e5912ba868917d58ccb0f2c558dbe5bb397f4b",
+  "template": "editorial",
+  "alt": "Cover for \"What GPA Do You Need for University of Pennsylvania?\": the title in serif type with a line drawing of a bar chart."
+ },
+ "what-gpa-do-you-need-for-university-of-pittsburgh.html": {
+  "sig": "c90b62966c610be795a4f93afb8a776869613e30",
+  "template": "editorial",
+  "alt": "Cover for \"What GPA Do You Need for University of Pittsburgh?\": the title in serif type with a line drawing of a bar chart."
+ },
+ "what-gpa-do-you-need-for-university-of-south-carolina.html": {
+  "sig": "78cd4e7d579d3c53b51865cd46041843dc8d18d0",
+  "template": "editorial",
+  "alt": "Cover for \"What GPA Do You Need for University of South Carolina?\": the title in serif type with a line drawing of a bar chart."
+ },
+ "what-gpa-do-you-need-for-virginia-tech.html": {
+  "sig": "fe04962a2e70b1cfbce9d3a14a149b0f2161e53d",
+  "template": "editorial",
+  "alt": "Cover for \"What GPA Do You Need for Virginia Tech?\": the title in serif type with a line drawing of a bar chart."
  }
 }

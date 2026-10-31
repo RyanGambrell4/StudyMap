@@ -430,6 +430,90 @@
       "destination": "/printable-finals-planner.html"
     },
     {
+      "source": "/what-gpa-do-you-need-for-university-of-pennsylvania",
+      "destination": "/what-gpa-do-you-need-for-university-of-pennsylvania.html"
+    },
+    {
+      "source": "/what-gpa-do-you-need-for-university-of-chicago",
+      "destination": "/what-gpa-do-you-need-for-university-of-chicago.html"
+    },
+    {
+      "source": "/what-gpa-do-you-need-for-carnegie-mellon",
+      "destination": "/what-gpa-do-you-need-for-carnegie-mellon.html"
+    },
+    {
+      "source": "/what-gpa-do-you-need-for-university-of-georgia",
+      "destination": "/what-gpa-do-you-need-for-university-of-georgia.html"
+    },
+    {
+      "source": "/what-gpa-do-you-need-for-uc-san-diego",
+      "destination": "/what-gpa-do-you-need-for-uc-san-diego.html"
+    },
+    {
+      "source": "/what-gpa-do-you-need-for-uc-davis",
+      "destination": "/what-gpa-do-you-need-for-uc-davis.html"
+    },
+    {
+      "source": "/what-gpa-do-you-need-for-virginia-tech",
+      "destination": "/what-gpa-do-you-need-for-virginia-tech.html"
+    },
+    {
+      "source": "/what-gpa-do-you-need-for-university-of-pittsburgh",
+      "destination": "/what-gpa-do-you-need-for-university-of-pittsburgh.html"
+    },
+    {
+      "source": "/what-gpa-do-you-need-for-florida-state",
+      "destination": "/what-gpa-do-you-need-for-florida-state.html"
+    },
+    {
+      "source": "/what-gpa-do-you-need-for-indiana-university",
+      "destination": "/what-gpa-do-you-need-for-indiana-university.html"
+    },
+    {
+      "source": "/what-gpa-do-you-need-for-university-of-maryland",
+      "destination": "/what-gpa-do-you-need-for-university-of-maryland.html"
+    },
+    {
+      "source": "/what-gpa-do-you-need-for-nc-state",
+      "destination": "/what-gpa-do-you-need-for-nc-state.html"
+    },
+    {
+      "source": "/what-gpa-do-you-need-for-auburn",
+      "destination": "/what-gpa-do-you-need-for-auburn.html"
+    },
+    {
+      "source": "/what-gpa-do-you-need-for-university-of-alabama",
+      "destination": "/what-gpa-do-you-need-for-university-of-alabama.html"
+    },
+    {
+      "source": "/what-gpa-do-you-need-for-university-of-south-carolina",
+      "destination": "/what-gpa-do-you-need-for-university-of-south-carolina.html"
+    },
+    {
+      "source": "/what-gpa-do-you-need-for-university-of-iowa",
+      "destination": "/what-gpa-do-you-need-for-university-of-iowa.html"
+    },
+    {
+      "source": "/what-gpa-do-you-need-for-iowa-state",
+      "destination": "/what-gpa-do-you-need-for-iowa-state.html"
+    },
+    {
+      "source": "/what-gpa-do-you-need-for-cu-boulder",
+      "destination": "/what-gpa-do-you-need-for-cu-boulder.html"
+    },
+    {
+      "source": "/what-gpa-do-you-need-for-university-of-oregon",
+      "destination": "/what-gpa-do-you-need-for-university-of-oregon.html"
+    },
+    {
+      "source": "/what-gpa-do-you-need-for-umass-amherst",
+      "destination": "/what-gpa-do-you-need-for-umass-amherst.html"
+    },
+    {
+      "source": "/what-gpa-do-you-need-for-syracuse",
+      "destination": "/what-gpa-do-you-need-for-syracuse.html"
+    },
+    {
       "source": "/blog/:slug",
       "destination": "/blog/:slug.html"
     },
