@@ -5,9 +5,9 @@
   "alt": "Cover for \"The AI study app built for students done winging it.\": the StudyEdge AI Grade Hub screen shown in a browser window, beside the page title."
  },
  "active-recall-app.html": {
-  "sig": "1cffaa1573d0fcf1834db69cc627b9c703950764",
+  "sig": "e69be72bb8ed7bd58371d7123f2a0c080979d3af",
   "template": "editorial",
-  "alt": "Cover for \"Re-reading your notesisn't studying.This is.\": the title in serif type with a line drawing of a stack of flashcards."
+  "alt": "Cover for \"Re-reading your notes isn't studying. This is.\": the title in serif type with a line drawing of a stack of flashcards."
  },
  "ai-flashcard-maker.html": {
   "sig": "c6589925a9c18bf3fcb9264bca518bc312af4ca6",
@@ -1120,9 +1120,9 @@
   "alt": "Cover for \"Grad School GPA Requirements\": the title in serif type with a line drawing of a bar chart."
  },
  "grade-calculator-college.html": {
-  "sig": "bfb5b1778c48a3d32db7ad0a19f0bf5bc71200b7",
+  "sig": "28f41765e1e1f068411c43c901790d9fd1c30037",
   "template": "editorial",
-  "alt": "Cover for \"What do you actually needon that final?Find out in 60 seconds.\": the title in serif type with a line drawing of a bar chart."
+  "alt": "Cover for \"What do you actually need on that final? Find out in 60 seconds.\": the title in serif type with a line drawing of a bar chart."
  },
  "grade-calculator.html": {
   "sig": "95b78689cce64cb68af2b34dbaa554f13b29d081",
@@ -1270,14 +1270,14 @@
   "alt": "Cover for \"Privacy Policy\": the title in serif type with a line drawing of a light bulb."
  },
  "quizlet-alternative.html": {
-  "sig": "e9dd08752d8cdaaedb607d0a72abad37b7a2f4b0",
+  "sig": "17640d69771355da7866c3af7396998a9ec9691d",
   "template": "product",
-  "alt": "Cover for \"Quizlet killed Q-Chat.StudyEdge AI picked upwhere it left off — and went further.\": the StudyEdge AI Review Queue screen shown in a browser window, beside the page title."
+  "alt": "Cover for \"Quizlet killed Q-Chat. StudyEdge AI picked up where it left off, and went further.\": the StudyEdge AI Review Queue screen shown in a browser window, beside the page title."
  },
  "quizlet-qchat-alternative.html": {
-  "sig": "2aa4b0639693a88f1bfe7400ad8ae4004766817d",
+  "sig": "0bc4119b038603adc5ddf997f1c385c8a34f36ab",
   "template": "product",
-  "alt": "Cover for \"Q-Chat is gone.Here's what replaced it.\": the StudyEdge AI Review Queue screen shown in a browser window, beside the page title."
+  "alt": "Cover for \"Q-Chat is gone. Here's what replaced it.\": the StudyEdge AI Review Queue screen shown in a browser window, beside the page title."
  },
  "resources.html": {
   "sig": "7a414fc254903645de7a95f247c6e3820843fdea",
@@ -1325,9 +1325,9 @@
   "alt": "Cover for \"Study Planner for College Students\": the title in serif type with a line drawing of a calendar."
  },
  "study-schedule-generator.html": {
-  "sig": "bb32a62d1787f7b9d864ffacf9e35ddfd43295d1",
+  "sig": "e970eb2e4ae1e0b25aa89f02e13f7ab3a48d96db",
   "template": "editorial",
-  "alt": "Cover for \"Stop making your schedule by hand.Let the AI figure it out.\": the title in serif type with a line drawing of a calendar."
+  "alt": "Cover for \"Stop making your schedule by hand. Let the AI figure it out.\": the title in serif type with a line drawing of a calendar."
  },
  "study-schedule-maker.html": {
   "sig": "1cf0f2b1c3dce89c6985f02e1019176c4cb02c0c",
@@ -1618,5 +1618,15 @@
   "sig": "25091634942e8f2d4090db7209aa8e863de1f2b4",
   "template": "product",
   "alt": "Cover for \"Wolfram Alpha answers the question. StudyEdge AI teaches you to answer it yourself.\": the StudyEdge AI Review Queue screen shown in a browser window, beside the page title."
+ },
+ "compare/studyedge-vs-anki.html": {
+  "sig": "2ddc383042da68cdd30dc7ae16769398b1e53761",
+  "template": "product",
+  "alt": "Cover for \"StudyEdge AI vs Anki\": the StudyEdge AI Review Queue screen shown in a browser window, beside the page title."
+ },
+ "compare/studyedge-vs-studocu.html": {
+  "sig": "d0be0d117f34192001e781379c2128795b0569de",
+  "template": "product",
+  "alt": "Cover for \"StudyEdge AI vs Studocu\": the StudyEdge AI Review Queue screen shown in a browser window, beside the page title."
  }
 }

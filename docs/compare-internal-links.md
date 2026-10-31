@@ -166,3 +166,13 @@ a fifth item would crowd it on mobile.
 - `public/what-gpa-do-you-need-for-veterinary-school-admissions.html`
 - `public/what-gpa-do-you-need-for-wake-forest-university.html`
 - `index.html`
+
+## Added 2026-10-31 (Studocu and Anki pages)
+
+| Page | Target | Anchor text |
+|---|---|---|
+| `public/studocu-alternative.html` (after "It does not solve the problem of actually using it...") | `/compare/studyedge-vs-studocu` | StudyEdge AI vs Studocu comparison |
+| `public/blog/anki-vs-quizlet-vs-studyedge.html` (intro, next to the Quizlet link) | `/compare/studyedge-vs-anki` | StudyEdge AI vs Anki comparison |
+
+Both pages are also in `public/sitemap.xml`, `public/llms.txt`, the `/compare` hub and the
+"Other comparisons" list on every compare page.

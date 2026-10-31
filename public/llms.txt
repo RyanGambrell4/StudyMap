@@ -40,6 +40,8 @@ Machine-readable pricing: https://getstudyedge.com/pricing.md
 - StudyEdge AI vs Quizlet: https://getstudyedge.com/compare/studyedge-vs-quizlet
 - StudyEdge AI vs StudyFetch: https://getstudyedge.com/compare/studyedge-vs-studyfetch
 - StudyEdge AI vs Knowt: https://getstudyedge.com/compare/studyedge-vs-knowt
+- StudyEdge AI vs Studocu: https://getstudyedge.com/compare/studyedge-vs-studocu
+- StudyEdge AI vs Anki: https://getstudyedge.com/compare/studyedge-vs-anki
 
 - Home: https://getstudyedge.com/
 - Pricing: https://getstudyedge.com/pricing

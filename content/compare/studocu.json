@@ -1,0 +1,48 @@
+{
+  "order": 4,
+  "slug": "studyedge-vs-studocu",
+  "competitor": "Studocu",
+  "checked": "2026-10-30",
+  "title": "StudyEdge AI vs Studocu: Honest 2026 Comparison",
+  "description": "StudyEdge AI vs Studocu compared honestly: shared notes library, AI quizzes, lecture recording, study planning and price, with sources for every Studocu claim.",
+  "hub_blurb": "Studocu is a library of notes shared by other students. StudyEdge AI plans your own semester around your exam dates.",
+  "deck": "Studocu is a library of study documents shared by other students, with AI quizzes, an AI helper and a lecture recorder on top. StudyEdge AI starts from your own courses and exam dates, and plans what to study each day.",
+  "short_answer": "    <p>If you want to read notes, past summaries and study guides other students have shared for your course, Studocu has something we do not: a large shared library. If you already have your own material and the problem is turning it into a plan you actually follow, StudyEdge AI is the better fit. It builds a weekly schedule from your exam dates, plans each session, makes flashcards and practice exams from your notes, and tracks your grades.</p>",
+  "pick_them_title": "You want other students' notes",
+  "pick_them_short": ["You want notes and summaries others shared for your course", "You want to record a lecture in the app", "You want an AI quiz from a document in one tap", "You need a native iPhone app today"],
+  "pick_us_title": "You need a plan for your own material",
+  "pick_us_short": ["You have several courses with exams on different dates", "You want each day's study planned for you", "You want spaced-repetition flashcards from your own notes", "You want to track grades and what you need on the final"],
+  "table": [
+    {"group": "Studying"},
+    {"topic": "Where the material comes from", "them": "A shared library; Studocu says it has 50M+ study resources, including real student notes", "us": "Your own notes, PDFs, Word and PowerPoint files, images, recordings and YouTube links"},
+    {"topic": "Quizzes", "them": "AI Quiz turns a document into a quiz with one tap", "us": "Quizzes and full practice exams written from your course material"},
+    {"topic": "Flashcards", "them": "Not stated in the listing we could read", "us": "Generated from your material, with a spaced-repetition review queue (SM-2)"},
+    {"topic": "AI help", "them": "Ask AI for study questions and step-by-step math", "us": "AI Tutor that knows your courses and syllabus; remembers past sessions on Unlimited"},
+    {"topic": "Lectures", "them": "Lecture Recorder in the app, with transcripts, AI summaries and quizzes", "us": "Upload an audio or video recording, or a YouTube link; no live recording"},
+    {"group": "Planning"},
+    {"topic": "Schedule from exam dates", "them": "Not stated", "us": "The core feature: a weekly schedule from your courses, exam dates and free time; syllabus PDF import pulls the dates in"},
+    {"topic": "Session plans", "them": "Not stated", "us": "Session Blueprint plans each sitting; Focus Mode runs it with a timer and recall prompts"},
+    {"topic": "Grade tracking", "them": "Not stated", "us": "Grade Hub: current grade, what you need on remaining work, semester GPA projection"},
+    {"group": "Everything else"},
+    {"topic": "Platforms", "them": "Web and iPhone/iPad; Android not verified by us", "us": "Web app that works on phones; native iOS app coming soon"}
+  ],
+  "pick_them": "    <p>Pick Studocu when the thing you are missing is material. If your course is common and other students have uploaded notes, summaries or study guides for it, reading what they made can save you hours, and an AI quiz on one of those documents is one tap away.</p>\n    <p>Studocu also records lectures in the app and turns the recording into a transcript, a summary and a quiz, and it has a native iPhone and iPad app today. We do neither of those yet.</p>",
+  "pick_us": "    <p>Pick StudyEdge AI when you have your own notes and slides but no system for getting through them. It builds a weekly schedule across all your courses from your exam dates and free time, decides what each session covers, and generates flashcards and practice exams from your own material, so they match what your professor covered rather than someone else's class.</p>\n    <p>Grade Hub shows where you stand in each course and what you need on the work that is left, which Studocu's listing does not describe.</p>",
+  "pricing_intro": "    <p>Studocu's website did not show us a price we could read, so these are the in-app purchase prices on its US App Store listing. No monthly plan appeared there. Web prices, if different, were not visible to us.</p>",
+  "their_prices": [["App", "Free to download"], ["Premium (yearly)", "$79.99 USD"], ["Premium (quarterly)", "$34.99 USD"], ["Free trial", "Not stated on the pages we could read"]],
+  "their_price_note": "From Studocu's US App Store listing, read October 30, 2026. The listing does not state what the free tier limits.",
+  "deep_dives": [
+    {"id": "library-vs-plan", "h": "The real difference: someone else's notes or your own plan", "html": "    <p>Studocu's strength is the library. You search for your course or textbook and read what other students uploaded, then quiz yourself on it. That works best when your course is widely taught and someone has already done the note-taking.</p>\n    <p>StudyEdge AI assumes you already have the material, because your professor's slides and your own notes are what the exam is built on. Its job is deciding what to study this week across every course you are taking, and turning your own material into review that is spaced out before each exam.</p>"}
+  ],
+  "both": "    <p>Yes, and they fit together reasonably well. Use Studocu to find extra notes or summaries for a topic you are stuck on, and StudyEdge AI to plan the semester and make flashcards and practice exams from your own course material.</p>",
+  "faq": [
+    {"q": "How much does Studocu Premium cost?", "a": "Studocu's US App Store listing showed Premium at $79.99 a year or $34.99 a quarter on October 30, 2026. We could not read a price on its website. StudyEdge AI Pro is $9.99 a month or $69.99 a year."},
+    {"q": "Is Studocu's content written by Studocu?", "a": "Mostly no. Studocu describes its library as study resources including real student notes, shared by other students. StudyEdge AI works from the notes and files you upload yourself."},
+    {"q": "Does Studocu make a study schedule?", "a": "We could not find a study schedule built from exam dates in Studocu's listing. Building the schedule from your exam dates is StudyEdge AI's core feature."},
+    {"q": "Does either app record lectures?", "a": "Studocu has a Lecture Recorder in its app that produces transcripts, summaries and quizzes. StudyEdge AI does not record live, but you can upload a recording or a YouTube link and it turns it into study material."}
+  ],
+  "sources": [
+    {"label": "Studocu on the US App Store (features and in-app prices)", "url": "https://apps.apple.com/us/app/studocu-ai-homework-helper/id1460235511"},
+    {"label": "Studocu Premium page", "url": "https://www.studocu.com/en-us/premium"}
+  ]
+}

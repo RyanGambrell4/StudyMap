@@ -95,3 +95,12 @@ then reruns the generator, which re-renders only the product covers:
 
 JSON-LD `"operatingSystem"` is switched back only on the 33 pages that said `"Web, iOS"` before
 the change; the other pages have always said `"Web"` and stay that way.
+
+## Added 2026-10-31
+
+The Studocu and Anki comparison pages, built after the list above was recorded:
+
+| File:line | Now | After launch |
+|---|---|---|
+| `content/compare/studocu.json`:27 | Web app that works on phones; native iOS app coming soon | Web app, plus a native iOS app |
+| `content/compare/anki.json`:26 | Web app that works on phones; native iOS app coming soon | Web app, plus a native iOS app |

@@ -158,7 +158,7 @@ def render(d, others):
 
 <div class="post-body">
   <div class="container">
-    <p class="cmp-disclosure"><strong>Before you read:</strong> we make StudyEdge AI, so weigh that. Everything we say about {esc(them)} comes from {esc(them)}'s own website, checked on {checked}, and is linked under <a href="#sources">Sources</a>. Plans change; check their pricing page before you buy.</p>
+    <p class="cmp-disclosure"><strong>Before you read:</strong> we make StudyEdge AI, so weigh that. Everything we say about {esc(them)} comes from {esc(them)}'s own website or official app store listing, checked on {checked}, and is linked under <a href="#sources">Sources</a>. Plans change; check their pricing page before you buy.</p>
 
     <div class="toc">
       <span class="toc-label">On this page</span>
@@ -301,3 +301,8 @@ for p in pages:
     open(os.path.join(OUT, p['slug'] + '.html'), 'w', encoding='utf-8').write(render(p, pages))
 open(os.path.join(OUT, 'index.html'), 'w', encoding='utf-8').write(render_hub(pages))
 print('built', [p['slug'] for p in pages], '+ hub')
+
+# The template has no cover tags; the cover generator wires og:image / twitter:image back in
+# (and renders a cover for any new compare page).
+import subprocess
+subprocess.run(['node', os.path.join(ROOT, 'scripts', 'build-covers.mjs')], check=True)

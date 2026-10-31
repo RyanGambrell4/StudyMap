@@ -1,0 +1,53 @@
+{
+  "order": 5,
+  "slug": "studyedge-vs-anki",
+  "competitor": "Anki",
+  "checked": "2026-10-30",
+  "title": "StudyEdge AI vs Anki: Honest 2026 Comparison",
+  "description": "StudyEdge AI vs Anki compared honestly: spaced repetition, card creation, shared decks, study planning and price, with sources for every Anki claim.",
+  "hub_blurb": "Anki is the deepest spaced-repetition tool, and mostly free. StudyEdge AI makes the cards for you and plans the semester around them.",
+  "deck": "Anki is a free, highly customizable flashcard program with one of the most respected spaced-repetition schedulers. StudyEdge AI generates cards from your notes and also plans your weeks around exam dates.",
+  "short_answer": "    <p>If you are memorizing a large body of facts over months or years and do not mind building and tuning your own decks, Anki is the stronger flashcard tool: its scheduler is more configurable than ours, its add-ons and shared decks are huge, and it is free everywhere except iOS. If you would rather not make cards by hand and need help deciding what to study across several courses, StudyEdge AI is the better fit.</p>",
+  "pick_them_title": "You want the deepest flashcard tool",
+  "pick_them_short": ["You are memorizing for years (medicine, languages, law)", "You want to tune the scheduler, including FSRS", "You want free desktop, Android and web apps", "You want shared decks and add-ons"],
+  "pick_us_title": "You want cards made for you, plus a plan",
+  "pick_us_short": ["You do not want to build decks by hand", "You have several courses with different exam dates", "You want practice exams as well as flashcards", "You want to track grades and what you need on the final"],
+  "table": [
+    {"group": "Flashcards"},
+    {"topic": "Making cards", "them": "You build them with note types and templates, or download a shared deck; AI generation is not part of Anki", "us": "Generated from your notes, PDFs, slides or recordings"},
+    {"topic": "Scheduling", "them": "Spaced repetition with the SM-2 algorithm or the optional FSRS scheduler, highly configurable", "us": "Spaced-repetition review queue (SM-2); fewer settings to tune"},
+    {"topic": "Shared decks and add-ons", "them": "Large shared deck library and third-party add-ons", "us": "None; cards come from your own material"},
+    {"topic": "Media", "them": "Audio, images, video and scientific markup on cards", "us": "Text cards generated from your material"},
+    {"group": "Planning"},
+    {"topic": "Schedule from exam dates", "them": "Not described in Anki's manual", "us": "The core feature: a weekly schedule from your courses, exam dates and free time"},
+    {"topic": "Practice exams", "them": "Not stated", "us": "Practice exams written from your course material"},
+    {"topic": "Grade tracking", "them": "Not stated", "us": "Grade Hub: current grade, what you need on remaining work, semester GPA projection"},
+    {"group": "Everything else"},
+    {"topic": "Platforms", "them": "Windows, Mac and Linux, Android (AnkiDroid), web (AnkiWeb), and iOS (AnkiMobile)", "us": "Web app that works on phones; native iOS app coming soon"}
+  ],
+  "pick_them": "    <p>Pick Anki if flashcards are the whole job and the stakes are long term. Medical students, language learners and anyone memorizing for a licensing exam use it because the scheduler is excellent and fully adjustable, including the newer FSRS option, and because the desktop app, Android app and AnkiWeb sync cost nothing.</p>\n    <p>Its shared decks mean that for some subjects you can start reviewing without making a single card, and add-ons let you change almost anything. Anki's own manual does advise using shared decks as a supplement to your course material for complex subjects.</p>",
+  "pick_us": "    <p>Pick StudyEdge AI if building cards is the part you never get to. It generates flashcards from your lecture notes and slides, schedules them for review, and also writes practice exams from the same material.</p>\n    <p>It plans the rest of your studying too: a weekly schedule built from your exam dates across all your courses, a plan for each session, and Grade Hub to show where you stand. Anki's manual does not describe planning around exam dates.</p>",
+  "pricing_intro": "    <p>Anki has no subscription. The only paid version is the iOS app, a one-time purchase on the App Store.</p>",
+  "their_prices": [["Desktop (Windows, Mac, Linux)", "Free"], ["AnkiWeb sync and web study", "Free"], ["AnkiDroid (Android)", "Free"], ["AnkiMobile (iOS)", "$24.99 USD one time, up to 5 devices"]],
+  "their_price_note": "From apps.ankiweb.net, the Anki manual and AnkiMobile's US App Store listing, read October 30, 2026.",
+  "deep_dives": [
+    {"id": "build-vs-generate", "h": "The real difference: building cards or getting them made", "html": "    <p>Anki gives you a powerful engine and expects you to feed it. You decide what goes on each card, how cards are laid out, and how the scheduler behaves. Done well, that is the most efficient way to memorize a large body of material, which is why it is popular for medicine and languages.</p>\n    <p>StudyEdge AI makes the opposite trade. It takes your notes and slides and produces the cards for you, with fewer knobs to tune, and puts them inside a plan for the whole semester. You give up some control over the cards in exchange for not having to make them, and for help deciding what to study when."}
+  ],
+  "both": "    <p>Yes. Keep Anki for long-term decks you have built or downloaded, such as a medical or language deck, and use StudyEdge AI to plan your courses, generate cards and practice exams from new lecture material, and track grades. There is no import between them.</p>",
+  "faq": [
+    {"q": "Is Anki free?", "a": "Mostly. The desktop app, AnkiWeb and the Android app (AnkiDroid) are free. The iOS app, AnkiMobile, was $24.99 as a one-time purchase on the US App Store on October 30, 2026, usable on up to 5 iOS devices."},
+    {"q": "Does Anki use AI to make flashcards?", "a": "AI card generation is not part of Anki itself; you build cards with note types and templates or download shared decks. StudyEdge AI generates flashcards from your notes, PDFs, slides and recordings."},
+    {"q": "Which has the better spaced repetition?", "a": "Anki's is more configurable: it supports the SM-2 algorithm and the newer FSRS scheduler, with many settings. StudyEdge AI uses SM-2 with fewer settings, and ties review into a study plan built from your exam dates."},
+    {"q": "Can I import my Anki decks into StudyEdge AI?", "a": "No. StudyEdge AI does not import Anki or Quizlet decks. It generates cards from your own course material instead."}
+  ],
+  "sources": [
+    {"label": "Anki official site (platforms and pricing)", "url": "https://apps.ankiweb.net/"},
+    {"label": "Anki manual: getting started (scheduling, shared decks)", "url": "https://docs.ankiweb.net/getting-started.html"},
+    {"label": "Anki manual: deck options (SM-2 and FSRS)", "url": "https://docs.ankiweb.net/deck-options.html"},
+    {"label": "Anki manual: syncing with AnkiWeb", "url": "https://docs.ankiweb.net/syncing.html"},
+    {"label": "Anki manual: add-ons", "url": "https://docs.ankiweb.net/addons.html"},
+    {"label": "Anki FAQ: why AnkiMobile costs more", "url": "https://docs.ankiweb.net/faqs/why-does-ankimobile-cost-more-than-a-typical-mobile-app"},
+    {"label": "AnkiMobile on the US App Store", "url": "https://apps.apple.com/us/app/ankimobile-flashcards/id373493387"},
+    {"label": "AnkiDroid manual", "url": "https://docs.ankidroid.org/"}
+  ]
+}

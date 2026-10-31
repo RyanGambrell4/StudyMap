@@ -10,6 +10,8 @@ Recorded 2026-10-30. Check again between **2026-11-20 and 2026-11-27** (3 to 4 w
 | https://getstudyedge.com/compare/studyedge-vs-quizlet | 2026-10-30 | |
 | https://getstudyedge.com/compare/studyedge-vs-studyfetch | 2026-10-30 | |
 | https://getstudyedge.com/compare/studyedge-vs-knowt | 2026-10-30 | |
+| https://getstudyedge.com/compare/studyedge-vs-studocu | 2026-10-31 | Check 2026-11-21 to 11-28 |
+| https://getstudyedge.com/compare/studyedge-vs-anki | 2026-10-31 | Check 2026-11-21 to 11-28 |
 
 Deployed with commit `b80e7388` (verified live, HTTP 200, on 2026-10-30). Added to
 `public/sitemap.xml` and `public/llms.txt` the same day. Internal links to them (14
@@ -51,7 +53,7 @@ so always set `GSC_SITE`:
 cd ~/Projects/studyedge-gsc
 export GSC_SITE="sc-domain:getstudyedge.com"
 python3 gsc.py pages --days 28 --min-impr 0 | grep -E "/compare|alternative|anki-vs"
-for p in compare compare/studyedge-vs-quizlet compare/studyedge-vs-studyfetch compare/studyedge-vs-knowt; do
+for p in compare compare/studyedge-vs-quizlet compare/studyedge-vs-studyfetch compare/studyedge-vs-knowt compare/studyedge-vs-studocu compare/studyedge-vs-anki; do
   python3 gsc.py page-queries --page "https://getstudyedge.com/$p" --days 28
 done
 python3 gsc.py queries --days 28 --min-impr 1 | grep -iE "quizlet|studyfetch|study fetch|knowt"
@@ -63,3 +65,11 @@ Things to look at: whether the compare pages are indexed (`gsc.py inspect`), the
 impressions and average position, whether they take impressions away from
 `/quizlet-alternative` and `/blog/anki-vs-quizlet-vs-studyedge` (cannibalization) or add to
 them, and whether StudyFetch queries move from position ~48 toward page 1.
+
+## Added 2026-10-31: Studocu and Anki
+
+Baseline for the two new pages is zero (launched after the last Search Console data). The
+pages they were proposed from, last 28 days (2026-09-30 to 2026-10-28):
+`/studocu-alternative` 213 impressions, 3 clicks, position 7.0;
+`/blog/anki-vs-quizlet-vs-studyedge` 200 impressions, 0 clicks, position 8.4.
+Watch whether the compare pages add to these or take impressions from them.

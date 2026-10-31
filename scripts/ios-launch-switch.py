@@ -66,8 +66,10 @@ OS_OLD, OS_NEW = '"operatingSystem": "Web"', '"operatingSystem": "Web, iOS"'
 
 # file -> expected number of PHRASES replacements (recorded 2026-10-30)
 PHRASE_FILES = {
+ "content/compare/anki.json": 1,
  "content/compare/knowt.json": 1,
  "content/compare/quizlet.json": 2,
+ "content/compare/studocu.json": 1,
  "content/compare/studyfetch.json": 1,
  "public/ai-study-tools.html": 1,
  "public/best-ai-for-students.html": 1,
