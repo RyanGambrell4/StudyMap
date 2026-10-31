@@ -1380,9 +1380,9 @@
   "alt": "Cover for \"Time management for college students: the system that actually holds.\": the title in serif type with a line drawing of a timer."
  },
  "weighted-gpa-calculator.html": {
-  "sig": "99909affdc107ba0c43dc8c5c954f8e6368470d3",
+  "sig": "f82b6d439e73cf54d515d3a8c71c6b9c2edb11c7",
   "template": "editorial",
-  "alt": "Cover for \"Weighted GPA Calculator\": the title in serif type with a line drawing of a bar chart."
+  "alt": "Cover for \"Weighted vs Unweighted GPA Calculator\": the title in serif type with a line drawing of a bar chart."
  },
  "what-gpa-do-you-need-for-architecture-school-admissions.html": {
   "sig": "55a922592a02ea2ef193e5b47b917b872b80dfd9",
@@ -1628,5 +1628,10 @@
   "sig": "d0be0d117f34192001e781379c2128795b0569de",
   "template": "product",
   "alt": "Cover for \"StudyEdge AI vs Studocu\": the StudyEdge AI Review Queue screen shown in a browser window, beside the page title."
+ },
+ "gpa-raise-calculator.html": {
+  "sig": "4fd312c78b55e7f1c3a764938734d560856432c5",
+  "template": "editorial",
+  "alt": "Cover for \"How Many A's Do I Need to Raise My GPA?\": the title in serif type with a line drawing of a bar chart."
  }
 }

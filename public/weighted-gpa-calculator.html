@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Weighted GPA Calculator: AP and Honors Bonus | StudyEdge AI</title>
-  <meta name="description" content="Free weighted GPA calculator for high school and college. Enter grades, credit hours, and course level to see your weighted GPA." />
+  <title>Weighted vs Unweighted GPA Calculator | StudyEdge AI</title>
+  <meta name="description" content="Free weighted vs unweighted GPA calculator. Enter courses to get both GPAs, or convert a weighted GPA you already have back to unweighted." />
   <meta name="robots" content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1" />
   <link rel="canonical" href="https://getstudyedge.com/weighted-gpa-calculator" />
   <link rel="alternate" hreflang="en" href="https://getstudyedge.com/weighted-gpa-calculator" />
@@ -13,12 +13,12 @@
 
   <meta property="og:type" content="website" />
   <meta property="og:url" content="https://getstudyedge.com/weighted-gpa-calculator" />
-  <meta property="og:title" content="Weighted GPA Calculator: AP and Honors Bonus | StudyEdge AI" />
-  <meta property="og:description" content="Free weighted GPA calculator for high school and college. Enter grades, credit hours, and course level to see your weighted GPA." />
+  <meta property="og:title" content="Weighted vs Unweighted GPA Calculator | StudyEdge AI" />
+  <meta property="og:description" content="Free weighted vs unweighted GPA calculator. Enter courses to get both GPAs, or convert a weighted GPA you already have back to unweighted." />
 <meta property="og:site_name" content="StudyEdge AI" />
 
-<meta name="twitter:title" content="Weighted GPA Calculator: AP and Honors Bonus | StudyEdge AI" />
-  <meta name="twitter:description" content="Free weighted GPA calculator with AP and honors bonuses." />
+<meta name="twitter:title" content="Weighted vs Unweighted GPA Calculator | StudyEdge AI" />
+  <meta name="twitter:description" content="Free weighted vs unweighted GPA calculator. Enter courses to get both GPAs, or convert a weighted GPA you already have back to unweighted." />
 <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
@@ -51,7 +51,7 @@
       {
         "@type": "Question",
         "name": "What is a good weighted GPA?",
-        "acceptedAnswer": { "@type": "Answer", "text": "For high school, a weighted GPA above 4.0 indicates honors or AP coursework with strong grades. Selective colleges typically see weighted GPAs in the 4.0 to 4.5 range from admitted students, and the most competitive schools see 4.5 to 5.0. For unweighted, a 3.7 or above is generally considered strong." }
+        "acceptedAnswer": { "@type": "Answer", "text": "For high school, a weighted GPA above 4.0 indicates honors or AP coursework with strong grades. Florida State University, one of the few colleges to publish both, reported a 4.29 average weighted GPA and a 3.72 unweighted GPA for first-year students enrolling in fall 2025 (FSU Common Data Set 2025-26, section C12)." }
       },
       {
         "@type": "Question",
@@ -61,7 +61,7 @@
       {
         "@type": "Question",
         "name": "How are AP and IB classes weighted?",
-        "acceptedAnswer": { "@type": "Answer", "text": "Most high schools weight AP and IB classes with a +1.0 bonus on the standard 4.0 scale, so an A is 5.0, a B is 4.0, and a C is 3.0. Some schools use +0.5 or other variations. Check your high school's official policy before relying on a generic calculator." }
+        "acceptedAnswer": { "@type": "Answer", "text": "A common scheme adds +1.0 to AP and IB classes on the standard 4.0 scale, so an A is 5.0, a B is 4.0, and a C is 3.0. Some schools use +0.5 or other variations. Check your high school's official policy before relying on a generic calculator." }
       },
       {
         "@type": "Question",
@@ -101,6 +101,9 @@
     .calc-result .stat-block { text-align: center; }
     .calc-result .stat-num { font-size: 36px; font-weight: 800; color: #3B61C4; letter-spacing: -0.02em; }
     .calc-result .stat-label { font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: var(--muted); margin-top: 4px; }
+    #convert-wrap label { display: flex; flex-direction: column; gap: 6px; font-size: 13px; font-weight: 600; color: var(--muted); }
+    #convert-wrap input, #convert-wrap select { width: 100%; padding: 10px 12px; border: 1px solid var(--border); border-radius: 8px; font: inherit; font-weight: 400; background: #fff; color: var(--text); }
+    #convert-wrap .calc-result { grid-template-columns: 1fr; }
     @media (max-width: 640px) {
       .calc-row, .calc-head { grid-template-columns: 1.5fr 0.8fr 1.2fr 0.7fr 32px; gap: 6px; font-size: 13px; }
     }
@@ -111,10 +114,10 @@
   <meta property="og:image" content="https://getstudyedge.com/covers/weighted-gpa-calculator.png" />
   <meta property="og:image:width" content="1200" />
   <meta property="og:image:height" content="630" />
-  <meta property="og:image:alt" content="Cover for &quot;Weighted GPA Calculator&quot;: the title in serif type with a line drawing of a bar chart." />
+  <meta property="og:image:alt" content="Cover for &quot;Weighted vs Unweighted GPA Calculator&quot;: the title in serif type with a line drawing of a bar chart." />
   <meta name="twitter:card" content="summary_large_image" />
   <meta name="twitter:image" content="https://getstudyedge.com/covers/weighted-gpa-calculator.png" />
-  <meta name="twitter:image:alt" content="Cover for &quot;Weighted GPA Calculator&quot;: the title in serif type with a line drawing of a bar chart." />
+  <meta name="twitter:image:alt" content="Cover for &quot;Weighted vs Unweighted GPA Calculator&quot;: the title in serif type with a line drawing of a bar chart." />
   <!-- /cover:meta -->
 </head>
 <body>
@@ -137,8 +140,8 @@
 <section class="hero">
   <div class="container">
     <div class="eyebrow eyebrow-indigo">Weighted GPA Calculator</div>
-    <h1>Weighted GPA Calculator</h1>
-    <p class="hero-sub">Enter your courses, grades, credits, and course type. The calculator returns your weighted GPA (with AP and honors bonus) and unweighted GPA side by side, instantly. No signup.</p>
+    <h1>Weighted vs Unweighted GPA Calculator</h1>
+    <p class="hero-sub">Enter your courses, grades, credits, and course type. The calculator returns your weighted GPA (with AP and honors bonus) and unweighted GPA side by side, instantly. No signup. Already have a weighted GPA? Use the converter below it.</p>
   </div>
 </section>
 
@@ -167,17 +170,36 @@
         </div>
       </div>
     </div>
+
+    <div class="calc-wrap" id="convert-wrap" style="margin-top:24px">
+      <h2 style="font-size:20px;margin:0 0 6px">Convert a weighted GPA to unweighted</h2>
+      <p style="margin:0 0 14px;color:#5C5952;font-size:15px">For when you know your weighted GPA but not every grade. It is exact when your courses carry equal credit, your school adds the same bonus to every weighted course, and none of them is an F.</p>
+      <div class="convert-grid" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px">
+        <label>Weighted GPA<input type="number" id="cv-weighted" step="0.01" min="0" max="6" value="4.20" oninput="convertGpa()" /></label>
+        <label>Weighted courses (AP, IB, honors)<input type="number" id="cv-k" step="1" min="0" value="4" oninput="convertGpa()" /></label>
+        <label>Total courses<input type="number" id="cv-n" step="1" min="1" value="12" oninput="convertGpa()" /></label>
+        <label>Bonus per weighted course<select id="cv-bonus" onchange="convertGpa()"><option value="1">+1.0</option><option value="0.5">+0.5</option></select></label>
+      </div>
+      <div class="calc-result" style="margin-top:14px">
+        <div class="stat-block">
+          <div class="stat-num" id="cv-result">0.00</div>
+          <div class="stat-label">Unweighted GPA</div>
+        </div>
+      </div>
+      <p id="cv-note" style="margin:10px 0 0;color:#5C5952;font-size:14px"></p>
+    </div>
   </div>
 </section>
 
 <section class="section">
   <div class="container" style="max-width: 760px;">
     <h2>How weighted GPA works</h2>
-    <p>The standard unweighted GPA scale runs 0 to 4.0: A = 4.0, B = 3.0, C = 2.0, D = 1.0, F = 0.0. Weighted GPA adds a bonus for harder courses. The most common bonus: +1.0 for AP and IB (so an A in AP US History is 5.0), and +0.5 for honors (an A in Honors English is 4.5). This calculator uses that scale.</p>
+    <p>The standard unweighted GPA scale runs 0 to 4.0: A = 4.0, B = 3.0, C = 2.0, D = 1.0, F = 0.0. Weighted GPA adds a bonus for harder courses. A common scheme is +1.0 for AP and IB (so an A in AP US History is 5.0) and +0.5 for honors (an A in Honors English is 4.5), and this calculator uses it. Schools set their own bonuses, so check your handbook.</p>
+    <p>The converter works backwards. If every course carries the same credit, each weighted course adds its bonus divided by your total number of courses. So unweighted GPA = weighted GPA - bonus &times; (weighted courses / total courses). With a 4.20 weighted GPA, 4 AP courses out of 12 and a +1.0 bonus: 4.20 - 1.0 &times; 4/12 = 3.87 unweighted.</p>
     <p>To compute, the calculator multiplies each course's weighted grade points by its credits, sums those across all courses, and divides by total credits. The unweighted column does the same with the standard 4.0 scale, ignoring AP and honors bonuses.</p>
 
-    <h2>What counts as a good weighted GPA</h2>
-    <p>For high school, anything above 4.0 means the student is taking honors or AP coursework and doing well in it. Selective colleges typically see admitted students with weighted GPAs in the 4.0 to 4.5 range, and the most competitive admit pools see 4.5 to 5.0. The unweighted GPA still matters: a 3.7 or higher is the threshold most admissions counselors use for "strong academic profile."</p>
+    <h2>Weighted vs unweighted: what a real school reports</h2>
+    <p>On a +1.0 scheme, a weighted GPA above 4.0 is only possible with weighted courses, because an A in a regular class tops out at 4.0. That is why the two numbers can look so far apart for the same student. Florida State University is one of the few colleges that publishes both for its entering class. In its 2025-26 Common Data Set, enrolled first-year students averaged a 4.29 weighted GPA and a 3.72 unweighted GPA (<a href="https://ir.fsu.edu/commondataset.aspx" target="_blank" rel="noopener">FSU Common Data Set, section C12</a>). Most colleges report a single average and do not say which kind it is, so compare like with like.</p>
 
     <h2>Why colleges still look at unweighted</h2>
     <p>Every high school weights differently. Some give +1.0 for AP, others give +0.5. Some have no honors track at all. Colleges recalculate on their own scales to compare students fairly. That is why the unweighted GPA is often what admissions officers see first. They look separately at course rigor: how many APs, how many honors, which subjects, did the student take the hardest available option.</p>
@@ -194,7 +216,7 @@
   <div class="container">
     <div class="cta-block">
       <h2>Calculate the grade. Build the system that gets you there.</h2>
-      <p>StudyEdge AI uses your real grades to build a weekly study plan that moves the courses where the GPA leverage is highest.</p>
+      <p>StudyEdge AI turns your exam dates into a weekly study plan and gives more time to the courses where you set a higher target grade.</p>
       <a href="/app?signup=1" class="btn btn-primary btn-lg">Try StudyEdge AI Free</a>
       <p class="cta-fine">Free plan available.</p>
     </div>
@@ -211,6 +233,7 @@
       <li><a href="/cumulative-gpa-calculator">Cumulative GPA calculator</a></li>
       <li><a href="/semester-gpa-calculator">Semester GPA calculator</a></li>
       <li><a href="/grade-calculator">Grade calculator</a></li>
+      <li><a href="/gpa-raise-calculator">How many A's to raise your GPA</a></li>
     </ul>
     <h2 style="font-size:20px;font-weight:600;color:#111;margin:0 0 18px;letter-spacing:-0.01em">Is your GPA good?</h2>
     <ul style="list-style:none;padding:0;margin:0;display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:10px 24px">
@@ -327,10 +350,38 @@
     document.getElementById('unweighted-gpa').textContent = u;
   }
 
+  // Equal credits and one bonus for every weighted course: U = W - bonus * k / n.
+  function unweightedFromWeighted(weighted, k, n, bonus) {
+    return weighted - bonus * k / n;
+  }
+
+  function convertGpa() {
+    const w = parseFloat(document.getElementById('cv-weighted').value);
+    const k = parseInt(document.getElementById('cv-k').value, 10);
+    const n = parseInt(document.getElementById('cv-n').value, 10);
+    const bonus = parseFloat(document.getElementById('cv-bonus').value);
+    const out = document.getElementById('cv-result');
+    const note = document.getElementById('cv-note');
+    if (isNaN(w) || isNaN(k) || isNaN(n) || n < 1 || k < 0 || k > n) {
+      out.textContent = '-';
+      note.textContent = 'Weighted courses has to be between 0 and your total number of courses.';
+      return;
+    }
+    const u = unweightedFromWeighted(w, k, n, bonus);
+    if (u < 0 || u > 4) {
+      out.textContent = '-';
+      note.textContent = 'Those numbers do not fit a 4.0 scale with this bonus. Check the bonus your school uses, or enter your courses above instead.';
+      return;
+    }
+    out.textContent = u.toFixed(2);
+    note.textContent = w.toFixed(2) + ' - ' + bonus + ' x ' + k + '/' + n + ' = ' + u.toFixed(2);
+  }
+
   // Seed three sample rows
   addRow('English', 'A', 'honors', 1);
   addRow('AP Biology', 'B+', 'ap', 1);
   addRow('Pre-Calculus', 'A-', 'regular', 1);
+  convertGpa();
 </script>
 
 </body>

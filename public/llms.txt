@@ -51,6 +51,7 @@ Machine-readable pricing: https://getstudyedge.com/pricing.md
 - GPA Calculator: https://getstudyedge.com/gpa-calculator
 - Grade Calculator: https://getstudyedge.com/grade-calculator
 - Weighted GPA Calculator: https://getstudyedge.com/weighted-gpa-calculator
+- GPA Raise Calculator (how many A's to reach a target GPA): https://getstudyedge.com/gpa-raise-calculator
 - Final Exam Calculator: https://getstudyedge.com/final-exam-calculator
 - Study Schedule Generator: https://getstudyedge.com/study-schedule-generator
 - Study Schedule Maker: https://getstudyedge.com/study-schedule-maker

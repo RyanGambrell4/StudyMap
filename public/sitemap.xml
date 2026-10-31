@@ -345,7 +345,7 @@
   </url>
   <url>
     <loc>https://getstudyedge.com/final-exam-calculator</loc>
-    <lastmod>2026-08-29</lastmod>
+    <lastmod>2026-10-31</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.95</priority>
   </url>
@@ -537,7 +537,13 @@
   </url>
   <url>
     <loc>https://getstudyedge.com/weighted-gpa-calculator</loc>
-    <lastmod>2026-08-29</lastmod>
+    <lastmod>2026-10-31</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://getstudyedge.com/gpa-raise-calculator</loc>
+    <lastmod>2026-10-31</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.9</priority>
   </url>
@@ -873,7 +879,7 @@
   </url>
   <url>
     <loc>https://getstudyedge.com/ap-world-history-study-schedule</loc>
-    <lastmod>2026-07-13</lastmod>
+    <lastmod>2026-10-31</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.85</priority>
   </url>

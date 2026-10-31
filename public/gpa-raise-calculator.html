@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>GPA Raise Calculator: How Many A's Do I Need? | StudyEdge AI</title>
+  <meta name="description" content="Find out how many A's it takes to raise your GPA to a target, based on your current GPA and credits. Shows the math, plus a one-semester check." />
+  <meta name="robots" content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1" />
+  <link rel="canonical" href="https://getstudyedge.com/gpa-raise-calculator" />
+  <link rel="alternate" hreflang="en" href="https://getstudyedge.com/gpa-raise-calculator" />
+  <link rel="alternate" hreflang="x-default" href="https://getstudyedge.com/gpa-raise-calculator" />
+  <link rel="icon" type="image/png" href="/favicon.png" />
+
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content="https://getstudyedge.com/gpa-raise-calculator" />
+  <meta property="og:title" content="GPA Raise Calculator: How Many A's Do I Need? | StudyEdge AI" />
+  <meta property="og:description" content="Find out how many A's it takes to raise your GPA to a target, based on your current GPA and credits. Shows the math, plus a one-semester check." />
+<meta property="og:site_name" content="StudyEdge AI" />
+
+<meta name="twitter:title" content="GPA Raise Calculator: How Many A's Do I Need? | StudyEdge AI" />
+  <meta name="twitter:description" content="Find out how many A's it takes to raise your GPA to a target, based on your current GPA and credits. Shows the math, plus a one-semester check." />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/seo.css" />
+
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "WebApplication",
+    "name": "GPA Raise Calculator",
+    "url": "https://getstudyedge.com/gpa-raise-calculator",
+    "applicationCategory": "EducationalApplication",
+    "operatingSystem": "Any",
+    "description": "Calculates how many courses of a given grade it takes to raise a cumulative GPA to a target, from current GPA and credits completed.",
+    "offers": {
+      "@type": "Offer",
+      "price": "0",
+      "priceCurrency": "USD"
+    },
+    "publisher": {
+      "@type": "Organization",
+      "name": "StudyEdge AI",
+      "url": "https://getstudyedge.com"
+    }
+  }
+  </script>
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "mainEntity": [
+      {
+        "@type": "Question",
+        "name": "Can I raise my GPA from 2.5 to 3.0 in one semester?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "It depends on how many credits you already have. With 30 credits at a 2.5, you need 15 credits of straight A's to reach exactly 3.0: (2.5 x 30 + 4.0 x 15) / 45 = 3.0. That is five 3-credit courses, which is a full semester for many students. With 60 credits at a 2.5, the same jump takes 30 credits of A's, about two semesters."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Why is it harder to raise my GPA as a senior?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Your GPA is an average over every credit you have taken. Each new grade moves the average less as the total grows. Going from 3.2 to 3.5 takes 6 three-credit A's with 30 credits behind you, but 12 with 60 credits and 18 with 90."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Do retaken classes count differently?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Some schools replace the old grade when you retake a course, and others average both attempts or keep both on the record. This calculator assumes every new course adds to your record. Check your registrar's repeat policy, because grade replacement can raise a GPA faster than new courses can."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Can I get to a 4.0 if I already have a lower grade?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Not unless your school lets a retake replace that grade. Once a grade below an A counts toward your GPA, a perfect 4.0 is out of reach, because new A's can only bring the average closer to 4.0. You can get very close, which the calculator shows."
+        }
+      }
+    ]
+  }
+  </script>
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    "itemListElement": [
+      {
+        "@type": "ListItem",
+        "position": 1,
+        "name": "Home",
+        "item": "https://getstudyedge.com/"
+      },
+      {
+        "@type": "ListItem",
+        "position": 2,
+        "name": "GPA Calculator",
+        "item": "https://getstudyedge.com/gpa-calculator"
+      },
+      {
+        "@type": "ListItem",
+        "position": 3,
+        "name": "GPA Raise Calculator",
+        "item": "https://getstudyedge.com/gpa-raise-calculator"
+      }
+    ]
+  }
+  </script>
+  <style>
+    .calc-wrap { background: #fff; border: 1px solid var(--border); border-radius: 14px; padding: 28px; max-width: 760px; margin: 0 auto; box-shadow: 0 1px 3px rgba(0,0,0,0.06); }
+    .rg-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 14px; }
+    .rg-grid label { display: flex; flex-direction: column; gap: 6px; font-size: 13px; font-weight: 600; color: var(--muted); }
+    .rg-grid input, .rg-grid select { width: 100%; padding: 10px 12px; border: 1px solid var(--border); border-radius: 8px; font: inherit; font-weight: 400; background: #fff; color: var(--text); }
+    .calc-result { margin-top: 24px; padding: 20px; background: #F0EFEC; border-radius: 12px; display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+    .calc-result .stat-block { text-align: center; }
+    .calc-result .stat-num { font-size: 36px; font-weight: 800; color: #3452D9; letter-spacing: -0.02em; }
+    .calc-result .stat-label { font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: var(--muted); margin-top: 4px; }
+    .rg-explain { margin: 14px 0 0; font-size: 15px; color: var(--text); }
+    .rg-table { width: 100%; border-collapse: collapse; margin: 16px 0 24px; font-size: 15px; }
+    .rg-table th, .rg-table td { border-bottom: 1px solid var(--border); padding: 10px 8px; text-align: left; }
+    .rg-table th { font-size: 12px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted); }
+  </style>
+  <script src="/ph-init.js"></script>
+  <script src="/utm-propagate.js" defer></script>
+  <!-- cover:meta -->
+  <meta property="og:image" content="https://getstudyedge.com/covers/gpa-raise-calculator.png" />
+  <meta property="og:image:width" content="1200" />
+  <meta property="og:image:height" content="630" />
+  <meta property="og:image:alt" content="Cover for &quot;How Many A's Do I Need to Raise My GPA?&quot;: the title in serif type with a line drawing of a bar chart." />
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:image" content="https://getstudyedge.com/covers/gpa-raise-calculator.png" />
+  <meta name="twitter:image:alt" content="Cover for &quot;How Many A's Do I Need to Raise My GPA?&quot;: the title in serif type with a line drawing of a bar chart." />
+  <!-- /cover:meta -->
+</head>
+<body>
+
+<header class="site-header">
+  <nav class="site-nav">
+    <a class="nav-logo" href="/">
+      <img src="/favicon.png" alt="StudyEdge AI" />
+      StudyEdge AI
+    </a>
+    <div class="nav-links">
+      <a href="/#features">Features</a>
+      <a href="/studyedge-ai#pricing">Pricing</a>
+      <a href="/blog">Blog</a>
+      <a href="/app?signup=1" class="nav-cta">Try Free</a>
+    </div>
+  </nav>
+</header>
+
+<section class="hero">
+  <div class="container">
+    <div class="eyebrow eyebrow-indigo">GPA Raise Calculator</div>
+    <h1>How Many A's Do I Need to Raise My GPA?</h1>
+    <p class="hero-sub">Enter your current GPA, the credits behind it, and the GPA you want. The calculator shows how many courses of A's (or A-'s, or B+'s) it takes to get there, and where one more semester would leave you.</p>
+  </div>
+</section>
+
+<section class="section" style="padding-top: 24px;">
+  <div class="container">
+    <div class="calc-wrap">
+      <div class="rg-grid">
+        <label>Current GPA<input type="number" id="rg-gpa" step="0.01" min="0" max="4" value="2.50" oninput="raiseCalc()" /></label>
+        <label>Credits completed<input type="number" id="rg-credits" step="1" min="1" value="30" oninput="raiseCalc()" /></label>
+        <label>Target GPA<input type="number" id="rg-target" step="0.01" min="0" max="4" value="3.00" oninput="raiseCalc()" /></label>
+        <label>Credits per course<input type="number" id="rg-per" step="0.5" min="0.5" value="3" oninput="raiseCalc()" /></label>
+        <label>Grade you expect<select id="rg-grade" onchange="raiseCalc()"><option value="4.0">A (4.0)</option><option value="3.7">A- (3.7)</option><option value="3.3">B+ (3.3)</option></select></label>
+        <label>Credits next semester<input type="number" id="rg-next" step="1" min="0" value="15" oninput="raiseCalc()" /></label>
+      </div>
+      <div class="calc-result">
+        <div class="stat-block">
+          <div class="stat-num" id="rg-courses">0</div>
+          <div class="stat-label">Courses needed</div>
+        </div>
+        <div class="stat-block">
+          <div class="stat-num" id="rg-after">0.00</div>
+          <div class="stat-label">GPA after next semester</div>
+        </div>
+      </div>
+      <p class="rg-explain" id="rg-explain"></p>
+      <p class="rg-explain" style="color:var(--muted);font-size:13px">Grade points use the common 4.0 scale (A = 4.0, A- = 3.7, B+ = 3.3). Some schools differ, and the calculator assumes new courses add to your record rather than replacing old grades.</p>
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container" style="max-width: 760px;">
+    <h2>How the math works</h2>
+    <p>Your cumulative GPA is total grade points divided by total credits. If you have a GPA of G over C credits and you add n courses of c credits each at grade g, your new GPA is (G &times; C + g &times; c &times; n) / (C + c &times; n). Setting that equal to your target T and solving for n gives:</p>
+    <p><strong>Courses needed = C &times; (T - G) / (c &times; (g - T))</strong>, rounded up.</p>
+    <p>Two things fall straight out of the formula. The more credits you already have (C), the more courses each tenth of a point costs. And if the grade you expect is at or below your target (g &le; T), no number of courses gets you there.</p>
+
+    <h2>Worked examples with 3-credit A's</h2>
+    <table class="rg-table">
+      <thead><tr><th>Current GPA</th><th>Credits done</th><th>Target</th><th>A's needed</th></tr></thead>
+      <tbody>
+        <tr><td>2.5</td><td>30</td><td>3.0</td><td>5 (15 credits)</td></tr>
+        <tr><td>2.5</td><td>60</td><td>3.0</td><td>10 (30 credits)</td></tr>
+        <tr><td>3.2</td><td>30</td><td>3.5</td><td>6 (18 credits)</td></tr>
+        <tr><td>3.2</td><td>60</td><td>3.5</td><td>12 (36 credits)</td></tr>
+        <tr><td>3.2</td><td>90</td><td>3.5</td><td>18 (54 credits)</td></tr>
+        <tr><td>3.5</td><td>60</td><td>3.7</td><td>14 (42 credits)</td></tr>
+      </tbody>
+    </table>
+    <p>The first row answers a common question: can you raise a 2.5 to a 3.0 in one semester? With 30 credits behind you, yes, if you take five 3-credit courses and earn an A in all of them: (2.5 &times; 30 + 4.0 &times; 15) / 45 = 3.0. With 60 credits behind you, the same jump takes ten.</p>
+
+    <h2>What actually moves a GPA faster</h2>
+    <p>Because the math gets harder every semester, the earliest semesters matter most. If your school offers grade replacement for retaken courses, retaking a low grade can move your GPA more than a new A, since it removes the old grade points instead of only diluting them. Policies differ a lot, so read your registrar's repeat policy before planning around it.</p>
+    <p>For the courses you are taking now, see <a href="/blog/how-to-raise-your-gpa-after-a-bad-semester">how to raise your GPA after a bad semester</a> and <a href="/how-to-get-a-4-0-gpa-in-college">how to get a 4.0 GPA in college</a>. To see what a single final exam does to a course grade, use the <a href="/final-exam-calculator">final exam calculator</a>.</p>
+
+    <h2>Questions</h2>
+    <h3>Can I raise my GPA from 2.5 to 3.0 in one semester?</h3>
+    <p>It depends on how many credits you already have. With 30 credits at a 2.5, you need 15 credits of straight A's to reach exactly 3.0: (2.5 &times; 30 + 4.0 &times; 15) / 45 = 3.0. That is five 3-credit courses, which is a full semester for many students. With 60 credits at a 2.5, the same jump takes 30 credits of A's, about two semesters.</p>
+    <h3>Why is it harder to raise my GPA as a senior?</h3>
+    <p>Your GPA is an average over every credit you have taken. Each new grade moves the average less as the total grows. Going from 3.2 to 3.5 takes 6 three-credit A's with 30 credits behind you, but 12 with 60 credits and 18 with 90.</p>
+    <h3>Do retaken classes count differently?</h3>
+    <p>Some schools replace the old grade when you retake a course, and others average both attempts or keep both on the record. This calculator assumes every new course adds to your record. Check your registrar's repeat policy, because grade replacement can raise a GPA faster than new courses can.</p>
+    <h3>Can I get to a 4.0 if I already have a lower grade?</h3>
+    <p>Not unless your school lets a retake replace that grade. Once a grade below an A counts toward your GPA, a perfect 4.0 is out of reach, because new A's can only bring the average closer to 4.0. You can get very close, which the calculator shows.</p>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <div class="cta-block">
+      <h2>Know how many A's. Now plan for them.</h2>
+      <p>StudyEdge AI turns your exam dates into a weekly study plan and gives more time to the courses where you set a higher target grade.</p>
+      <a href="/app?signup=1" class="btn btn-primary btn-lg" data-seo-cta="gpa-raise-calc">Try StudyEdge AI Free</a>
+      <p class="cta-fine">Free plan available.</p>
+    </div>
+  </div>
+</section>
+
+
+<!-- Related links (internal) -->
+<section class="related-links" style="background:#FFFFFF;border-top:1px solid rgba(0,0,0,0.07);padding:48px 24px">
+  <div class="container" style="max-width:1100px;margin:0 auto">
+    <h2 style="font-size:20px;font-weight:600;color:#111;margin:0 0 18px;letter-spacing:-0.01em">Related on StudyEdge AI</h2>
+    <ul style="list-style:none;padding:0;margin:0 0 32px;display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:10px 24px">
+      <li><a href="/cumulative-gpa-calculator">Cumulative GPA calculator</a></li>
+      <li><a href="/gpa-calculator">GPA calculator</a></li>
+      <li><a href="/semester-gpa-calculator">Semester GPA calculator</a></li>
+      <li><a href="/weighted-gpa-calculator">Weighted vs unweighted GPA calculator</a></li>
+      <li><a href="/final-exam-calculator">Final exam calculator</a></li>
+      <li><a href="/blog/how-to-raise-your-gpa-after-a-bad-semester">How to raise your GPA after a bad semester</a></li>
+    </ul>
+    <h2 style="font-size:20px;font-weight:600;color:#111;margin:0 0 18px;letter-spacing:-0.01em">Is your GPA good?</h2>
+    <ul style="list-style:none;padding:0;margin:0;display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:10px 24px">
+      <li><a href="/is-a-3-5-gpa-good">Is a 3.5 GPA good?</a></li>
+      <li><a href="/is-a-3-3-gpa-good">Is a 3.3 GPA good?</a></li>
+      <li><a href="/is-a-3-0-gpa-good">Is a 3.0 GPA good?</a></li>
+      <li><a href="/is-a-2-7-gpa-good">Is a 2.7 GPA good?</a></li>
+      <li><a href="/is-a-2-5-gpa-good">Is a 2.5 GPA good?</a></li>
+      <li><a href="/is-a-2-0-gpa-good">Is a 2.0 GPA good?</a></li>
+    </ul>
+  </div>
+</section>
+<footer class="site-footer">
+<div class="footer-links">
+<strong style="display:block;width:100%;color:var(--muted);font-size:11px;letter-spacing:0.08em;text-transform:uppercase;margin-bottom:8px;margin-top:0;font-weight:700;">Tools</strong>
+<a href="/">Home</a>
+<a href="/free-study-tools">Free Study Tools</a>
+<a href="/best-study-app-by-university">By University</a>
+<a href="/best-study-app-by-major">By Major</a>
+<a href="/gpa-calculator">GPA Calculator</a>
+<a href="/cumulative-gpa-calculator">Cumulative GPA Calculator</a>
+<a href="/semester-gpa-calculator">Semester GPA Calculator</a>
+<a href="/grade-calculator">Grade Calculator</a>
+<a href="/grade-calculator-college">College Grade Calculator</a>
+<a href="/study-schedule-generator">Study Schedule Generator</a>
+<a href="/ai-flashcard-maker">AI Flashcard Maker</a>
+<strong style="display:block;width:100%;color:var(--muted);font-size:11px;letter-spacing:0.08em;text-transform:uppercase;margin:14px 0 8px;font-weight:700;">Guides</strong>
+<a href="/study-planner-for-college-students">Study Planner</a>
+<a href="/study-schedule-template">Schedule Template</a>
+<a href="/how-to-study-for-finals">How to Study for Finals</a>
+<a href="/pre-med-study-guide">Pre-Med Study Guide</a>
+<a href="/best-study-app-for-students">Best Study App</a>
+<strong style="display:block;width:100%;color:var(--muted);font-size:11px;letter-spacing:0.08em;text-transform:uppercase;margin:14px 0 8px;font-weight:700;">Compare</strong>
+<a href="/quizlet-alternative">Quizlet Alternative</a>
+<a href="/anki-alternative">Anki Alternative</a>
+<a href="/chegg-alternative">Chegg Alternative</a>
+<a href="/coursehero-alternative">Course Hero Alternative</a>
+<a href="/khan-academy-alternative">Khan Academy Alternative</a>
+<a href="/notion-for-studying">Notion for Studying</a>
+<a href="/ai-tutor">AI Tutor</a>
+<a href="/ai-study-coach">AI Study Coach</a>
+<strong style="display:block;width:100%;color:var(--muted);font-size:11px;letter-spacing:0.08em;text-transform:uppercase;margin:14px 0 8px;font-weight:700;">Articles</strong>
+<a href="/blog">All Articles</a>
+<a href="/blog/how-to-raise-your-gpa-after-a-bad-semester">Raise Your GPA</a>
+<a href="/blog/how-to-get-an-a-in-any-class">Get an A in Any Class</a>
+<a href="/blog/how-to-study-for-calculus">Study for Calculus</a>
+<a href="/blog/how-to-study-for-biology">Study for Biology</a>
+<strong style="display:block;width:100%;color:var(--muted);font-size:11px;letter-spacing:0.08em;text-transform:uppercase;margin:14px 0 8px;font-weight:700;">Company</strong>
+<a href="/about">About</a>
+<a href="/privacy">Privacy</a>
+<a href="/terms">Terms</a>
+</div>
+<p class="footer-copy">&copy; 2026 StudyEdge AI</p>
+</footer>
+
+<script>
+  // New GPA = (G*C + g*c*n) / (C + c*n). Solve for n.
+  function coursesNeeded(gpa, credits, target, perCourse, grade) {
+    if (target <= gpa) return 0;
+    if (grade <= target) return Infinity;
+    return Math.ceil(Number((credits * (target - gpa) / (perCourse * (grade - target))).toFixed(9)));
+  }
+
+  function gpaAfter(gpa, credits, newCredits, grade) {
+    return (gpa * credits + grade * newCredits) / (credits + newCredits);
+  }
+
+  function raiseCalc() {
+    const G = parseFloat(document.getElementById('rg-gpa').value);
+    const C = parseFloat(document.getElementById('rg-credits').value);
+    const T = parseFloat(document.getElementById('rg-target').value);
+    const c = parseFloat(document.getElementById('rg-per').value);
+    const g = parseFloat(document.getElementById('rg-grade').value);
+    const next = parseFloat(document.getElementById('rg-next').value);
+    const out = document.getElementById('rg-courses');
+    const after = document.getElementById('rg-after');
+    const ex = document.getElementById('rg-explain');
+    if ([G, C, T, c, next].some(isNaN) || C <= 0 || c <= 0 || next < 0 || G < 0 || G > 4 || T < 0 || T > 4) {
+      out.textContent = '-'; after.textContent = '-';
+      ex.textContent = 'Enter a GPA between 0 and 4.0 and a positive number of credits.';
+      return;
+    }
+    after.textContent = gpaAfter(G, C, next, g).toFixed(2);
+    const n = coursesNeeded(G, C, T, c, g);
+    const label = document.getElementById('rg-grade').selectedOptions[0].text.split(' ')[0];
+    if (n === 0) {
+      out.textContent = '0';
+      ex.textContent = 'You are already at or above ' + T.toFixed(2) + '.';
+    } else if (n === Infinity) {
+      out.textContent = 'Not possible';
+      ex.textContent = 'Grades of ' + label + ' (' + g.toFixed(1) + ') cannot lift your GPA to ' + T.toFixed(2) + ', because the average can never pass the grade you add. Try a higher expected grade.';
+    } else {
+      out.textContent = String(n);
+      ex.textContent = n + ' courses of ' + c + ' credits at ' + label + ' (' + (n * c) + ' credits) take you from ' + G.toFixed(2) + ' to at least ' + T.toFixed(2) + '. One semester of ' + next + ' credits at ' + label + ' would put you at ' + gpaAfter(G, C, next, g).toFixed(2) + '.';
+    }
+  }
+
+  raiseCalc();
+</script>
+
+</body>
+</html>
