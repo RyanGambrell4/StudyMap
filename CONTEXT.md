@@ -1,5 +1,22 @@
 # StudyEdge AI — Living Context
 
+## SEO / fact-check round 4 -- 2026-10-31
+
+Everything shipped to main and verified live. Rules this round: no invented facts; every figure from an
+official source linked on the page, src/, or plain math; no em dashes; titles <= 60 chars.
+
+**Data files that pages are generated or checked from (edit the data, then re-run the script):**
+- `content/law-school-medians.json` (ABA 509, Fall 2025 class, 196 schools) -> `node scripts/sync-law-medians.mjs`; guard `src/lib/lawSchoolMedians.test.js` fails on any law GPA not in the data. Before/after in `docs/law-medians-before-after.md`.
+- `content/ap-scores-2026.json` (College Board 2026 distributions, 2027 dates) -> `python3 scripts/build-ap-score-pages.py` (19 `/is-a-3-on-ap-*-good` pages).
+- `content/ap-flashcards.json` (cards cited to CED codes) -> `python3 scripts/build-ap-flashcard-pages.py` (9 `/ap-*-flashcards` decks).
+- `content/cds-gpa-2025.json` (each school's own CDS 2025-26, section C) -> `python3 scripts/build-school-gpa-pages.py` (21 new + 6 rebuilt `what-gpa-do-you-need-for-*`).
+- `src/lib/sitemapRoutes.test.js`: every sitemap URL must resolve through vercel.json. There is no cleanUrls, so **every new top-level page needs a rewrite** (blog/ and compare/ have pattern rules). `/study-schedule-maker` had been 404ing in production.
+
+**Open issues found, not fixed this round:**
+- About 31 older `what-gpa-do-you-need-for-*` pages (Harvard, Stanford, MIT, Princeton, Columbia, Duke, etc.) and most cards on `/gpa-requirements` state unsourced averages and per-program GPA "targets", in the same pattern as the Georgia Tech page that was rebuilt (it claimed "~16% admit rate, ~4.0+ unweighted, Source: Common Data Set"; the CDS says 13.3% and an unlabelled 4.17). Rebuild them from each CDS with `scripts/build-school-gpa-pages.py` by adding rows to the data file.
+- The professional-school rows on `/gpa-requirements` (med, MBA, nursing, vet, architecture, engineering grad "minimum/average") have no sources.
+- Original data report (B9) not possible yet: 1,305 accounts, 35 users have ever completed a study session (62 completions), 6 grade baselines, and the privacy policy only covers aggregate use "to improve the product".
+
 ## Verification Agent -- 2026-08-24 (P0 audit, shipped with the funnel branch)
 
 Shipped as 4 commits on top of the 12 unmerged `worktree-fix-funnel-course-gate`
