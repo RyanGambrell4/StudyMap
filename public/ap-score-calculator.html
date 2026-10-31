@@ -56,7 +56,7 @@
       {
         "@type": "Question",
         "name": "How accurate is this AP score calculator?",
-        "acceptedAnswer": { "@type": "Answer", "text": "This calculator uses publicly available AP exam structures and typical score cutoff distributions derived from College Board released scoring guidelines and historical score distributions. It provides a reasonable estimate — within 0-1 score point for most students — but the College Board adjusts score cutoffs each year based on overall student performance, so exact scores can vary. Use this as a planning tool, not a guarantee." }
+        "acceptedAnswer": { "@type": "Answer", "text": "This calculator uses publicly available AP exam structures and typical score cutoff distributions derived from College Board released scoring guidelines and historical score distributions. It provides a reasonable estimate (within 0-1 score point for most students), but the College Board adjusts score cutoffs each year based on overall student performance, so exact scores can vary. Use this as a planning tool, not a guarantee." }
       },
       {
         "@type": "Question",
@@ -66,7 +66,7 @@
       {
         "@type": "Question",
         "name": "How is an AP exam scored?",
-        "acceptedAnswer": { "@type": "Answer", "text": "Most AP exams have two sections: a multiple choice section and a free response section (essays, problems, or document-based questions). Each section is weighted — typically 50-50, though some exams differ. The raw scores from each section are combined into a composite score, which the College Board then converts to a 1-5 scale using cutoffs that can shift slightly from year to year." }
+        "acceptedAnswer": { "@type": "Answer", "text": "Most AP exams have two sections: a multiple choice section and a free response section (essays, problems, or document-based questions). Each section is weighted, typically 50-50, though some exams differ. The raw scores from each section are combined into a composite score, which the College Board then converts to a 1-5 scale using cutoffs that can shift slightly from year to year." }
       },
       {
         "@type": "Question",
@@ -254,7 +254,7 @@
 
 <section class="content-section" style="max-width:680px;margin:0 auto;padding:0 24px 60px">
   <h2>How AP exams are scored</h2>
-  <p>AP exams have two sections that are weighted together into a composite score, which is then converted to a 1-5 scale. The exact conversion depends on overall student performance and changes slightly each year — which is why College Board doesn't publish fixed cutoffs in advance.</p>
+  <p>AP exams have two sections that are weighted together into a composite score, which is then converted to a 1-5 scale. The exact conversion depends on overall student performance and changes slightly each year, which is why College Board doesn't publish fixed cutoffs in advance.</p>
 
   <h3 style="margin-top:28px">Multiple choice section</h3>
   <p>AP multiple choice questions are scored with no penalty for wrong answers. Your raw MC score is simply the number of questions you answered correctly. Each question is worth one raw point.</p>
@@ -267,12 +267,12 @@
 
   <h2 style="margin-top:40px">Related tools and resources</h2>
   <ul>
-    <li><a href="/ap-exam-study-schedule-templates">AP Exam Study Schedule Templates</a> — subject-specific 8-week plans</li>
+    <li><a href="/ap-exam-study-schedule-templates">AP Exam Study Schedule Templates</a>: subject-specific 8-week plans</li>
     <li><a href="/ap-calculus-ab-study-schedule">AP Calculus AB Study Schedule</a></li>
     <li><a href="/ap-biology-study-schedule">AP Biology Study Schedule</a></li>
     <li><a href="/apush-study-schedule">APUSH Study Schedule</a></li>
-    <li><a href="/spaced-repetition-vs-cramming">Spaced Repetition vs Cramming</a> — what science says about AP prep efficiency</li>
-    <li><a href="/flashcard-converter">Free Flashcard Converter</a> — convert notes into Anki or Quizlet decks</li>
+    <li><a href="/spaced-repetition-vs-cramming">Spaced Repetition vs Cramming</a>: what science says about AP prep efficiency</li>
+    <li><a href="/flashcard-converter">Free Flashcard Converter</a>: convert notes into Anki or Quizlet decks</li>
   </ul>
 </section>
 
@@ -403,7 +403,7 @@
     document.getElementById("result-sub").textContent = scoreSubs[score];
     var barPct = ((composite - cuts[score - 1]) / ((cuts[score] || 100) - cuts[score - 1])) * 100;
     document.getElementById("result-bar-fill").style.width = Math.min(100, Math.max(5, barPct)) + "%";
-    document.getElementById("result-pct").textContent = "Composite: " + composite.toFixed(1) + "% — " + (score < 5 ? "Need ~" + (cuts[score] - composite).toFixed(1) + "% more for a " + (score + 1) : "At the top");
+    document.getElementById("result-pct").textContent = "Composite: " + composite.toFixed(1) + "%. " + (score < 5 ? "Need ~" + (cuts[score] - composite).toFixed(1) + "% more for a " + (score + 1) : "At the top");
     box.classList.add("visible");
     box.scrollIntoView({ behavior: "smooth", block: "nearest" });
   }
