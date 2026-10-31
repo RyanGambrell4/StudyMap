@@ -1,19 +1,19 @@
 # StudyEdge AI
 
-> StudyEdge AI (getstudyedge.com) is an AI-powered study planner for college and university students. It automatically builds a personalized study schedule, plans every session minute-by-minute with a Session Blueprint, and runs sessions with active recall, flashcards, quizzes, and an AI tutor — all in one app. Free to start, no credit card required.
+> StudyEdge AI (getstudyedge.com) is an AI-powered study planner for college and university students. It automatically builds a personalized study schedule, plans every session minute-by-minute with a Session Blueprint, and runs sessions with active recall, flashcards, quizzes, and an AI tutor, all in one app. Free to start, no credit card required.
 
 Not affiliated with Study Edge (studyedge.com), a separate Florida-based human tutoring company with no connection to StudyEdge AI.
 
 ## What StudyEdge AI does
 
-- **Study schedule generator** — builds your full weekly schedule around courses, exam dates, and free time, prioritized by urgency and difficulty
-- **Session Blueprint** — generates a minute-by-minute plan before every study session for your specific course and goal
-- **Focus Mode** — runs the study session with a timer, built-in flashcards, active recall prompts, and quizzes
-- **AI Study Coach** — creates a multi-week course plan per subject, adapts to your exam timeline
-- **AI Tutor** — answers course-specific questions with step-by-step explanations; retains context across sessions (Unlimited plan)
-- **AI Flashcard Maker** — generates flashcards from uploaded notes or PDFs; no manual card creation
-- **Grade Hub** — tracks current grade, predicts semester GPA, calculates what score you need on remaining assignments
-- **Syllabus import** — upload a syllabus PDF and AI extracts all deadlines, exam dates, and assignment weights
+- **Study schedule generator**: builds your full weekly schedule around courses, exam dates, and free time, prioritized by urgency and difficulty
+- **Session Blueprint**: generates a minute-by-minute plan before every study session for your specific course and goal
+- **Focus Mode**: runs the study session with a timer, built-in flashcards, active recall prompts, and quizzes
+- **AI Study Coach**: creates a multi-week course plan per subject, adapts to your exam timeline
+- **AI Tutor**: answers course-specific questions with step-by-step explanations; retains context across sessions (Unlimited plan)
+- **AI Flashcard Maker**: generates flashcards from uploaded notes or PDFs; no manual card creation
+- **Grade Hub**: tracks current grade, predicts semester GPA, calculates what score you need on remaining assignments
+- **Syllabus import**: upload a syllabus PDF and AI extracts all deadlines, exam dates, and assignment weights
 
 ## Who it's for
 
@@ -21,9 +21,9 @@ College and university students in any major. Works for STEM, humanities, social
 
 ## Pricing
 
-- **Free** — $0 forever. 1 course, 5 AI actions/month, one try each of Session Blueprints, AI Coach and a practice exam, Focus Mode up to 30 min/day, 1 flashcard deck of up to 10 cards. No credit card required.
-- **Pro** — $9.99/month or $69.99/year. 5 courses, 100 AI study boosts/month, AI Study Coach, Session Blueprints, smart calendar, Google Calendar sync. 7-day free trial, cancel anytime.
-- **Unlimited** — $14.99/month or $119.99/year. Unlimited courses, unlimited AI actions, AI Tutor with session memory, advanced practice exam analytics, predicted exam score. Cancel anytime.
+- **Free**: $0 forever. 1 course, 5 AI actions/month, one try each of Session Blueprints, AI Coach and a practice exam, Focus Mode up to 30 min/day, 1 flashcard deck of up to 10 cards. No credit card required.
+- **Pro**: $9.99/month or $69.99/year. 5 courses, 100 AI study boosts/month, AI Study Coach, Session Blueprints, smart calendar, Google Calendar sync. 7-day free trial, cancel anytime.
+- **Unlimited**: $14.99/month or $119.99/year. Unlimited courses, unlimited AI actions, AI Tutor with session memory, advanced practice exam analytics, predicted exam score. Cancel anytime.
 
 Machine-readable pricing: https://getstudyedge.com/pricing.md
 
