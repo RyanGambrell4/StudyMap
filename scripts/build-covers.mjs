@@ -200,7 +200,8 @@ function editorialCover({ title, kickerText, iconName, variant }) {
 }
 
 // ── Page reading ────────────────────────────────────────────────────────────────────
-const strip = s => s.replace(/<[^>]+>/g, '').replace(/&amp;/g, '&').replace(/&#39;|&rsquo;/g, "'").replace(/&nbsp;/g, ' ').replace(/\s+/g, ' ').trim()
+// Tags become spaces (a <br> in a headline separates words), then spaces before punctuation go.
+const strip = s => s.replace(/<[^>]+>/g, ' ').replace(/&amp;/g, '&').replace(/&#39;|&rsquo;/g, "'").replace(/&nbsp;/g, ' ').replace(/\s+/g, ' ').replace(/ ([.,:;!?])/g, '$1').trim()
 function readPage(rel) {
   const html = fs.readFileSync(path.join(ROOT, 'public', rel), 'utf8')
   const h1 = html.match(/<h1[^>]*>([\s\S]*?)<\/h1>/)
