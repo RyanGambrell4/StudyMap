@@ -50,9 +50,29 @@ Machine-readable pricing: https://getstudyedge.com/pricing.md
 - AI Flashcard Maker: https://getstudyedge.com/ai-flashcard-maker
 - GPA Calculator: https://getstudyedge.com/gpa-calculator
 - Grade Calculator: https://getstudyedge.com/grade-calculator
-- Weighted GPA Calculator: https://getstudyedge.com/weighted-gpa-calculator
+- Weighted vs Unweighted GPA Calculator: https://getstudyedge.com/weighted-gpa-calculator
 - GPA Raise Calculator (how many A's to reach a target GPA): https://getstudyedge.com/gpa-raise-calculator
 - Final Exam Calculator: https://getstudyedge.com/final-exam-calculator
+- AP Score Calculator: https://getstudyedge.com/ap-score-calculator
+- Is a 3 on AP Biology Good? (2026 score distribution, 2027 exam date): https://getstudyedge.com/is-a-3-on-ap-biology-good
+- Is a 3 on AP Chemistry Good? (2026 score distribution, 2027 exam date): https://getstudyedge.com/is-a-3-on-ap-chemistry-good
+- Is a 3 on AP Physics 1 Good? (2026 score distribution, 2027 exam date): https://getstudyedge.com/is-a-3-on-ap-physics-1-good
+- Is a 3 on AP Environmental Science Good? (2026 score distribution, 2027 exam date): https://getstudyedge.com/is-a-3-on-ap-environmental-science-good
+- Is a 3 on AP Calculus AB Good? (2026 score distribution, 2027 exam date): https://getstudyedge.com/is-a-3-on-ap-calculus-ab-good
+- Is a 3 on AP Calculus BC Good? (2026 score distribution, 2027 exam date): https://getstudyedge.com/is-a-3-on-ap-calculus-bc-good
+- Is a 3 on AP Precalculus Good? (2026 score distribution, 2027 exam date): https://getstudyedge.com/is-a-3-on-ap-precalculus-good
+- Is a 3 on AP Statistics Good? (2026 score distribution, 2027 exam date): https://getstudyedge.com/is-a-3-on-ap-statistics-good
+- Is a 3 on AP Computer Science A Good? (2026 score distribution, 2027 exam date): https://getstudyedge.com/is-a-3-on-ap-computer-science-a-good
+- Is a 3 on AP Computer Science Principles Good? (2026 score distribution, 2027 exam date): https://getstudyedge.com/is-a-3-on-ap-computer-science-principles-good
+- Is a 3 on AP English Language Good? (2026 score distribution, 2027 exam date): https://getstudyedge.com/is-a-3-on-ap-english-language-good
+- Is a 3 on AP English Literature Good? (2026 score distribution, 2027 exam date): https://getstudyedge.com/is-a-3-on-ap-english-literature-good
+- Is a 3 on AP US History Good? (2026 score distribution, 2027 exam date): https://getstudyedge.com/is-a-3-on-ap-us-history-good
+- Is a 3 on AP World History Good? (2026 score distribution, 2027 exam date): https://getstudyedge.com/is-a-3-on-ap-world-history-good
+- Is a 3 on AP US Government Good? (2026 score distribution, 2027 exam date): https://getstudyedge.com/is-a-3-on-ap-us-government-good
+- Is a 3 on AP Human Geography Good? (2026 score distribution, 2027 exam date): https://getstudyedge.com/is-a-3-on-ap-human-geography-good
+- Is a 3 on AP Psychology Good? (2026 score distribution, 2027 exam date): https://getstudyedge.com/is-a-3-on-ap-psychology-good
+- Is a 3 on AP Macroeconomics Good? (2026 score distribution, 2027 exam date): https://getstudyedge.com/is-a-3-on-ap-macroeconomics-good
+- Is a 3 on AP Microeconomics Good? (2026 score distribution, 2027 exam date): https://getstudyedge.com/is-a-3-on-ap-microeconomics-good
 - Study Schedule Generator: https://getstudyedge.com/study-schedule-generator
 - Study Schedule Maker: https://getstudyedge.com/study-schedule-maker
 - Active Recall App: https://getstudyedge.com/active-recall-app

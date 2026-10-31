@@ -1,0 +1,34 @@
+{
+ "_about": "2026 AP score distributions (percent of students earning each score) and the published 2027 exam schedule, copied from College Board. scripts/build-ap-score-pages.py turns this into public/is-a-3-on-ap-*-good.html. Percentages are College Board's rounded figures.",
+ "year": 2026,
+ "retrieved": "2026-10-31",
+ "sources": {
+  "distributions": "https://apstudents.collegeboard.org/about-ap-scores/score-distributions",
+  "score_scale": "https://apstudents.collegeboard.org/about-ap-scores/ap-score-scale-table",
+  "credit_recommendation": "https://apcentral.collegeboard.org/about-ap/higher-education/setting-credit-placement-policy/credit-granting-recommendations",
+  "credit_search": "https://apstudents.collegeboard.org/getting-credit-placement/search-policies",
+  "exam_dates": "https://apstudents.collegeboard.org/exam-dates"
+ },
+ "score_scale": {"5": "extremely well qualified", "4": "very well qualified", "3": "qualified", "2": "possibly qualified", "1": "no recommendation"},
+ "subjects": [
+  {"slug": "biology", "name": "Biology", "group": "science", "pct": [15, 25, 31, 21, 8], "pass": 71, "exam2027": ["2027-05-03", "afternoon"], "schedule": "ap-biology-study-schedule"},
+  {"slug": "chemistry", "name": "Chemistry", "group": "science", "pct": [15, 31, 30, 18, 6], "pass": 75, "exam2027": ["2027-05-06", "afternoon"], "schedule": "ap-chemistry-study-schedule"},
+  {"slug": "physics-1", "name": "Physics 1", "full": "Physics 1: Algebra-Based", "group": "science", "pct": [19, 24, 25, 15, 17], "pass": 68, "exam2027": ["2027-05-05", "afternoon"], "schedule": "ap-physics-1-study-schedule"},
+  {"slug": "environmental-science", "name": "Environmental Science", "group": "science", "pct": [13, 29, 27, 15, 16], "pass": 69, "exam2027": ["2027-05-13", "afternoon"]},
+  {"slug": "calculus-ab", "name": "Calculus AB", "group": "math", "pct": [20, 28, 17, 24, 11], "pass": 65, "exam2027": ["2027-05-10", "morning"], "schedule": "ap-calculus-ab-study-schedule"},
+  {"slug": "calculus-bc", "name": "Calculus BC", "group": "math", "pct": [46, 22, 14, 14, 4], "pass": 82, "exam2027": ["2027-05-10", "morning"]},
+  {"slug": "precalculus", "name": "Precalculus", "group": "math", "pct": [29, 29, 24, 11, 7], "pass": 82, "exam2027": ["2027-05-11", "morning"]},
+  {"slug": "statistics", "name": "Statistics", "group": "math", "pct": [17, 23, 22, 17, 21], "pass": 62, "exam2027": ["2027-05-11", "afternoon"], "schedule": "ap-statistics-study-schedule"},
+  {"slug": "computer-science-a", "name": "Computer Science A", "group": "math", "pct": [25, 26, 15, 11, 23], "pass": 66, "exam2027": ["2027-05-12", "afternoon"]},
+  {"slug": "computer-science-principles", "name": "Computer Science Principles", "short": "CSP", "group": "math", "pct": [10, 23, 30, 21, 16], "pass": 63, "exam2027": ["2027-05-14", "morning"]},
+  {"slug": "english-language", "name": "English Language", "full": "English Language and Composition", "group": "english", "pct": [15, 28, 32, 15, 10], "pass": 75, "exam2027": ["2027-05-12", "morning"], "schedule": "ap-english-language-study-schedule"},
+  {"slug": "english-literature", "name": "English Literature", "full": "English Literature and Composition", "group": "english", "pct": [16, 26, 31, 16, 11], "pass": 73, "exam2027": ["2027-05-05", "morning"]},
+  {"slug": "us-history", "name": "US History", "full": "United States History", "short": "APUSH", "group": "history", "pct": [14, 37, 23, 18, 8], "pass": 74, "exam2027": ["2027-05-07", "morning"], "schedule": "apush-study-schedule"},
+  {"slug": "world-history", "name": "World History", "full": "World History: Modern", "group": "history", "pct": [14, 36, 16, 26, 8], "pass": 66, "exam2027": ["2027-05-06", "morning"], "schedule": "ap-world-history-study-schedule"},
+  {"slug": "us-government", "name": "US Government", "full": "United States Government and Politics", "group": "history", "pct": [23, 28, 25, 16, 8], "pass": 76, "exam2027": ["2027-05-04", "morning"]},
+  {"slug": "human-geography", "name": "Human Geography", "group": "history", "pct": [19, 26, 21, 24, 10], "pass": 66, "exam2027": ["2027-05-03", "morning"]},
+  {"slug": "psychology", "name": "Psychology", "group": "history", "pct": [15, 35, 24, 18, 8], "pass": 74, "exam2027": ["2027-05-14", "afternoon"], "schedule": "ap-psychology-study-schedule"},
+  {"slug": "macroeconomics", "name": "Macroeconomics", "group": "history", "pct": [19, 22, 25, 20, 14], "pass": 66, "exam2027": ["2027-05-07", "afternoon"]},
+  {"slug": "microeconomics", "name": "Microeconomics", "group": "history", "pct": [19, 26, 23, 20, 12], "pass": 68, "exam2027": ["2027-05-04", "afternoon"]}
+ ]
+}

@@ -1633,5 +1633,105 @@
   "sig": "4fd312c78b55e7f1c3a764938734d560856432c5",
   "template": "editorial",
   "alt": "Cover for \"How Many A's Do I Need to Raise My GPA?\": the title in serif type with a line drawing of a bar chart."
+ },
+ "finals-week-study-schedule.html": {
+  "sig": "1833d6dc26d3e3c546eaf86fb79e594bff6ff380",
+  "template": "editorial",
+  "alt": "Cover for \"Finals Week Study Schedule\": the title in serif type with a line drawing of a calendar."
+ },
+ "is-a-3-on-ap-biology-good.html": {
+  "sig": "c4e5609690f80ee36855eca14414e6a7dff3843b",
+  "template": "editorial",
+  "alt": "Cover for \"Is a 3 on AP Biology Good?\": the title in serif type with a line drawing of a lab flask."
+ },
+ "is-a-3-on-ap-calculus-ab-good.html": {
+  "sig": "81c74c28e485a790aaf377c24dd327c15eec149c",
+  "template": "editorial",
+  "alt": "Cover for \"Is a 3 on AP Calculus AB Good?\": the title in serif type with a line drawing of a light bulb."
+ },
+ "is-a-3-on-ap-calculus-bc-good.html": {
+  "sig": "4acfb110a3eb62afc667eed9d465f11eda3874a8",
+  "template": "editorial",
+  "alt": "Cover for \"Is a 3 on AP Calculus BC Good?\": the title in serif type with a line drawing of a light bulb."
+ },
+ "is-a-3-on-ap-chemistry-good.html": {
+  "sig": "6454bdce60c0c1324e79edf3e48d504df5b45be4",
+  "template": "editorial",
+  "alt": "Cover for \"Is a 3 on AP Chemistry Good?\": the title in serif type with a line drawing of a lab flask."
+ },
+ "is-a-3-on-ap-computer-science-a-good.html": {
+  "sig": "d02bafd325e1eb63dfb217ea8ec904a9e0700029",
+  "template": "editorial",
+  "alt": "Cover for \"Is a 3 on AP Computer Science A Good?\": the title in serif type with a line drawing of a light bulb."
+ },
+ "is-a-3-on-ap-computer-science-principles-good.html": {
+  "sig": "4c4d7ec4f0a09c197aa830f31c65da047ba60600",
+  "template": "editorial",
+  "alt": "Cover for \"Is a 3 on AP Computer Science Principles Good?\": the title in serif type with a line drawing of a light bulb."
+ },
+ "is-a-3-on-ap-english-language-good.html": {
+  "sig": "0a22fdb4897a0331873e44f7592b483c3f2bcef2",
+  "template": "editorial",
+  "alt": "Cover for \"Is a 3 on AP English Language Good?\": the title in serif type with a line drawing of a book."
+ },
+ "is-a-3-on-ap-english-literature-good.html": {
+  "sig": "771c3de98daeb1ca7e9fa56eb78edd148917e618",
+  "template": "editorial",
+  "alt": "Cover for \"Is a 3 on AP English Literature Good?\": the title in serif type with a line drawing of a book."
+ },
+ "is-a-3-on-ap-environmental-science-good.html": {
+  "sig": "e6797e3f8bd875ab5758f4ea4779a540de79173d",
+  "template": "editorial",
+  "alt": "Cover for \"Is a 3 on AP Environmental Science Good?\": the title in serif type with a line drawing of a light bulb."
+ },
+ "is-a-3-on-ap-human-geography-good.html": {
+  "sig": "2e2eff9de2dbe6cf1494d43ef334f5417ecd2fde",
+  "template": "editorial",
+  "alt": "Cover for \"Is a 3 on AP Human Geography Good?\": the title in serif type with a line drawing of a light bulb."
+ },
+ "is-a-3-on-ap-macroeconomics-good.html": {
+  "sig": "28fb0067ccfc23bc115e38e2ed29c43773006836",
+  "template": "editorial",
+  "alt": "Cover for \"Is a 3 on AP Macroeconomics Good?\": the title in serif type with a line drawing of a bar chart."
+ },
+ "is-a-3-on-ap-microeconomics-good.html": {
+  "sig": "0b252585acee23a2a697f524adf953629e2c2386",
+  "template": "editorial",
+  "alt": "Cover for \"Is a 3 on AP Microeconomics Good?\": the title in serif type with a line drawing of a bar chart."
+ },
+ "is-a-3-on-ap-physics-1-good.html": {
+  "sig": "35c3421cfb8445047bd16926dbeb8640ed960f89",
+  "template": "editorial",
+  "alt": "Cover for \"Is a 3 on AP Physics 1 Good?\": the title in serif type with a line drawing of a lab flask."
+ },
+ "is-a-3-on-ap-precalculus-good.html": {
+  "sig": "c9f0ccf3239a09d856579813992334fabae405c6",
+  "template": "editorial",
+  "alt": "Cover for \"Is a 3 on AP Precalculus Good?\": the title in serif type with a line drawing of a light bulb."
+ },
+ "is-a-3-on-ap-psychology-good.html": {
+  "sig": "8c1b431ec024050ed3559a38848d2bb14d547ccf",
+  "template": "editorial",
+  "alt": "Cover for \"Is a 3 on AP Psychology Good?\": the title in serif type with a line drawing of a light bulb."
+ },
+ "is-a-3-on-ap-statistics-good.html": {
+  "sig": "d88adc0ae3ca3598cefe8b297fa43170d6077841",
+  "template": "editorial",
+  "alt": "Cover for \"Is a 3 on AP Statistics Good?\": the title in serif type with a line drawing of a bar chart."
+ },
+ "is-a-3-on-ap-us-government-good.html": {
+  "sig": "f19bebcde16a6db46d4bcbf617ed61cde76a9ef7",
+  "template": "editorial",
+  "alt": "Cover for \"Is a 3 on AP US Government Good?\": the title in serif type with a line drawing of a light bulb."
+ },
+ "is-a-3-on-ap-us-history-good.html": {
+  "sig": "0280f7e7e84a7c8112d53f37b7101b5702a3a839",
+  "template": "editorial",
+  "alt": "Cover for \"Is a 3 on AP US History Good?\": the title in serif type with a line drawing of a book."
+ },
+ "is-a-3-on-ap-world-history-good.html": {
+  "sig": "1f2fd216ed96bfa1182922452d1d629a05049ba3",
+  "template": "editorial",
+  "alt": "Cover for \"Is a 3 on AP World History Good?\": the title in serif type with a line drawing of a book."
  }
 }
