@@ -12,12 +12,12 @@
   {
     "page": "compare/studyedge-vs-quizlet.html",
     "template": "product",
-    "alt": "Cover for \"StudyEdge AI vs Quizlet\": the StudyEdge AI Today screen shown on a phone, beside the page title."
+    "alt": "Cover for \"StudyEdge AI vs Quizlet\": the StudyEdge AI Review Queue screen shown in a browser window, beside the page title."
   },
   {
     "page": "ai-study-coach.html",
     "template": "product",
-    "alt": "Cover for \"The AI study coach that actually tells you what to study.\": the StudyEdge AI AI Coach screen shown on a phone, beside the page title."
+    "alt": "Cover for \"The AI study coach that actually tells you what to study.\": the StudyEdge AI Grade Hub screen shown in a browser window, beside the page title."
   },
   {
     "page": "blog/how-to-study-effectively.html",
@@ -28,5 +28,15 @@
     "page": "blog/pomodoro-technique-for-studying.html",
     "template": "editorial",
     "alt": "Cover for \"The Pomodoro Technique for College Students: A No-BS Guide (2026)\": the title in serif type with a line drawing of a timer."
+  },
+  {
+    "page": "compare/studyedge-vs-quizlet.html",
+    "template": "product (phone alternate)",
+    "alt": "Cover for \"StudyEdge AI vs Quizlet\": the StudyEdge AI Today screen shown on a phone, beside the page title."
+  },
+  {
+    "page": "ai-study-coach.html",
+    "template": "product (phone alternate)",
+    "alt": "Cover for \"The AI study coach that actually tells you what to study.\": the StudyEdge AI AI Coach screen shown on a phone, beside the page title."
   }
 ]

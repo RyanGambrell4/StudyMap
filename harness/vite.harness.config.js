@@ -11,6 +11,7 @@ const stubs = {
   'lib/subscription': `${here}/stub-subscription.js`,
   'lib/analytics':    `${here}/stub-analytics.js`,
   'lib/db':           `${here}/stub-db.js`,
+  'lib/supabase':     `${here}/stub-supabase.js`,
 }
 
 export default defineConfig({

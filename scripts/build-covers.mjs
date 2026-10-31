@@ -41,7 +41,14 @@ const FONTS = [
 ]
 const dataUri = (p, mime = 'image/png') => `data:${mime};base64,${fs.readFileSync(p).toString('base64')}`
 const LOGO = dataUri(path.join(ROOT, 'public', 'favicon.png'))
+// Product shots use the web app in a browser window while the iOS app is "coming soon".
+// scripts/ios-launch-switch.py flips this to 'phone' on App Store launch day.
+const PRODUCT_DEVICE = process.env.COVER_DEVICE || 'browser'
 const SCREENS = {
+  // web: captured by scripts/cover-assets/capture-web.mjs from the harness (fixture data)
+  'web-review': dataUri(path.join(ROOT, 'scripts', 'cover-assets', 'screens', 'web-review.png')),
+  'web-gradehub': dataUri(path.join(ROOT, 'scripts', 'cover-assets', 'screens', 'web-gradehub.png')),
+  // phone: cropped from the build 22 App Store set (UI-test fixture data)
   today: dataUri(path.join(ROOT, 'scripts', 'cover-assets', 'screens', 'today.png')),
   session: dataUri(path.join(ROOT, 'scripts', 'cover-assets', 'screens', 'session.png')),
   coach: dataUri(path.join(ROOT, 'scripts', 'cover-assets', 'screens', 'coach.png')),
@@ -126,7 +133,24 @@ function numberCover({ title, kickerText, value, lo, hi, label, min = 0 }) {
 }
 
 // ── Template b: product shot ────────────────────────────────────────────────────────
-function productCover({ title, kickerText, sub, screen }) {
+function productCover({ title, kickerText, sub, screen, device }) {
+  if (device === 'browser') {
+    const win = h('div', { position: 'absolute', left: 610, top: 92, width: 700, height: 560, flexDirection: 'column', borderRadius: 14,
+        backgroundColor: '#fff', border: `1px solid ${C.rule}`, boxShadow: '0 24px 60px rgba(28,27,24,0.12)', overflow: 'hidden' },
+      h('div', { height: 44, alignItems: 'center', gap: 8, paddingLeft: 18, borderBottom: `1px solid ${C.rule}`, backgroundColor: '#F6F5F2' },
+        ...[0, 1, 2].map(() => h('div', { width: 11, height: 11, borderRadius: 6, backgroundColor: '#D6D3CC' })),
+        h('div', { marginLeft: 22, height: 26, width: 300, borderRadius: 7, backgroundColor: '#fff', border: `1px solid ${C.rule}`, alignItems: 'center', paddingLeft: 12,
+          fontFamily: 'Sans', fontSize: 14, color: C.dim }, 'getstudyedge.com/app')),
+      h('div', { position: 'relative', width: 700, height: 516, overflow: 'hidden' },
+        img(SCREENS[screen], { position: 'absolute', left: screen === 'web-review' ? -58 : -96, top: -18, width: 1180, height: 738 })))
+    return frame(
+      h('div', { position: 'absolute', left: 80, top: 0, bottom: 0, width: 490, flexDirection: 'column', justifyContent: 'center' },
+        kicker(kickerText),
+        h('div', { fontFamily: 'Serif', fontWeight: 600, fontSize: titleSize(title, 56), lineHeight: 1.08, color: C.ink, marginTop: 16, letterSpacing: -0.5 }, title),
+        sub ? h('div', { fontFamily: 'Sans', fontSize: 21, lineHeight: 1.45, color: C.muted, marginTop: 18 }, sub) : null),
+      win,
+      h('div', { position: 'absolute', left: 80, bottom: 44 }, brand()))
+  }
   const phone = h('div', { position: 'absolute', right: 96, top: 70, width: 330, height: 690, borderRadius: 52, backgroundColor: '#fff',
       border: `1px solid ${C.rule}`, boxShadow: '0 24px 60px rgba(28,27,24,0.12)', padding: 12 },
     h('div', { width: 306, height: 666, borderRadius: 42, overflow: 'hidden', backgroundColor: '#F5F6F8' },
@@ -204,7 +228,7 @@ function findNumber(slug, html) {
   return null
 }
 
-function coverFor(rel) {
+function coverFor(rel, opts = {}) {
   const slug = slugOf(rel)
   const { html, title, category } = readPage(rel)
   let tpl = chooseTemplate(slug)
@@ -217,11 +241,14 @@ function coverFor(rel) {
     } else tpl = 'editorial'
   }
   if (tpl === 'product') {
-    const screen = /compare|alternative/.test(slug) ? 'today' : /coach|planner|schedule/.test(slug) ? 'coach' : 'session'
+    const device = opts.device || PRODUCT_DEVICE
+    const screen = device === 'browser'
+      ? (/compare|alternative|flashcard|anki|quizlet|recall|review/.test(slug) ? 'web-review' : 'web-gradehub')
+      : (/compare|alternative/.test(slug) ? 'today' : /coach|planner|schedule/.test(slug) ? 'coach' : 'session')
     const sub = slug.startsWith('compare/') ? 'Sourced, side by side, with where each app wins.' : null
-    tree = productCover({ title, kickerText: slug.startsWith('compare/') ? 'Comparison' : 'StudyEdge AI', sub, screen })
-    const screenName = { today: 'Today screen', session: 'study session screen', coach: 'AI Coach screen' }[screen]
-    alt = `Cover for "${title}": the StudyEdge AI ${screenName} shown on a phone, beside the page title.`
+    tree = productCover({ title, kickerText: slug.startsWith('compare/') ? 'Comparison' : 'StudyEdge AI', sub, screen, device })
+    const screenName = { 'web-review': 'Review Queue screen', 'web-gradehub': 'Grade Hub screen', today: 'Today screen', session: 'study session screen', coach: 'AI Coach screen' }[screen]
+    alt = `Cover for "${title}": the StudyEdge AI ${screenName} shown ${device === 'browser' ? 'in a browser window' : 'on a phone'}, beside the page title.`
   }
   if (tpl === 'editorial') {
     const iconName = pickIcon(slug)
@@ -255,6 +282,10 @@ async function main() {
       pngs.push(await render(c.tree, path.join(outDir, c.slug.replace(/\//g, '--'))))
       meta.push({ page: rel, template: c.tpl, alt: c.alt })
       console.log(c.tpl.padEnd(9), rel)
+    }
+    for (const rel of SAMPLES) {
+      const c = coverFor(rel, { device: 'phone' })
+      if (c.tpl === 'product') { await render(c.tree, path.join(outDir, 'phone-alternate', c.slug.replace(/\//g, '--'))); meta.push({ page: rel, template: 'product (phone alternate)', alt: c.alt }) }
     }
     fs.writeFileSync(path.join(outDir, 'samples.json'), JSON.stringify(meta, null, 2) + '\n')
     // contact sheet: 2 columns x 3 rows at half size
