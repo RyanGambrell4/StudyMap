@@ -1,0 +1,2200 @@
+{
+  "note": "AP flashcard decks built from the official College Board Course and Exam Descriptions (CEDs). Every card quotes or closely paraphrases the essential knowledge (EK), key concept (KC) or learning objective statement named in its code. Edit here, then run python3 scripts/build-ap-flashcard-pages.py.",
+  "verified": "2026-10-31",
+  "courses": [
+    {
+      "slug": "biology",
+      "name": "Biology",
+      "full": "Biology",
+      "score_slug": "biology",
+      "schedule": "ap-biology-study-schedule",
+      "ced_edition": "AP Biology Course and Exam Description, Effective Fall 2025",
+      "ced_url": "https://apcentral.collegeboard.org/media/pdf/ap-biology-course-and-exam-description.pdf",
+      "weight_note": "Exam weighting from the CED.",
+      "units": [
+        {
+          "number": 1,
+          "title": "Chemistry of Life",
+          "weight": "8-11%"
+        },
+        {
+          "number": 2,
+          "title": "Cells",
+          "weight": "10-13%"
+        },
+        {
+          "number": 3,
+          "title": "Cellular Energetics",
+          "weight": "12-16%"
+        },
+        {
+          "number": 4,
+          "title": "Cell Communication and Cell Cycle",
+          "weight": "10-15%"
+        },
+        {
+          "number": 5,
+          "title": "Heredity",
+          "weight": "8-11%"
+        },
+        {
+          "number": 6,
+          "title": "Gene Expression and Regulation",
+          "weight": "12-16%"
+        },
+        {
+          "number": 7,
+          "title": "Natural Selection",
+          "weight": "13-20%"
+        },
+        {
+          "number": 8,
+          "title": "Ecology",
+          "weight": "10-15%"
+        }
+      ],
+      "cards": [
+        {
+          "unit": 1,
+          "topic": "1.1",
+          "front": "What do the hydrogen bonds between adjacent polar water molecules result in?",
+          "back": "Cohesion, adhesion, and surface tension.",
+          "code": "1.1.A.2"
+        },
+        {
+          "unit": 1,
+          "topic": "1.2",
+          "front": "What are sulfur, phosphorus, and nitrogen used to build?",
+          "back": "Sulfur is used in building proteins. Phosphorus is used in phospholipids and nucleic acids. Nitrogen is used in nucleic acids.",
+          "code": "1.2.A.1"
+        },
+        {
+          "unit": 1,
+          "topic": "1.3",
+          "front": "What is hydrolysis?",
+          "back": "A chemical reaction that cleaves covalent bonds, breaking molecules into smaller molecules. Adding water to the bond between monomers breaks it.",
+          "code": "1.3.A.1"
+        },
+        {
+          "unit": 1,
+          "topic": "1.6",
+          "front": "What are the structural components of a nucleotide?",
+          "back": "A five-carbon sugar (deoxyribose or ribose), a phosphate, and a nitrogenous base.",
+          "code": "1.6.A.1"
+        },
+        {
+          "unit": 2,
+          "topic": "2.2",
+          "front": "Why do surface area-to-volume ratios matter to a cell?",
+          "back": "They affect a biological system's ability to obtain nutrients, eliminate wastes, acquire or dissipate thermal energy, and exchange chemicals and energy with the environment.",
+          "code": "2.2.A.1"
+        },
+        {
+          "unit": 2,
+          "topic": "2.4",
+          "front": "What causes the selective permeability of the plasma membrane?",
+          "back": "The membrane's hydrophobic interior.",
+          "code": "2.4.A.1"
+        },
+        {
+          "unit": 2,
+          "topic": "2.5",
+          "front": "What is passive transport?",
+          "back": "The net movement of molecules from high concentration to low concentration.",
+          "code": "2.5.A.2"
+        },
+        {
+          "unit": 2,
+          "topic": "2.10",
+          "front": "How did mitochondria and chloroplasts originate?",
+          "back": "They evolved from once free-living prokaryotic cells via endosymbiosis.",
+          "code": "2.10.A.1"
+        },
+        {
+          "unit": 3,
+          "topic": "3.1",
+          "front": "How do enzymes facilitate reactions?",
+          "back": "Enzymes are proteins that act as biological catalysts by lowering the activation energy of a reaction.",
+          "code": "3.1.A.1"
+        },
+        {
+          "unit": 3,
+          "topic": "3.2",
+          "front": "When does denaturation of an enzyme occur?",
+          "back": "When the protein structure is disrupted by a change in its environment, which may change its function or efficiency.",
+          "code": "3.2.A.1"
+        },
+        {
+          "unit": 3,
+          "topic": "3.4",
+          "front": "What does photosynthesis use, and what does it make?",
+          "back": "It uses carbon dioxide, water, and light energy to make carbohydrates and oxygen.",
+          "code": "3.4.A.1"
+        },
+        {
+          "unit": 3,
+          "topic": "3.5",
+          "front": "What does glycolysis produce?",
+          "back": "ATP (from ADP and inorganic phosphate), NADH (from NAD+), and pyruvate.",
+          "code": "3.5.B.1"
+        },
+        {
+          "unit": 4,
+          "topic": "4.2",
+          "front": "How does cell signaling begin?",
+          "back": "When a receptor protein in a target cell recognizes a chemical messenger, the ligand.",
+          "code": "4.2.B.1"
+        },
+        {
+          "unit": 4,
+          "topic": "4.4",
+          "front": "How does negative feedback maintain homeostasis?",
+          "back": "By reducing the initial stimulus.",
+          "code": "4.4.A.1"
+        },
+        {
+          "unit": 4,
+          "topic": "4.5",
+          "front": "What are the stages of the cell cycle?",
+          "back": "Interphase (G1, S, G2), mitosis, and cytokinesis.",
+          "code": "4.5.A.1"
+        },
+        {
+          "unit": 4,
+          "topic": "4.6",
+          "front": "What can disruptions to the cell cycle result in?",
+          "back": "Cancer or apoptosis (programmed cell death).",
+          "code": "4.6.B.1"
+        },
+        {
+          "unit": 5,
+          "topic": "5.1",
+          "front": "How do mitosis and meiosis compare?",
+          "back": "Both use a spindle apparatus to move chromosomes. They differ in the number of cells produced and in the genetic content of the daughter cells.",
+          "code": "5.1.B.1"
+        },
+        {
+          "unit": 5,
+          "topic": "5.3",
+          "front": "Which genes do Mendel's laws of segregation and independent assortment apply to?",
+          "back": "Genes on different chromosomes.",
+          "code": "5.3.A.1"
+        },
+        {
+          "unit": 5,
+          "topic": "5.5",
+          "front": "What is phenotypic plasticity?",
+          "back": "Individual genotypes producing different phenotypes because environmental conditions influence gene expression.",
+          "code": "5.5.A.1"
+        },
+        {
+          "unit": 6,
+          "topic": "6.1",
+          "front": "Purines vs. pyrimidines?",
+          "back": "Purines (G, A) have a double-ring structure. Pyrimidines (C, T, U) have a single-ring structure.",
+          "code": "6.1.B.1"
+        },
+        {
+          "unit": 6,
+          "topic": "6.2",
+          "front": "In which direction is new DNA synthesized?",
+          "back": "5' to 3'.",
+          "code": "6.2.A.1"
+        },
+        {
+          "unit": 6,
+          "topic": "6.5",
+          "front": "How can operons in prokaryotes be regulated?",
+          "back": "In an inducible or a repressible system.",
+          "code": "6.5.B.1"
+        },
+        {
+          "unit": 6,
+          "topic": "6.8",
+          "front": "What does gel electrophoresis do?",
+          "back": "It separates DNA fragments by size and charge.",
+          "code": "6.8.A.1"
+        },
+        {
+          "unit": 7,
+          "topic": "7.1",
+          "front": "How is evolutionary fitness measured?",
+          "back": "By reproductive success.",
+          "code": "7.1.B.1"
+        },
+        {
+          "unit": 7,
+          "topic": "7.5",
+          "front": "What is Hardy-Weinberg equilibrium?",
+          "back": "A model for describing and predicting allele frequencies in a non-evolving population.",
+          "code": "7.5.A.1"
+        },
+        {
+          "unit": 7,
+          "topic": "7.10",
+          "front": "Sympatric vs. allopatric speciation?",
+          "back": "Sympatric speciation happens in populations with geographic overlap. Allopatric speciation happens in geographically isolated populations.",
+          "code": "7.10.C.1"
+        },
+        {
+          "unit": 7,
+          "topic": "7.10",
+          "front": "Punctuated equilibrium vs. gradualism?",
+          "back": "Punctuated equilibrium is rapid evolution after a long period of stasis. Gradualism is slow evolution over hundreds of thousands to millions of years.",
+          "code": "7.10.B.1"
+        },
+        {
+          "unit": 8,
+          "topic": "8.2",
+          "front": "How do energy and matter move through ecosystems?",
+          "back": "Energy flows, while matter and nutrients cycle through biogeochemical cycles.",
+          "code": "8.2.B.2"
+        },
+        {
+          "unit": 8,
+          "topic": "8.4",
+          "front": "What is carrying capacity?",
+          "back": "The sustainable abundance of a species that can be supported by the ecosystem's total available resources.",
+          "code": "8.4.A.1"
+        },
+        {
+          "unit": 8,
+          "topic": "8.6",
+          "front": "Why are keystone species important?",
+          "back": "Their effects are disproportionate to their abundance. When they are removed, the ecosystem often collapses.",
+          "code": "8.6.B.1"
+        },
+        {
+          "unit": 8,
+          "topic": "8.7",
+          "front": "Name two human impacts the CED lists as driving extinctions.",
+          "back": "Biomagnification and eutrophication.",
+          "code": "8.7.C.1"
+        }
+      ],
+      "short": "Biology"
+    },
+    {
+      "slug": "psychology",
+      "name": "Psychology",
+      "full": "Psychology",
+      "short": "Psychology",
+      "score_slug": "psychology",
+      "schedule": "ap-psychology-study-schedule",
+      "ced_edition": "AP Psychology Course and Exam Description, Effective Fall 2025 (the course framework launched in 2024-25)",
+      "ced_url": "https://apcentral.collegeboard.org/media/pdf/ap-psychology-course-and-exam-description.pdf",
+      "weight_note": "Exam weighting from the CED.",
+      "units": [
+        {
+          "number": 1,
+          "title": "Biological Bases of Behavior",
+          "weight": "15-25%"
+        },
+        {
+          "number": 2,
+          "title": "Cognition",
+          "weight": "15-25%"
+        },
+        {
+          "number": 3,
+          "title": "Development and Learning",
+          "weight": "15-25%"
+        },
+        {
+          "number": 4,
+          "title": "Social Psychology and Personality",
+          "weight": "15-25%"
+        },
+        {
+          "number": 5,
+          "title": "Mental and Physical Health",
+          "weight": "15-25%"
+        }
+      ],
+      "cards": [
+        {
+          "unit": 1,
+          "topic": "1.1",
+          "front": "What research designs are used to study the effects of genes on behavior?",
+          "back": "Twin studies, family studies, and adoption studies.",
+          "code": "1.1.A.3"
+        },
+        {
+          "unit": 1,
+          "topic": "1.2",
+          "front": "What does the central nervous system include?",
+          "back": "The brain and the spinal cord.",
+          "code": "1.2.A.1"
+        },
+        {
+          "unit": 1,
+          "topic": "1.3",
+          "front": "Agonists vs. antagonists?",
+          "back": "Agonists encourage neural firing. Antagonists inhibit neural firing.",
+          "code": "1.3.C.1"
+        },
+        {
+          "unit": 1,
+          "topic": "1.4",
+          "front": "What does the brain stem, including the medulla, control?",
+          "back": "Basic functioning such as breathing and heart rate.",
+          "code": "1.4.A.1"
+        },
+        {
+          "unit": 1,
+          "topic": "1.6",
+          "front": "Which sense is not processed first in the thalamus?",
+          "back": "Smell.",
+          "code": "1.6.D.1"
+        },
+        {
+          "unit": 2,
+          "topic": "2.1",
+          "front": "Bottom-up vs. top-down processing?",
+          "back": "Bottom-up processing relies on external sensory information. Top-down processing relies on internal prior expectations.",
+          "code": "2.1.A.1"
+        },
+        {
+          "unit": 2,
+          "topic": "2.2",
+          "front": "What is a prototype?",
+          "back": "The ideal example for any given concept.",
+          "code": "2.2.A.1"
+        },
+        {
+          "unit": 2,
+          "topic": "2.6",
+          "front": "Recall vs. recognition?",
+          "back": "Recall is remembering without cues. Recognition relies on retrieval cues.",
+          "code": "2.6.A.1"
+        },
+        {
+          "unit": 2,
+          "topic": "2.7",
+          "front": "What does the forgetting curve show?",
+          "back": "Forgetting occurs rapidly after initial learning and levels off over time.",
+          "code": "2.7.A.1"
+        },
+        {
+          "unit": 2,
+          "topic": "2.8",
+          "front": "What is the Flynn effect?",
+          "back": "The general rise in IQ scores over time, due to societal factors such as higher SES, better health care, and better nutrition.",
+          "code": "2.8.C.1"
+        },
+        {
+          "unit": 3,
+          "topic": "3.4",
+          "front": "According to Piaget, how do children develop schemas?",
+          "back": "Through assimilation and accommodation.",
+          "code": "3.4.A.1"
+        },
+        {
+          "unit": 3,
+          "topic": "3.8",
+          "front": "What does the law of effect state?",
+          "back": "Behaviors with reinforcing consequences are more likely to be repeated.",
+          "code": "3.8.A.1"
+        },
+        {
+          "unit": 3,
+          "topic": "3.9",
+          "front": "What is insight learning?",
+          "back": "When the solution to a problem occurs without any association, consequence, or model being present.",
+          "code": "3.9.B.1"
+        },
+        {
+          "unit": 3,
+          "topic": "3.9",
+          "front": "What is latent learning?",
+          "back": "Information learned without reinforcement.",
+          "code": "3.9.B.2"
+        },
+        {
+          "unit": 4,
+          "topic": "4.1",
+          "front": "Dispositional vs. situational attributions?",
+          "back": "Dispositional attributions relate to internal qualities of others, such as intelligence or personality. Situational attributions relate to external factors.",
+          "code": "4.1.A.1"
+        },
+        {
+          "unit": 4,
+          "topic": "4.1",
+          "front": "What is the mere exposure effect?",
+          "back": "Repeated exposure to a stimulus over time can increase liking for it.",
+          "code": "4.1.C.1"
+        },
+        {
+          "unit": 4,
+          "topic": "4.2",
+          "front": "What is belief perseverance?",
+          "back": "When a belief persists even if evidence suggests it is not accurate.",
+          "code": "4.2.B.1"
+        },
+        {
+          "unit": 4,
+          "topic": "4.5",
+          "front": "According to social-cognitive theory, what shapes personality?",
+          "back": "Reciprocal determinism.",
+          "code": "4.5.A.1"
+        },
+        {
+          "unit": 4,
+          "topic": "4.6",
+          "front": "Which hormones regulate hunger?",
+          "back": "Ghrelin and leptin, which regulate feelings of hunger and satiety.",
+          "code": "4.6.B.1.i"
+        },
+        {
+          "unit": 5,
+          "topic": "5.1",
+          "front": "What are the stages of the general adaptation syndrome?",
+          "back": "Alarm reaction (fight-flight-freeze), then resistance, then exhaustion.",
+          "code": "5.1.C.1"
+        },
+        {
+          "unit": 5,
+          "topic": "5.1",
+          "front": "Problem-focused vs. emotion-focused coping?",
+          "back": "Problem-focused coping treats stress as a problem to solve. Emotion-focused coping manages emotional reactions to stress.",
+          "code": "5.1.D.1-2"
+        },
+        {
+          "unit": 5,
+          "topic": "5.3",
+          "front": "What does the biopsychosocial model assume?",
+          "back": "Any psychological problem potentially involves a combination of biological, psychological, and sociocultural factors.",
+          "code": "5.3.C.1"
+        },
+        {
+          "unit": 5,
+          "topic": "5.4",
+          "front": "What characterizes bipolar disorders?",
+          "back": "Periods of mania and periods of depression.",
+          "code": "5.4.D.1"
+        },
+        {
+          "unit": 5,
+          "topic": "5.5",
+          "front": "What techniques do psychodynamic therapies use?",
+          "back": "Free association and dream interpretation.",
+          "code": "5.5.D.1"
+        }
+      ]
+    },
+    {
+      "slug": "us-history",
+      "name": "US History",
+      "full": "United States History",
+      "short": "APUSH",
+      "score_slug": "us-history",
+      "schedule": "apush-study-schedule",
+      "ced_edition": "AP U.S. History Course and Exam Description, Effective Fall 2026",
+      "ced_url": "https://apcentral.collegeboard.org/media/pdf/ap-us-history-course-and-exam-description.pdf",
+      "weight_note": "Exam weighting from the CED.",
+      "units": [
+        {
+          "number": 1,
+          "title": "Period 1: 1491-1607",
+          "weight": "4-6%"
+        },
+        {
+          "number": 2,
+          "title": "Period 2: 1607-1754",
+          "weight": "6-8%"
+        },
+        {
+          "number": 3,
+          "title": "Period 3: 1754-1800",
+          "weight": "10-17%"
+        },
+        {
+          "number": 4,
+          "title": "Period 4: 1800-1848",
+          "weight": "10-17%"
+        },
+        {
+          "number": 5,
+          "title": "Period 5: 1844-1877",
+          "weight": "10-17%"
+        },
+        {
+          "number": 6,
+          "title": "Period 6: 1865-1898",
+          "weight": "10-17%"
+        },
+        {
+          "number": 7,
+          "title": "Period 7: 1890-1945",
+          "weight": "10-17%"
+        },
+        {
+          "number": 8,
+          "title": "Period 8: 1945-1980",
+          "weight": "10-17%"
+        },
+        {
+          "number": 9,
+          "title": "Period 9: 1980-Present",
+          "weight": "4-6%"
+        }
+      ],
+      "cards": [
+        {
+          "unit": 1,
+          "topic": "1.2",
+          "front": "What did the spread of maize cultivation into the present-day American Southwest support?",
+          "back": "Economic development, settlement, advanced irrigation, and social diversification.",
+          "code": "KC-1.1.I.A"
+        },
+        {
+          "unit": 1,
+          "topic": "1.3",
+          "front": "What motivated European exploration and conquest in the Americas?",
+          "back": "A search for new sources of wealth, economic and military competition, and a desire to spread Christianity.",
+          "code": "KC-1.2.I.A"
+        },
+        {
+          "unit": 1,
+          "topic": "1.5",
+          "front": "What was the encomienda system?",
+          "back": "A system through which Spanish colonial economies marshaled Native American labor to support plantation agriculture and extract precious metals and other resources.",
+          "code": "KC-1.2.II.B"
+        },
+        {
+          "unit": 2,
+          "topic": "2.2",
+          "front": "How did French and Dutch colonization differ from English colonization?",
+          "back": "French and Dutch efforts involved relatively few Europeans and relied on trade alliances and intermarriage with American Indians. English efforts attracted comparatively large numbers of migrants.",
+          "code": "KC-2.1.I.B-C"
+        },
+        {
+          "unit": 2,
+          "topic": "2.3",
+          "front": "What did the Chesapeake and North Carolina colonies grow for export?",
+          "back": "Tobacco, a labor-intensive product.",
+          "code": "KC-2.1.II.A"
+        },
+        {
+          "unit": 2,
+          "topic": "2.5",
+          "front": "What led the Spanish to accommodate some Native practices?",
+          "back": "American Indian resistance, particularly after the Pueblo Revolt.",
+          "code": "KC-2.1.III.F"
+        },
+        {
+          "unit": 3,
+          "topic": "3.2",
+          "front": "What was the result of Britain's victory over France in the Seven Years' War?",
+          "back": "A major expansion of British territory at tremendous expense, which set the stage for imperial efforts to raise revenue.",
+          "code": "KC-3.1.I.B"
+        },
+        {
+          "unit": 3,
+          "topic": "3.7",
+          "front": "What kind of central government did the Articles of Confederation create?",
+          "back": "A central government with limited power.",
+          "code": "KC-3.2.II.B"
+        },
+        {
+          "unit": 3,
+          "topic": "3.7",
+          "front": "What did the Northwest Ordinance do?",
+          "back": "It set the process for admitting new states, and it promoted public education, the protection of private property, and a ban on slavery in the Northwest Territory.",
+          "code": "KC-3.3.I.C"
+        },
+        {
+          "unit": 3,
+          "topic": "3.10",
+          "front": "What did Washington's Farewell Address warn against?",
+          "back": "Political factions and permanent foreign alliances.",
+          "code": "KC-3.3.II.C"
+        },
+        {
+          "unit": 4,
+          "topic": "4.2",
+          "front": "What did early Supreme Court decisions establish?",
+          "back": "The primacy of the judiciary in interpreting the Constitution, and that federal laws took precedence over state laws.",
+          "code": "KC-4.1.I.B"
+        },
+        {
+          "unit": 4,
+          "topic": "4.3",
+          "front": "What was the effect of the Missouri Compromise?",
+          "back": "It only temporarily stemmed growing tensions between opponents and defenders of slavery.",
+          "code": "KC-4.3.II.C"
+        },
+        {
+          "unit": 4,
+          "topic": "4.5",
+          "front": "Which innovations drove the market revolution?",
+          "back": "Textile machinery, steam engines, interchangeable parts, the telegraph, and agricultural inventions.",
+          "code": "KC-4.2.I.B"
+        },
+        {
+          "unit": 4,
+          "topic": "4.11",
+          "front": "Where did the women's rights movement express its ideals?",
+          "back": "At the Seneca Falls Convention.",
+          "code": "KC-4.1.III.C"
+        },
+        {
+          "unit": 5,
+          "topic": "5.2",
+          "front": "What did advocates of annexing western lands argue?",
+          "back": "That Manifest Destiny and the superiority of American institutions compelled the United States to expand.",
+          "code": "KC-5.1.I.B"
+        },
+        {
+          "unit": 5,
+          "topic": "5.5",
+          "front": "What nativist movement arose in the 1840s and 1850s?",
+          "back": "A strongly anti-Catholic movement aimed at limiting new immigrants' political power and cultural influence.",
+          "code": "KC-5.1.II.B"
+        },
+        {
+          "unit": 5,
+          "topic": "5.9",
+          "front": "How did the Emancipation Proclamation change the Civil War?",
+          "back": "Lincoln began the war to preserve the Union. The Proclamation reframed the purpose of the war and helped prevent the Confederacy from gaining full diplomatic support from European powers.",
+          "code": "KC-5.3.I.B"
+        },
+        {
+          "unit": 5,
+          "topic": "5.10",
+          "front": "What did the 13th, 14th, and 15th Amendments do?",
+          "back": "The 13th abolished slavery. The 14th and 15th granted African Americans citizenship, equal protection under the laws, and voting rights.",
+          "code": "KC-5.3.II.A"
+        },
+        {
+          "unit": 6,
+          "topic": "6.4",
+          "front": "What did Plessy v. Ferguson uphold?",
+          "back": "Racial segregation (Jim Crow).",
+          "code": "KC-6.3.II.C"
+        },
+        {
+          "unit": 6,
+          "topic": "6.6",
+          "front": "How did business leaders seek increased profits in the Gilded Age?",
+          "back": "By consolidating corporations into large trusts and holding companies.",
+          "code": "KC-6.1.I.D"
+        },
+        {
+          "unit": 7,
+          "topic": "7.3",
+          "front": "What did victory in the Spanish-American War bring the United States?",
+          "back": "Island territories in the Caribbean and the Pacific.",
+          "code": "KC-7.3.I.C"
+        },
+        {
+          "unit": 7,
+          "topic": "7.5",
+          "front": "What did the Senate refuse to do after World War I?",
+          "back": "Ratify the Treaty of Versailles or join the League of Nations.",
+          "code": "KC-7.3.II.C"
+        },
+        {
+          "unit": 7,
+          "topic": "7.8",
+          "front": "Which 1920s movement expressed ethnic and regional identity?",
+          "back": "The Harlem Renaissance.",
+          "code": "KC-7.2.I.B"
+        },
+        {
+          "unit": 7,
+          "topic": "7.10",
+          "front": "What did the New Deal aim to do?",
+          "back": "Use government power to provide relief to the poor, stimulate recovery, and reform the economy.",
+          "code": "KC-7.1.III.A"
+        },
+        {
+          "unit": 8,
+          "topic": "8.2",
+          "front": "How did the Cold War fluctuate?",
+          "back": "Between periods of direct and indirect military confrontation and periods of mutual coexistence (detente).",
+          "code": "KC-8.1.I.C"
+        },
+        {
+          "unit": 8,
+          "topic": "8.4",
+          "front": "What spurred economic growth after 1945?",
+          "back": "A burgeoning private sector, federal spending, the baby boom, and technological developments.",
+          "code": "KC-8.3.I.A"
+        },
+        {
+          "unit": 8,
+          "topic": "8.8",
+          "front": "What did the Vietnam War inspire at home?",
+          "back": "Sizable and passionate antiwar protest.",
+          "code": "KC-8.1.II.B"
+        },
+        {
+          "unit": 9,
+          "topic": "9.3",
+          "front": "What contributed to the end of the Cold War?",
+          "back": "Increased U.S. military spending, Reagan's diplomatic initiatives, and political changes and economic problems in Eastern Europe and the Soviet Union.",
+          "code": "KC-9.3.I.B"
+        },
+        {
+          "unit": 9,
+          "topic": "9.4",
+          "front": "How did employment shift after 1980?",
+          "back": "Service-sector jobs increased, manufacturing jobs decreased, and union membership declined.",
+          "code": "KC-9.2.I.C"
+        },
+        {
+          "unit": 9,
+          "topic": "9.6",
+          "front": "What questions did the war on terrorism raise?",
+          "back": "Questions about the protection of civil liberties and human rights.",
+          "code": "KC-9.3.II.B"
+        }
+      ]
+    },
+    {
+      "slug": "world-history",
+      "name": "World History: Modern",
+      "full": "World History: Modern",
+      "short": "World History",
+      "score_slug": "world-history",
+      "schedule": "ap-world-history-study-schedule",
+      "ced_edition": "AP World History: Modern Course and Exam Description, Effective Fall 2026",
+      "ced_url": "https://apcentral.collegeboard.org/media/pdf/ap-world-history-modern-course-and-exam-description.pdf",
+      "weight_note": "Exam weighting from the CED.",
+      "units": [
+        {
+          "number": 1,
+          "title": "The Global Tapestry (c. 1200 to c. 1450)",
+          "weight": "8-10%"
+        },
+        {
+          "number": 2,
+          "title": "Networks of Exchange (c. 1200 to c. 1450)",
+          "weight": "8-10%"
+        },
+        {
+          "number": 3,
+          "title": "Land-Based Empires (c. 1450 to c. 1750)",
+          "weight": "12-15%"
+        },
+        {
+          "number": 4,
+          "title": "Transoceanic Interconnections (c. 1450 to c. 1750)",
+          "weight": "12-15%"
+        },
+        {
+          "number": 5,
+          "title": "Revolutions (c. 1750 to c. 1900)",
+          "weight": "12-15%"
+        },
+        {
+          "number": 6,
+          "title": "Consequences of Industrialization (c. 1750 to c. 1900)",
+          "weight": "12-15%"
+        },
+        {
+          "number": 7,
+          "title": "Global Conflict (c. 1900 to the present)",
+          "weight": "8-10%"
+        },
+        {
+          "number": 8,
+          "title": "Cold War and Decolonization (c. 1900 to the present)",
+          "weight": "8-10%"
+        },
+        {
+          "number": 9,
+          "title": "Globalization (c. 1900 to the present)",
+          "weight": "8-10%"
+        }
+      ],
+      "cards": [
+        {
+          "unit": 1,
+          "topic": "1.1",
+          "front": "What happened to the economy of Song China?",
+          "back": "It became increasingly commercialized while continuing to depend on free peasant and artisanal labor.",
+          "code": "KC-3.3.III.A.i"
+        },
+        {
+          "unit": 1,
+          "topic": "1.2",
+          "front": "What did Muslim states and empires encourage?",
+          "back": "Significant intellectual innovations and transfers.",
+          "code": "KC-3.2.II.A.i"
+        },
+        {
+          "unit": 1,
+          "topic": "1.6",
+          "front": "How was Europe politically organized from c. 1200 to c. 1450?",
+          "back": "It was politically fragmented, with decentralized monarchies, feudalism, and the manorial system.",
+          "code": "KC-3.2.I.B.ii"
+        },
+        {
+          "unit": 2,
+          "topic": "2.3",
+          "front": "What environmental knowledge did Indian Ocean trade depend on?",
+          "back": "Advanced knowledge of the monsoon winds.",
+          "code": "KC-3.1.II.A.i"
+        },
+        {
+          "unit": 2,
+          "topic": "2.3",
+          "front": "What did merchants set up in key places along trade routes?",
+          "back": "Diasporic communities, where they introduced their own cultural traditions.",
+          "code": "KC-3.1.III.B"
+        },
+        {
+          "unit": 2,
+          "topic": "2.4",
+          "front": "Which West African empire's expansion facilitated Afro-Eurasian trade?",
+          "back": "Mali.",
+          "code": "KC-3.1.I.E.ii"
+        },
+        {
+          "unit": 3,
+          "topic": "3.2",
+          "front": "How did rulers of land-based empires legitimize their rule?",
+          "back": "Through religious ideas, art, and monumental architecture.",
+          "code": "KC-4.3.I.A"
+        },
+        {
+          "unit": 3,
+          "topic": "3.2",
+          "front": "How did rulers of land-based empires generate revenue?",
+          "back": "Through tribute collection, tax farming, and innovative tax-collection systems.",
+          "code": "KC-4.3.I.D"
+        },
+        {
+          "unit": 3,
+          "topic": "3.3",
+          "front": "What intensified the split between Sunni and Shi'a Islam?",
+          "back": "Political rivalries between the Ottoman and Safavid empires.",
+          "code": "KC-4.1.VI.ii"
+        },
+        {
+          "unit": 3,
+          "topic": "3.3",
+          "front": "Where did Sikhism develop?",
+          "back": "In South Asia, in a context of interactions between Hinduism and Islam.",
+          "code": "KC-4.1.VI.iii"
+        },
+        {
+          "unit": 4,
+          "topic": "4.2",
+          "front": "What resulted from Portuguese maritime development?",
+          "back": "Increased travel to and trade with Africa and Asia.",
+          "code": "KC-4.1.III.A"
+        },
+        {
+          "unit": 4,
+          "topic": "4.4",
+          "front": "Which African states grew through maritime trade?",
+          "back": "The Asante and the Kingdom of the Kongo.",
+          "code": "KC-4.3.II.A.ii"
+        },
+        {
+          "unit": 4,
+          "topic": "4.5",
+          "front": "What did European rulers use mercantilist policies for?",
+          "back": "To expand and control their economies and claim overseas territories.",
+          "code": "KC-4.1.IV.C"
+        },
+        {
+          "unit": 5,
+          "topic": "5.2",
+          "front": "On what did people build a new sense of commonality, or nationalism?",
+          "back": "Language, religion, social customs, and territory.",
+          "code": "KC-5.3.II.ii"
+        },
+        {
+          "unit": 5,
+          "topic": "5.3",
+          "front": "What did the factory system do?",
+          "back": "It concentrated production in a single location and increased the specialization of labor.",
+          "code": "KC-5.1.I.C"
+        },
+        {
+          "unit": 5,
+          "topic": "5.5",
+          "front": "What did the \"second industrial revolution\" bring?",
+          "back": "New methods of producing steel, chemicals, electricity, and precision machinery.",
+          "code": "KC-5.1.I.E"
+        },
+        {
+          "unit": 5,
+          "topic": "5.6",
+          "front": "What did U.S. and European influence in Asia lead to in Japan?",
+          "back": "Internal reform that supported industrialization.",
+          "code": "KC-5.2.II.A"
+        },
+        {
+          "unit": 6,
+          "topic": "6.2",
+          "front": "How did European states expand their empires in Africa?",
+          "back": "Through both warfare and diplomacy.",
+          "code": "KC-5.2.I.C"
+        },
+        {
+          "unit": 6,
+          "topic": "6.5",
+          "front": "Where was economic imperialism primarily practiced?",
+          "back": "In Asia and Latin America.",
+          "code": "KC-5.2.I.E"
+        },
+        {
+          "unit": 6,
+          "topic": "6.7",
+          "front": "How did receiving societies sometimes respond to immigrants?",
+          "back": "With ethnic and racial prejudice, and with state attempts to restrict immigration.",
+          "code": "KC-5.4.III.C"
+        },
+        {
+          "unit": 7,
+          "topic": "7.1",
+          "front": "Which land-based empires collapsed after 1900?",
+          "back": "The Ottoman, Russian, and Qing empires.",
+          "code": "KC-6.2.I.A"
+        },
+        {
+          "unit": 7,
+          "topic": "7.3",
+          "front": "How did governments mobilize populations for World War I, the first total war?",
+          "back": "With political propaganda, art, media, and intensified forms of nationalism, in both home countries and colonies.",
+          "code": "KC-6.2.IV.A.i"
+        },
+        {
+          "unit": 7,
+          "topic": "7.4",
+          "front": "How did the Soviet government control its national economy?",
+          "back": "Through the Five Year Plans, often implementing repressive policies.",
+          "code": "KC-6.3.I.A.i"
+        },
+        {
+          "unit": 8,
+          "topic": "8.3",
+          "front": "What military alliances did the Cold War produce?",
+          "back": "NATO and the Warsaw Pact, along with nuclear proliferation and proxy wars.",
+          "code": "KC-6.2.IV.D"
+        },
+        {
+          "unit": 8,
+          "topic": "8.4",
+          "front": "How did China's communist government control its economy?",
+          "back": "Through the Great Leap Forward.",
+          "code": "KC-6.3.I.A.ii"
+        },
+        {
+          "unit": 8,
+          "topic": "8.8",
+          "front": "What contributed to the end of the Cold War?",
+          "back": "Advances in U.S. military and technology, and the Soviet Union's costly and ultimately failed invasion of Afghanistan, and public discontent and economic weakness in communist countries.",
+          "code": "KC-6.2.IV.E"
+        },
+        {
+          "unit": 9,
+          "topic": "9.1",
+          "front": "What did the Green Revolution and commercial agriculture do?",
+          "back": "They increased productivity and sustained the Earth's growing population.",
+          "code": "KC-6.1.I.B"
+        },
+        {
+          "unit": 9,
+          "topic": "9.3",
+          "front": "What contributed to debates about climate change?",
+          "back": "The release of greenhouse gases and pollutants into the atmosphere.",
+          "code": "KC-6.1.II.B"
+        },
+        {
+          "unit": 9,
+          "topic": "9.8",
+          "front": "Why was the United Nations formed?",
+          "back": "With the stated goal of maintaining world peace and facilitating international cooperation.",
+          "code": "KC-6.3.II.A"
+        }
+      ]
+    },
+    {
+      "slug": "calculus-ab",
+      "name": "Calculus AB",
+      "full": "Calculus AB",
+      "short": "Calculus AB",
+      "score_slug": "calculus-ab",
+      "schedule": "ap-calculus-ab-study-schedule",
+      "ced_edition": "AP Calculus AB and BC Course and Exam Description, Effective Fall 2020 (the edition College Board currently hosts)",
+      "ced_url": "https://apcentral.collegeboard.org/media/pdf/ap-calculus-ab-and-bc-course-and-exam-description.pdf",
+      "weight_note": "AB exam weighting for the multiple-choice section, from the CED.",
+      "units": [
+        {
+          "number": 1,
+          "title": "Limits and Continuity",
+          "weight": "10-15%"
+        },
+        {
+          "number": 2,
+          "title": "Differentiation: Definition and Fundamental Properties",
+          "weight": "10-15%"
+        },
+        {
+          "number": 3,
+          "title": "Differentiation: Composite, Implicit, and Inverse Functions",
+          "weight": "5-10%"
+        },
+        {
+          "number": 4,
+          "title": "Contextual Applications of Differentiation",
+          "weight": "10-15%"
+        },
+        {
+          "number": 5,
+          "title": "Analytical Applications of Differentiation",
+          "weight": "15-20%"
+        },
+        {
+          "number": 6,
+          "title": "Integration and Accumulation of Change",
+          "weight": "15-20%"
+        },
+        {
+          "number": 7,
+          "title": "Differential Equations",
+          "weight": "5-10%"
+        },
+        {
+          "number": 8,
+          "title": "Applications of Integration",
+          "weight": "10-15%"
+        }
+      ],
+      "cards": [
+        {
+          "unit": 1,
+          "topic": "1.3",
+          "front": "Name three ways a limit might not exist.",
+          "back": "The function is unbounded, the function oscillates near the value, or the left-hand limit does not equal the right-hand limit.",
+          "code": "LIM-1.C.4"
+        },
+        {
+          "unit": 1,
+          "topic": "1.10",
+          "front": "What are the types of discontinuities?",
+          "back": "Removable discontinuities, jump discontinuities, and discontinuities due to vertical asymptotes.",
+          "code": "LIM-2.A.1"
+        },
+        {
+          "unit": 1,
+          "topic": "1.11",
+          "front": "When is a function f continuous at x = c?",
+          "back": "When f(c) exists, the limit of f(x) as x approaches c exists, and the two are equal.",
+          "code": "LIM-2.A.2"
+        },
+        {
+          "unit": 1,
+          "topic": "1.15",
+          "front": "What do limits at infinity describe?",
+          "back": "End behavior.",
+          "code": "LIM-2.D.4"
+        },
+        {
+          "unit": 2,
+          "topic": "2.2",
+          "front": "Graphically, what is the derivative of a function at a point?",
+          "back": "The slope of the line tangent to the graph of the function at that point.",
+          "code": "CHA-2.C.1"
+        },
+        {
+          "unit": 2,
+          "topic": "2.4",
+          "front": "If f is differentiable at a point, what follows?",
+          "back": "f is continuous at that point. A continuous function may still fail to be differentiable.",
+          "code": "FUN-2.A.1-2"
+        },
+        {
+          "unit": 3,
+          "topic": "3.1",
+          "front": "What does the chain rule differentiate?",
+          "back": "Composite functions.",
+          "code": "FUN-3.C.1"
+        },
+        {
+          "unit": 3,
+          "topic": "3.2",
+          "front": "What is the basis for implicit differentiation?",
+          "back": "The chain rule.",
+          "code": "FUN-3.D.1"
+        },
+        {
+          "unit": 3,
+          "topic": "3.6",
+          "front": "How is the second derivative of f produced?",
+          "back": "By differentiating f', provided the derivative of f' exists.",
+          "code": "FUN-3.F.1"
+        },
+        {
+          "unit": 4,
+          "topic": "4.1",
+          "front": "What is the unit of f'(x)?",
+          "back": "The unit for f divided by the unit for x.",
+          "code": "CHA-3.A.3"
+        },
+        {
+          "unit": 4,
+          "topic": "4.4",
+          "front": "What is the basis for differentiating the variables in a related rates problem?",
+          "back": "The chain rule.",
+          "code": "CHA-3.D.1"
+        },
+        {
+          "unit": 4,
+          "topic": "4.6",
+          "front": "What is the tangent line to a graph, in terms of approximation?",
+          "back": "The graph of a locally linear approximation of the function near the point of tangency.",
+          "code": "CHA-3.F.1"
+        },
+        {
+          "unit": 4,
+          "topic": "4.7",
+          "front": "Which indeterminate forms can L'Hospital's Rule evaluate?",
+          "back": "0/0 and infinity/infinity.",
+          "code": "LIM-4.A.2"
+        },
+        {
+          "unit": 5,
+          "topic": "5.1",
+          "front": "What does the Mean Value Theorem guarantee?",
+          "back": "If f is continuous on [a, b] and differentiable on (a, b), there is a point in (a, b) where the instantaneous rate of change equals the average rate of change over [a, b].",
+          "code": "FUN-1.B.1"
+        },
+        {
+          "unit": 5,
+          "topic": "5.2",
+          "front": "What is a critical point?",
+          "back": "A point in the domain where the first derivative equals zero or fails to exist.",
+          "code": "FUN-1.C.2"
+        },
+        {
+          "unit": 5,
+          "topic": "5.5",
+          "front": "Where can absolute extrema on a closed interval occur?",
+          "back": "Only at critical points or at endpoints.",
+          "code": "FUN-4.A.3"
+        },
+        {
+          "unit": 5,
+          "topic": "5.6",
+          "front": "When is the graph of a function concave up?",
+          "back": "On an open interval where the function's derivative is increasing.",
+          "code": "FUN-4.A.4"
+        },
+        {
+          "unit": 6,
+          "topic": "6.1",
+          "front": "What does the area between a rate-of-change graph and the x-axis give?",
+          "back": "The accumulation of change.",
+          "code": "CHA-4.A.1"
+        },
+        {
+          "unit": 6,
+          "topic": "6.2",
+          "front": "Name the Riemann-type approximations in the CED.",
+          "back": "Left, right, and midpoint Riemann sums, and the trapezoidal sum.",
+          "code": "LIM-5.A.2"
+        },
+        {
+          "unit": 6,
+          "topic": "6.8",
+          "front": "What is an antiderivative of f?",
+          "back": "A function g whose derivative is f.",
+          "code": "FUN-6.B.1"
+        },
+        {
+          "unit": 6,
+          "topic": "6.9",
+          "front": "What must change when you use substitution on a definite integral?",
+          "back": "The limits of integration.",
+          "code": "FUN-6.D.2"
+        },
+        {
+          "unit": 7,
+          "topic": "7.3",
+          "front": "What is a slope field?",
+          "back": "A graphical representation of a differential equation on a finite set of points in the plane.",
+          "code": "FUN-7.C.1"
+        },
+        {
+          "unit": 7,
+          "topic": "7.7",
+          "front": "General solution vs. particular solution?",
+          "back": "A general solution may describe infinitely many solutions. Only one particular solution passes through a given point.",
+          "code": "FUN-7.E.1"
+        },
+        {
+          "unit": 7,
+          "topic": "7.8",
+          "front": "Which differential equation models \"the rate of change of a quantity is proportional to the size of the quantity\"?",
+          "back": "dy/dt = ky.",
+          "code": "FUN-7.F.2"
+        },
+        {
+          "unit": 8,
+          "topic": "8.2",
+          "front": "What do the definite integrals of velocity and of speed represent?",
+          "back": "The integral of velocity is displacement. The integral of speed is total distance traveled.",
+          "code": "CHA-4.C.1"
+        },
+        {
+          "unit": 8,
+          "topic": "8.3",
+          "front": "What does the definite integral of a rate of change give?",
+          "back": "The net change of that quantity over the interval.",
+          "code": "CHA-4.D.2"
+        },
+        {
+          "unit": 8,
+          "topic": "8.11",
+          "front": "When is the washer method used?",
+          "back": "For volumes of solids of revolution whose cross sections are ring shaped.",
+          "code": "CHA-5.C.3"
+        }
+      ]
+    },
+    {
+      "slug": "chemistry",
+      "name": "Chemistry",
+      "full": "Chemistry",
+      "short": "Chemistry",
+      "score_slug": "chemistry",
+      "schedule": "ap-chemistry-study-schedule",
+      "ced_edition": "AP Chemistry Course and Exam Description, Effective Fall 2024",
+      "ced_url": "https://apcentral.collegeboard.org/media/pdf/ap-chemistry-course-and-exam-description.pdf",
+      "weight_note": "Exam weighting from the CED.",
+      "units": [
+        {
+          "number": 1,
+          "title": "Atomic Structure and Properties",
+          "weight": "7-9%"
+        },
+        {
+          "number": 2,
+          "title": "Compound Structure and Properties",
+          "weight": "7-9%"
+        },
+        {
+          "number": 3,
+          "title": "Properties of Substances and Mixtures",
+          "weight": "18-22%"
+        },
+        {
+          "number": 4,
+          "title": "Chemical Reactions",
+          "weight": "7-9%"
+        },
+        {
+          "number": 5,
+          "title": "Kinetics",
+          "weight": "7-9%"
+        },
+        {
+          "number": 6,
+          "title": "Thermochemistry",
+          "weight": "7-9%"
+        },
+        {
+          "number": 7,
+          "title": "Equilibrium",
+          "weight": "7-9%"
+        },
+        {
+          "number": 8,
+          "title": "Acids and Bases",
+          "weight": "11-15%"
+        },
+        {
+          "number": 9,
+          "title": "Thermodynamics and Electrochemistry",
+          "weight": "7-9%"
+        }
+      ],
+      "cards": [
+        {
+          "unit": 1,
+          "topic": "1.1",
+          "front": "What does Avogadro's number connect?",
+          "back": "The number of moles in a pure sample of a substance and the number of constituent particles of that substance (6.022 x 10^23 per mole).",
+          "code": "1.1.A.2"
+        },
+        {
+          "unit": 1,
+          "topic": "1.3",
+          "front": "What is the law of definite proportions?",
+          "back": "The ratio of the masses of the constituent elements in any pure sample of a compound is always the same.",
+          "code": "1.3.A.2"
+        },
+        {
+          "unit": 1,
+          "topic": "1.6",
+          "front": "What does photoelectron spectroscopy (PES) measure?",
+          "back": "The energies of the electrons in a given shell.",
+          "code": "1.6.A.1"
+        },
+        {
+          "unit": 2,
+          "topic": "2.1",
+          "front": "How does electronegativity trend on the periodic table?",
+          "back": "It increases from left to right across a period and decreases down a group.",
+          "code": "2.1.A.1"
+        },
+        {
+          "unit": 2,
+          "topic": "2.4",
+          "front": "How is metallic bonding represented?",
+          "back": "As an array of positive metal ions surrounded by delocalized valence electrons, a \"sea of electrons.\"",
+          "code": "2.4.A.1"
+        },
+        {
+          "unit": 2,
+          "topic": "2.7",
+          "front": "What is VSEPR theory based on?",
+          "back": "Coulombic repulsion between electrons.",
+          "code": "2.7.A.1"
+        },
+        {
+          "unit": 3,
+          "topic": "3.1",
+          "front": "What causes London dispersion forces?",
+          "back": "Coulombic interactions between temporary, fluctuating dipoles.",
+          "code": "3.1.A.1"
+        },
+        {
+          "unit": 3,
+          "topic": "3.4",
+          "front": "In a mixture of gases, what does the partial pressure of each gas depend on?",
+          "back": "The pressure of each component is independent of the other components.",
+          "code": "3.4.A.2"
+        },
+        {
+          "unit": 3,
+          "topic": "3.10",
+          "front": "Which substances tend to be miscible?",
+          "back": "Substances with similar intermolecular interactions.",
+          "code": "3.10.A.1"
+        },
+        {
+          "unit": 3,
+          "topic": "3.13",
+          "front": "In the Beer-Lambert law, with path length and wavelength held constant, what is absorbance proportional to?",
+          "back": "Only the concentration of the absorbing species.",
+          "code": "3.13.A.2"
+        },
+        {
+          "unit": 4,
+          "topic": "4.6",
+          "front": "What is a titration used for?",
+          "back": "To determine the amount of an analyte in solution.",
+          "code": "4.6.A.1"
+        },
+        {
+          "unit": 4,
+          "topic": "4.7",
+          "front": "What does an oxidation-reduction (redox) reaction involve?",
+          "back": "The transfer of one or more electrons between chemical species, shown by changes in oxidation numbers.",
+          "code": "4.7.A.2"
+        },
+        {
+          "unit": 4,
+          "topic": "4.8",
+          "front": "Bronsted-Lowry acid vs. base?",
+          "back": "An acid is a proton donor. A base is a proton acceptor.",
+          "code": "4.8.A.1"
+        },
+        {
+          "unit": 5,
+          "topic": "5.3",
+          "front": "For a first-order reaction, which plot is linear?",
+          "back": "The natural log of the reactant concentration vs. time.",
+          "code": "5.3.A.2"
+        },
+        {
+          "unit": 5,
+          "topic": "5.5",
+          "front": "What do successful collisions need?",
+          "back": "Sufficient energy to overcome the activation energy barrier, and the proper orientation.",
+          "code": "5.5.A.2"
+        },
+        {
+          "unit": 5,
+          "topic": "5.11",
+          "front": "What happens to the net concentration of a catalyst in a reaction mechanism?",
+          "back": "It stays constant, though the catalyst may be consumed and regenerated.",
+          "code": "5.11.A.2"
+        },
+        {
+          "unit": 6,
+          "topic": "6.3",
+          "front": "How do the particles of a warmer body compare with those of a cooler body?",
+          "back": "Particles in the warmer body have greater average kinetic energy.",
+          "code": "6.3.A.1"
+        },
+        {
+          "unit": 6,
+          "topic": "6.4",
+          "front": "What does the first law of thermodynamics state?",
+          "back": "Energy is conserved in chemical and physical processes.",
+          "code": "6.4.A.2"
+        },
+        {
+          "unit": 6,
+          "topic": "6.9",
+          "front": "What happens to the enthalpy change when a reaction is reversed?",
+          "back": "Its magnitude stays the same, but its sign is reversed.",
+          "code": "6.9.B.2"
+        },
+        {
+          "unit": 7,
+          "topic": "7.3",
+          "front": "Which substances are left out of the reaction quotient Q?",
+          "back": "Substances whose concentrations are independent of the amount present, such as pure solids and liquids.",
+          "code": "7.3.A.2"
+        },
+        {
+          "unit": 7,
+          "topic": "7.6",
+          "front": "What happens to K when a reaction is reversed?",
+          "back": "K is inverted.",
+          "code": "7.6.A.1"
+        },
+        {
+          "unit": 7,
+          "topic": "7.10",
+          "front": "Which stress changes the equilibrium constant K itself?",
+          "back": "A change in temperature. Changes in concentration alter only Q.",
+          "code": "7.10.A.2"
+        },
+        {
+          "unit": 7,
+          "topic": "7.12",
+          "front": "What is the common-ion effect?",
+          "back": "A salt is less soluble in a solution that already contains one of its ions.",
+          "code": "7.12.A.1"
+        },
+        {
+          "unit": 8,
+          "topic": "8.1",
+          "front": "What is Kw at 25 degrees C?",
+          "back": "[H3O+][OH-] = 1.0 x 10^-14.",
+          "code": "8.1.A.2"
+        },
+        {
+          "unit": 8,
+          "topic": "8.2",
+          "front": "How do strong acids behave in water?",
+          "back": "They ionize completely. Examples are HCl, HBr, HI, HClO4, H2SO4, and HNO3.",
+          "code": "8.2.A.1"
+        },
+        {
+          "unit": 8,
+          "topic": "8.5",
+          "front": "At the equivalence point of a monoprotic acid-base titration, what is true?",
+          "back": "The moles of titrant added equal the moles of analyte.",
+          "code": "8.5.A.2"
+        },
+        {
+          "unit": 8,
+          "topic": "8.8",
+          "front": "What is a buffer?",
+          "back": "A solution with a large concentration of both members of a conjugate acid-base pair.",
+          "code": "8.8.A.1"
+        },
+        {
+          "unit": 9,
+          "topic": "9.1",
+          "front": "When does entropy increase?",
+          "back": "When matter becomes more dispersed, or when energy becomes more dispersed.",
+          "code": "9.1.A.1-2"
+        },
+        {
+          "unit": 9,
+          "topic": "9.4",
+          "front": "What is kinetic control?",
+          "back": "When a thermodynamically favored process does not proceed at a measurable rate, often because of a high activation energy.",
+          "code": "9.4.A.2"
+        },
+        {
+          "unit": 9,
+          "topic": "9.5",
+          "front": "Under standard conditions, what does a negative standard Gibbs free energy change mean for K?",
+          "back": "Products are favored at equilibrium, so K > 1.",
+          "code": "9.5.A.1"
+        },
+        {
+          "unit": 9,
+          "topic": "9.8",
+          "front": "Galvanic cell vs. electrolytic cell?",
+          "back": "Galvanic cells involve a thermodynamically favored reaction. Electrolytic cells involve a reaction that is not thermodynamically favored.",
+          "code": "9.8.A.2"
+        }
+      ]
+    },
+    {
+      "slug": "statistics",
+      "name": "Statistics",
+      "full": "Statistics",
+      "short": "Statistics",
+      "score_slug": "statistics",
+      "schedule": "ap-statistics-study-schedule",
+      "ced_edition": "AP Statistics Course and Exam Description, Effective Fall 2026 (the new five-unit framework)",
+      "ced_url": "https://apcentral.collegeboard.org/media/pdf/ap-statistics-course-and-exam-description.pdf",
+      "weight_note": "Exam weighting for the multiple-choice section, from the CED.",
+      "units": [
+        {
+          "number": 1,
+          "title": "Exploring One-Variable Data and Collecting Data",
+          "weight": "20-30%"
+        },
+        {
+          "number": 2,
+          "title": "Probability, Random Variables, and Probability Distributions",
+          "weight": "15-25%"
+        },
+        {
+          "number": 3,
+          "title": "Inference for Categorical Data: Proportions",
+          "weight": "15-25%"
+        },
+        {
+          "number": 4,
+          "title": "Inference for Quantitative Data: Means",
+          "weight": "10-20%"
+        },
+        {
+          "number": 5,
+          "title": "Regression Analysis",
+          "weight": "10-20%"
+        }
+      ],
+      "cards": [
+        {
+          "unit": 1,
+          "topic": "1.7",
+          "front": "Why are the median and IQR called resistant?",
+          "back": "Outliers do not greatly affect them, if at all.",
+          "code": "1.7.F.1"
+        },
+        {
+          "unit": 1,
+          "topic": "1.9",
+          "front": "What does a standardized score (z-score) measure?",
+          "back": "The number of standard deviations a value falls above or below the mean.",
+          "code": "1.9.D.1"
+        },
+        {
+          "unit": 1,
+          "topic": "1.12",
+          "front": "What is bias in a sampling method?",
+          "back": "A systematic error that makes a statistic consistently larger or smaller than the parameter.",
+          "code": "1.12.A.1"
+        },
+        {
+          "unit": 1,
+          "topic": "1.13",
+          "front": "What allows a cause-and-effect conclusion in an experiment?",
+          "back": "Random assignment of treatments to experimental units.",
+          "code": "1.13.D.1"
+        },
+        {
+          "unit": 2,
+          "topic": "2.7",
+          "front": "When are events A and B independent?",
+          "back": "When knowing whether A occurred does not change the probability of B.",
+          "code": "2.7.A.1"
+        },
+        {
+          "unit": 2,
+          "topic": "2.10",
+          "front": "What are the mean and standard deviation of a binomial random variable?",
+          "back": "Mean = np. Standard deviation = the square root of np(1 - p).",
+          "code": "2.10.B.1"
+        },
+        {
+          "unit": 2,
+          "topic": "2.11",
+          "front": "What does the empirical rule say?",
+          "back": "About 68% of the values in a normal distribution lie within 1 standard deviation of the mean, about 95% within 2, and about 99.7% within 3.",
+          "code": "2.11.C.1"
+        },
+        {
+          "unit": 2,
+          "topic": "2.12",
+          "front": "What is a sampling distribution?",
+          "back": "The distribution of a statistic's values for all possible samples of a given size from a population.",
+          "code": "2.12.A.1"
+        },
+        {
+          "unit": 3,
+          "topic": "3.1",
+          "front": "When is an estimator unbiased?",
+          "back": "When, on average, it does not underestimate or overestimate the population parameter.",
+          "code": "3.1.A.1"
+        },
+        {
+          "unit": 3,
+          "topic": "3.4",
+          "front": "For a given sample, what happens when you increase the confidence level?",
+          "back": "The critical value increases, so the margin of error increases.",
+          "code": "3.4.C.1"
+        },
+        {
+          "unit": 3,
+          "topic": "3.8",
+          "front": "What is a Type I error?",
+          "back": "Finding convincing statistical evidence that the alternative hypothesis is true when it is not.",
+          "code": "3.8.A.1"
+        },
+        {
+          "unit": 3,
+          "topic": "3.8",
+          "front": "What is the probability of a Type I error?",
+          "back": "The significance level, alpha.",
+          "code": "3.8.B.1"
+        },
+        {
+          "unit": 3,
+          "topic": "3.14",
+          "front": "What does the chi-square statistic measure?",
+          "back": "The distance between observed and expected counts, relative to the expected counts.",
+          "code": "3.14.A.1"
+        },
+        {
+          "unit": 4,
+          "topic": "4.2",
+          "front": "How do t-distributions compare with the standard normal distribution?",
+          "back": "They are symmetric and bell-shaped like it, but with wider tails.",
+          "code": "4.2.A.1"
+        },
+        {
+          "unit": 4,
+          "topic": "4.2",
+          "front": "What is the standard error of a sample mean?",
+          "back": "s divided by the square root of n.",
+          "code": "4.2.E.1"
+        },
+        {
+          "unit": 4,
+          "topic": "4.4",
+          "front": "Which test is used for a population mean when the population standard deviation is unknown?",
+          "back": "A one-sample t-test.",
+          "code": "4.4.A.1"
+        },
+        {
+          "unit": 5,
+          "topic": "5.1",
+          "front": "What does a description of the association in a scatterplot include?",
+          "back": "Form, direction, strength, and unusual features.",
+          "code": "5.1.B.1"
+        },
+        {
+          "unit": 5,
+          "topic": "5.2",
+          "front": "What does the correlation r summarize?",
+          "back": "The strength and direction of the linear association between two quantitative variables.",
+          "code": "5.2.A.1"
+        },
+        {
+          "unit": 5,
+          "topic": "5.4",
+          "front": "What does a positive residual mean?",
+          "back": "The model underpredicts the response.",
+          "code": "5.4.B.1"
+        },
+        {
+          "unit": 5,
+          "topic": "5.5",
+          "front": "How is the least-squares regression line fit?",
+          "back": "By minimizing the sum of the squared residuals.",
+          "code": "5.5.A.1"
+        }
+      ]
+    },
+    {
+      "slug": "english-language",
+      "name": "English Language",
+      "full": "English Language and Composition",
+      "short": "English Language",
+      "score_slug": "english-language",
+      "schedule": "ap-english-language-study-schedule",
+      "ced_edition": "AP English Language and Composition Course and Exam Description, Effective Fall 2024",
+      "ced_url": "https://apcentral.collegeboard.org/media/pdf/ap-english-language-and-composition-course-and-exam-description.pdf",
+      "weight_note": "The CED gives no exam weight per unit. It weights the multiple-choice section by skill category instead.",
+      "units": [
+        {
+          "number": 1,
+          "title": "Unit 1",
+          "weight": ""
+        },
+        {
+          "number": 2,
+          "title": "Unit 2",
+          "weight": ""
+        },
+        {
+          "number": 3,
+          "title": "Unit 3",
+          "weight": ""
+        },
+        {
+          "number": 4,
+          "title": "Unit 4",
+          "weight": ""
+        },
+        {
+          "number": 5,
+          "title": "Unit 5",
+          "weight": ""
+        },
+        {
+          "number": 6,
+          "title": "Unit 6",
+          "weight": ""
+        },
+        {
+          "number": 7,
+          "title": "Unit 7",
+          "weight": ""
+        },
+        {
+          "number": 8,
+          "title": "Unit 8",
+          "weight": ""
+        },
+        {
+          "number": 9,
+          "title": "Unit 9",
+          "weight": ""
+        }
+      ],
+      "cards": [
+        {
+          "unit": 1,
+          "topic": "",
+          "front": "What makes up the rhetorical situation?",
+          "back": "Exigence, purpose, audience, context, and message.",
+          "code": "RHS-1.A"
+        },
+        {
+          "unit": 1,
+          "topic": "",
+          "front": "What is exigence?",
+          "back": "The part of a rhetorical situation that inspires, stimulates, provokes, or prompts a writer to create a text.",
+          "code": "RHS-1.B"
+        },
+        {
+          "unit": 1,
+          "topic": "",
+          "front": "What is the purpose of a text?",
+          "back": "What the writer hopes to accomplish with it. A text may have more than one purpose.",
+          "code": "RHS-1.C"
+        },
+        {
+          "unit": 1,
+          "topic": "",
+          "front": "What does an audience share?",
+          "back": "An audience has shared as well as individual beliefs, values, needs, and backgrounds.",
+          "code": "RHS-1.D"
+        },
+        {
+          "unit": 1,
+          "topic": "",
+          "front": "What does the context of a text include?",
+          "back": "The time, place, and occasion in which the writer creates it.",
+          "code": "RHS-1.E"
+        },
+        {
+          "unit": 1,
+          "topic": "",
+          "front": "How do writers convey their positions?",
+          "back": "Through one or more claims that require a defense.",
+          "code": "CLE-1.A"
+        },
+        {
+          "unit": 1,
+          "topic": "",
+          "front": "Name types of evidence.",
+          "back": "Facts, anecdotes, analogies, statistics, examples, details, illustrations, expert opinions, personal observations, personal experiences, testimonies, or experiments.",
+          "code": "CLE-1.C"
+        },
+        {
+          "unit": 2,
+          "topic": "",
+          "front": "What do arguments use to persuade or motivate action?",
+          "back": "Appeals, also called modes of persuasion.",
+          "code": "RHS-1.H"
+        },
+        {
+          "unit": 2,
+          "topic": "",
+          "front": "When is evidence sufficient?",
+          "back": "When its quantity and quality provide apt support for the argument.",
+          "code": "CLE-1.H"
+        },
+        {
+          "unit": 2,
+          "topic": "",
+          "front": "What is a thesis?",
+          "back": "The main, overarching claim a writer seeks to defend or prove using reasoning supported by evidence.",
+          "code": "CLE-1.I"
+        },
+        {
+          "unit": 3,
+          "topic": "",
+          "front": "How do writers explain their reasoning?",
+          "back": "Through commentary that connects chosen evidence to a claim.",
+          "code": "REO-1.C"
+        },
+        {
+          "unit": 3,
+          "topic": "",
+          "front": "What does commentary do?",
+          "back": "It explains the significance and relevance of evidence in relation to the line of reasoning.",
+          "code": "REO-1.D"
+        },
+        {
+          "unit": 3,
+          "topic": "",
+          "front": "Name typical methods of development.",
+          "back": "Narration, cause-effect, comparison-contrast, definition, and description.",
+          "code": "REO-1.H"
+        },
+        {
+          "unit": 3,
+          "topic": "",
+          "front": "What must writers do when they use other people's intellectual property?",
+          "back": "Acknowledge it through attribution, citation, or reference.",
+          "code": "CLE-1.N"
+        },
+        {
+          "unit": 4,
+          "topic": "",
+          "front": "What does a conclusion do?",
+          "back": "It brings the argument to a unified end and may present the thesis.",
+          "code": "RHS-1.J"
+        },
+        {
+          "unit": 5,
+          "topic": "",
+          "front": "What are transitional elements?",
+          "back": "Words, phrases, clauses, sentences, or paragraphs that create coherence among sentences, paragraphs, or sections.",
+          "code": "REO-1.P"
+        },
+        {
+          "unit": 5,
+          "topic": "",
+          "front": "What two kinds of meaning do words have?",
+          "back": "Connotative and denotative meanings.",
+          "code": "STL-1.A"
+        },
+        {
+          "unit": 6,
+          "topic": "",
+          "front": "Position vs. perspective?",
+          "back": "Sources may share a position on a subject yet come from different perspectives based on their backgrounds and interests.",
+          "code": "CLE-1.R"
+        },
+        {
+          "unit": 6,
+          "topic": "",
+          "front": "What is tone?",
+          "back": "The writer's attitude or feeling about a subject, conveyed through word choice and writing style.",
+          "code": "STL-1.D"
+        },
+        {
+          "unit": 6,
+          "topic": "",
+          "front": "How do readers infer a writer's tone?",
+          "back": "From the writer's word choice, especially the positive, negative, or other connotations of those words.",
+          "code": "STL-1.E"
+        },
+        {
+          "unit": 7,
+          "topic": "",
+          "front": "Coordination vs. subordination?",
+          "back": "Coordination shows balance or equality between ideas. Subordination shows imbalance or inequality.",
+          "code": "STL-1.J-K"
+        },
+        {
+          "unit": 7,
+          "topic": "",
+          "front": "How can writers qualify an argument?",
+          "back": "By using words, phrases, and clauses as modifiers to limit its scope.",
+          "code": "CLE-1.X"
+        },
+        {
+          "unit": 8,
+          "topic": "",
+          "front": "Why do writers use comparisons such as similes, metaphors, analogies, or anecdotes?",
+          "back": "To relate to an audience. An effective comparison must be shared and understood by the audience to advance the writer's purpose.",
+          "code": "RHS-1.K"
+        },
+        {
+          "unit": 8,
+          "topic": "",
+          "front": "What makes up a writer's style?",
+          "back": "The mix of word choice, syntax, and conventions the writer uses.",
+          "code": "STL-1.Q"
+        },
+        {
+          "unit": 9,
+          "topic": "",
+          "front": "How do writers enhance their credibility when dealing with opposing arguments?",
+          "back": "By refuting, rebutting, or conceding opposing arguments and contradictory evidence.",
+          "code": "CLE-1.AA"
+        },
+        {
+          "unit": 9,
+          "topic": "",
+          "front": "Concede vs. rebut vs. refute?",
+          "back": "Conceding accepts all or part of a competing claim. Rebutting offers a contrasting perspective or alternative evidence. Refuting uses evidence to show that all or part of a competing claim is invalid.",
+          "code": "CLE-1.AB-AD"
+        }
+      ],
+      "unit_note": "The CED splits the course into nine units, Unit 1 through Unit 9, without titles, and teachers choose the themes. Each card below is filed under the unit where the CED first introduces its essential knowledge code."
+    },
+    {
+      "slug": "physics-1",
+      "name": "Physics 1",
+      "full": "Physics 1: Algebra-Based",
+      "short": "Physics 1",
+      "score_slug": "physics-1",
+      "schedule": "ap-physics-1-study-schedule",
+      "ced_edition": "AP Physics 1: Algebra-Based Course and Exam Description, Effective Fall 2024",
+      "ced_url": "https://apcentral.collegeboard.org/media/pdf/ap-physics-1-course-and-exam-description.pdf",
+      "weight_note": "Exam weighting for the multiple-choice section, from the CED.",
+      "units": [
+        {
+          "number": 1,
+          "title": "Kinematics",
+          "weight": "10-15%"
+        },
+        {
+          "number": 2,
+          "title": "Force and Translational Dynamics",
+          "weight": "18-23%"
+        },
+        {
+          "number": 3,
+          "title": "Work, Energy, and Power",
+          "weight": "18-23%"
+        },
+        {
+          "number": 4,
+          "title": "Linear Momentum",
+          "weight": "10-15%"
+        },
+        {
+          "number": 5,
+          "title": "Torque and Rotational Dynamics",
+          "weight": "10-15%"
+        },
+        {
+          "number": 6,
+          "title": "Energy and Momentum of Rotating Systems",
+          "weight": "5-8%"
+        },
+        {
+          "number": 7,
+          "title": "Oscillations",
+          "weight": "5-8%"
+        },
+        {
+          "number": 8,
+          "title": "Fluids",
+          "weight": "10-15%"
+        }
+      ],
+      "cards": [
+        {
+          "unit": 1,
+          "topic": "1.1",
+          "front": "Scalars vs. vectors?",
+          "back": "Scalars have magnitude only. Vectors have both magnitude and direction.",
+          "code": "1.1.A.1"
+        },
+        {
+          "unit": 1,
+          "topic": "1.2",
+          "front": "What is average velocity?",
+          "back": "The displacement of an object divided by the time interval in which that displacement occurs.",
+          "code": "1.2.B.2"
+        },
+        {
+          "unit": 1,
+          "topic": "1.5",
+          "front": "What is special about projectile motion?",
+          "back": "It has zero acceleration in one dimension and constant, nonzero acceleration in the other dimension.",
+          "code": "1.5.B.2"
+        },
+        {
+          "unit": 2,
+          "topic": "2.4",
+          "front": "What is translational equilibrium?",
+          "back": "A configuration of forces such that the net force exerted on a system is zero.",
+          "code": "2.4.A.2"
+        },
+        {
+          "unit": 2,
+          "topic": "2.6",
+          "front": "What is apparent weight?",
+          "back": "The magnitude of the normal force exerted on a system.",
+          "code": "2.6.C.1"
+        },
+        {
+          "unit": 2,
+          "topic": "2.7",
+          "front": "How does static friction behave?",
+          "back": "It adopts whatever value and direction are needed to prevent an object from slipping or sliding on a surface.",
+          "code": "2.7.B.2"
+        },
+        {
+          "unit": 2,
+          "topic": "2.9",
+          "front": "What is centripetal acceleration?",
+          "back": "The component of an object's acceleration directed toward the center of its circular path.",
+          "code": "2.9.A.1"
+        },
+        {
+          "unit": 3,
+          "topic": "3.2",
+          "front": "What is work?",
+          "back": "Energy transferred into or out of a system by a force exerted on that system over a distance.",
+          "code": "3.2.A.1"
+        },
+        {
+          "unit": 3,
+          "topic": "3.4",
+          "front": "Can a system made of a single object have potential energy?",
+          "back": "No. A single-object system can only have kinetic energy.",
+          "code": "3.4.A.1"
+        },
+        {
+          "unit": 3,
+          "topic": "3.5",
+          "front": "What is power?",
+          "back": "The rate at which energy changes with respect to time.",
+          "code": "3.5.A.1"
+        },
+        {
+          "unit": 4,
+          "topic": "4.2",
+          "front": "What is impulse?",
+          "back": "The average force exerted on a system multiplied by the time interval during which the force is exerted.",
+          "code": "4.2.A.2"
+        },
+        {
+          "unit": 4,
+          "topic": "4.3",
+          "front": "When is a system's total momentum constant?",
+          "back": "When the net external force exerted on the system is zero.",
+          "code": "4.3.B.2"
+        },
+        {
+          "unit": 4,
+          "topic": "4.4",
+          "front": "What defines an elastic collision?",
+          "back": "The system's initial kinetic energy equals its final kinetic energy.",
+          "code": "4.4.A.1"
+        },
+        {
+          "unit": 5,
+          "topic": "5.3",
+          "front": "What is the lever arm?",
+          "back": "The perpendicular distance from the axis of rotation to the line of action of the force.",
+          "code": "5.3.A.2"
+        },
+        {
+          "unit": 5,
+          "topic": "5.4",
+          "front": "When is a system's rotational inertia at a minimum?",
+          "back": "When the axis of rotation passes through the system's center of mass.",
+          "code": "5.4.B.1"
+        },
+        {
+          "unit": 5,
+          "topic": "5.6",
+          "front": "When does a system's angular velocity change?",
+          "back": "When the net torque exerted on it is not zero.",
+          "code": "5.6.A.1"
+        },
+        {
+          "unit": 6,
+          "topic": "6.4",
+          "front": "When is a system's total angular momentum constant?",
+          "back": "When the net external torque exerted on the system is zero.",
+          "code": "6.4.B.2"
+        },
+        {
+          "unit": 6,
+          "topic": "6.5",
+          "front": "What is a rolling system's total kinetic energy?",
+          "back": "The sum of its translational and rotational kinetic energies.",
+          "code": "6.5.A.1"
+        },
+        {
+          "unit": 6,
+          "topic": "6.5",
+          "front": "Does friction dissipate energy in ideal rolling without slipping?",
+          "back": "No.",
+          "code": "6.5.B.2"
+        },
+        {
+          "unit": 7,
+          "topic": "7.1",
+          "front": "When does simple harmonic motion result?",
+          "back": "When the restoring force is proportional to the displacement from equilibrium.",
+          "code": "7.1.A.2"
+        },
+        {
+          "unit": 7,
+          "topic": "7.2",
+          "front": "How are period and frequency related?",
+          "back": "T = 1/f.",
+          "code": "7.2.A.1"
+        },
+        {
+          "unit": 7,
+          "topic": "7.3",
+          "front": "Does changing the amplitude change the period of simple harmonic motion?",
+          "back": "No.",
+          "code": "7.3.A.2"
+        },
+        {
+          "unit": 8,
+          "topic": "8.2",
+          "front": "What is pressure?",
+          "back": "The perpendicular component of force per unit area. Pressure is a scalar.",
+          "code": "8.2.A.1-2"
+        },
+        {
+          "unit": 8,
+          "topic": "8.3",
+          "front": "What is the buoyant force?",
+          "back": "A net upward force exerted on an object by a fluid.",
+          "code": "8.3.B.1"
+        },
+        {
+          "unit": 8,
+          "topic": "8.4",
+          "front": "What does the continuity equation describe?",
+          "back": "Conservation of mass flow rate in incompressible fluids (A1v1 = A2v2).",
+          "code": "8.4.A.2"
+        },
+        {
+          "unit": 8,
+          "topic": "8.4",
+          "front": "What does Bernoulli's equation describe?",
+          "back": "Conservation of mechanical energy in fluid flow.",
+          "code": "8.4.B.2"
+        }
+      ]
+    }
+  ]
+}

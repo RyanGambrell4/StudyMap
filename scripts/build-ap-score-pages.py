@@ -35,6 +35,20 @@ def title_for(s):
     raise SystemExit('no title fits for ' + s['slug'])
 
 
+# Score-page slug -> flashcard deck slug (public/ap-<deck>-flashcards.html, built by
+# scripts/build-ap-flashcard-pages.py). The deck link appears only if that page exists.
+DECK_SLUGS = {'biology': 'biology', 'psychology': 'psychology', 'us-history': 'us-history',
+              'world-history': 'world-history', 'calculus-ab': 'calculus-ab', 'chemistry': 'chemistry',
+              'statistics': 'statistics', 'english-language': 'english-language', 'physics-1': 'physics-1'}
+
+
+def deck_for(s):
+    d = DECK_SLUGS.get(s['slug'])
+    if d and os.path.exists(os.path.join(PUB, f'ap-{d}-flashcards.html')):
+        return f'ap-{d}-flashcards'
+    return None
+
+
 def exam_date(s):
     d = datetime.date.fromisoformat(s['exam2027'][0])
     return d.strftime('%A, %B ') + str(d.day) + d.strftime(', %Y'), s['exam2027'][1]
@@ -115,6 +129,9 @@ def build(s):
     study = []
     if s.get('schedule'):
         study.append(f'the <a href="/{s["schedule"]}">AP {name} study schedule</a>')
+    deck = deck_for(s)
+    if deck:
+        study.append(f'the <a href="/{deck}">AP {name} flashcards</a> built from the course framework')
     study.append('the <a href="/ap-exam-study-schedule-templates">AP exam study schedule templates</a>')
     study.append('the <a href="/ap-score-calculator">AP score calculator</a>')
     study_sentence = ', '.join(study[:-1]) + ' and ' + study[-1]
@@ -197,13 +214,13 @@ def build(s):
     <ul style="list-style:none;padding:0;margin:0;display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:10px 24px">
       <li><a href="/ap-score-calculator">AP score calculator</a></li>
       <li><a href="/ap-exam-study-schedule-templates">AP exam study schedule templates</a></li>
-{f'      <li><a href="/{s["schedule"]}">AP {esc(name)} study schedule</a></li>' + chr(10) if s.get('schedule') else ''}    </ul>
+{f'      <li><a href="/{s["schedule"]}">AP {esc(name)} study schedule</a></li>' + chr(10) if s.get('schedule') else ''}{f'      <li><a href="/{deck}">AP {esc(name)} flashcards</a></li>' + chr(10) if deck else ''}    </ul>
   </div>
 </section>
 """
     footer = TEMPLATE[TEMPLATE.index('<footer class="site-footer">'):TEMPLATE.index('</footer>') + len('</footer>')]
     html = head + ld_html + style + tail_head + body + footer + '\n\n</body>\n</html>\n'
-    assert '—' not in html and '–' not in html, slug
+    assert chr(0x2014) not in html and chr(0x2013) not in html, slug
     for block in re.findall(r'<script type="application/ld\+json">([\s\S]*?)</script>', html):
         json.loads(block)
     out = os.path.join(PUB, slug + '.html')

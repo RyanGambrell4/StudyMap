@@ -514,6 +514,42 @@
       "destination": "/what-gpa-do-you-need-for-syracuse.html"
     },
     {
+      "source": "/ap-biology-flashcards",
+      "destination": "/ap-biology-flashcards.html"
+    },
+    {
+      "source": "/ap-psychology-flashcards",
+      "destination": "/ap-psychology-flashcards.html"
+    },
+    {
+      "source": "/ap-us-history-flashcards",
+      "destination": "/ap-us-history-flashcards.html"
+    },
+    {
+      "source": "/ap-world-history-flashcards",
+      "destination": "/ap-world-history-flashcards.html"
+    },
+    {
+      "source": "/ap-calculus-ab-flashcards",
+      "destination": "/ap-calculus-ab-flashcards.html"
+    },
+    {
+      "source": "/ap-chemistry-flashcards",
+      "destination": "/ap-chemistry-flashcards.html"
+    },
+    {
+      "source": "/ap-statistics-flashcards",
+      "destination": "/ap-statistics-flashcards.html"
+    },
+    {
+      "source": "/ap-english-language-flashcards",
+      "destination": "/ap-english-language-flashcards.html"
+    },
+    {
+      "source": "/ap-physics-1-flashcards",
+      "destination": "/ap-physics-1-flashcards.html"
+    },
+    {
       "source": "/blog/:slug",
       "destination": "/blog/:slug.html"
     },
