@@ -37,7 +37,7 @@ export function getBestPickTopic(courseId) {
   if (weak.length && weak[0].topic) {
     return { topic: weak[0].topic, contextLine: 'Your lowest-recall area' }
   }
-  return { topic: '', contextLine: 'No focus data yet — pick any topic' }
+  return { topic: '', contextLine: 'No focus data yet. Pick any topic' }
 }
 
 // Two topics for the Connections tool (two lowest-recall).
@@ -71,8 +71,8 @@ export function computeBestPick(toolId, courses) {
     const days = daysUntilExam(course?.examDate)
     return {
       course, courseIdx, topic, contextLine:
-        days == null ? 'No exam date set — add one to unlock rescue plans'
-        : days <= 0 ? 'Your exam is today — start now'
+        days == null ? 'No exam date set. Add one to unlock rescue plans'
+        : days <= 0 ? 'Your exam is today. Start now'
         : days === 1 ? 'Your exam is tomorrow'
         : `${days} days until your exam`,
     }
@@ -100,7 +100,7 @@ export function computeBestPick(toolId, courses) {
       const contextLine = source ? `${count} ${unit} ready · from ${source}` : `${count} ${unit} ready`
       return { course, courseIdx, topic, contextLine, source: cached?.fileLabel ?? null }
     }
-    return { course, courseIdx, topic: '', contextLine: 'No cards yet — upload material first', requiresUpload: true }
+    return { course, courseIdx, topic: '', contextLine: 'No cards yet. Upload material first', requiresUpload: true }
   }
 
   if (toolId === 'studyCoach') {
@@ -136,7 +136,7 @@ export function getRecommendations(courses) {
   if (avg != null && avg >= 70 && recs.length < 2) {
     recs.push({
       toolId: 'teachItBack',
-      reason: `${course.name} recall is strong — lock it in`,
+      reason: `${course.name} recall is strong, so lock it in`,
     })
   }
 

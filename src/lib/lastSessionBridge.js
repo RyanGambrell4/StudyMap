@@ -56,7 +56,7 @@ export function getLastSessionBridge({ courseId = null, courseName = null, curre
 
   // Weakest topic on this course, if we have data.
   const weakest = getWeakestTopics(courseId, 1)[0]
-  const weakLine = weakest?.topic ? ` — target ${weakest.topic} (${weakest.score}/100) next` : ''
+  const weakLine = weakest?.topic ? `. Target ${weakest.topic} (${weakest.score}/100) next` : ''
 
   const scoreLine = typeof recent.score === 'number' ? ` scored ${recent.score}%` : ''
   const parts = [

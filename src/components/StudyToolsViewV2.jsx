@@ -26,7 +26,7 @@ const ICON = {
 
 const TOOLS = {
   quizBurst: { id: 'quizBurst', name: 'Quiz Burst', desc: 'A 5-question hit on one topic. Fast recall, no setup.', color: '#E8A63C', ctaLabel: 'Start 5-question quiz', costLine: 'Uses 1 AI Boost', feature: 'quizBurst' },
-  topicDrill: { id: 'topicDrill', name: 'Topic Drill', desc: 'Type any topic — instant 5-question practice.', color: '#10A56E', ctaLabel: 'Start drill', costLine: 'Uses 1 AI Boost' },
+  topicDrill: { id: 'topicDrill', name: 'Topic Drill', desc: 'Type any topic for instant 5-question practice.', color: '#10A56E', ctaLabel: 'Start drill', costLine: 'Uses 1 AI Boost' },
   teachItBack: { id: 'teachItBack', name: 'Teach It Back', desc: 'Explain a concept in your own words. Get scored on understanding.', color: '#3452D9', ctaLabel: 'Start explanation', costLine: 'Uses 1 AI Boost', feature: 'teachItBack' },
   brainDump: { id: 'brainDump', name: 'Brain Dump', desc: 'Recall everything you know on a topic. Score your memory.', color: '#10A56E', ctaLabel: 'Start brain dump', costLine: 'Uses 1 AI Boost', feature: 'brainDump' },
   timeAttack: { id: 'timeAttack', name: 'Time Attack', desc: '60 seconds. 14 questions. How many can you get right?', color: '#EA580C', ctaLabel: 'Start time attack', costLine: 'Uses 1 AI Boost' },
@@ -221,7 +221,7 @@ export default function StudyToolsViewV2({
                     </div>
                     <div style={{ fontSize: 14, color: T.text, marginTop: 1 }}>
                       <span style={{ fontWeight: 700 }}>{t.name}</span>
-                      <span style={{ color: T.muted }}>{' — '}{r.reason}</span>
+                      <span style={{ color: T.muted }}>{': '}{r.reason}</span>
                     </div>
                   </div>
                   <div style={{

@@ -141,7 +141,7 @@ export default function CourseDiagnostic({
                 Take a 3-min diagnostic
               </div>
               <div style={{ fontSize: 13, color: D.textMuted, marginBottom: 0, lineHeight: 1.55 }}>
-                5 questions on {course?.name}. Your answers seed your mastery data so every other feature — Quiz Burst, Cheat Sheet, Study Coach — starts personalized from day 1 instead of guessing for two weeks.
+                5 questions on {course?.name}. Your answers seed your mastery data so every other feature (Quiz Burst, Cheat Sheet, Study Coach) starts personalized from day 1 instead of guessing for two weeks.
               </div>
             </div>
 
@@ -161,7 +161,7 @@ export default function CourseDiagnostic({
               Start diagnostic →
             </button>
             <button onClick={onClose} style={{ marginTop: 8, width: '100%', padding: '8px', fontSize: 12.5, color: D.textDim, background: 'none', border: 'none', cursor: 'pointer', fontFamily: 'inherit', fontWeight: 600 }}>
-              Skip — I'll set it up manually later
+              Skip, I'll set it up manually later
             </button>
           </div>
         )}
@@ -215,7 +215,7 @@ export default function CourseDiagnostic({
           <div style={{ padding: 28, textAlign: 'center' }}>
             <div style={{ fontSize: 56, marginBottom: 10 }}>🎯</div>
             <div style={{ fontSize: 22, fontWeight: 800, color: D.text, letterSpacing: -0.3, marginBottom: 6 }}>
-              {correctCount}/{questions.length} right — but the score doesn't matter.
+              {correctCount}/{questions.length} right, but the score doesn't matter.
             </div>
             <div style={{ fontSize: 13.5, color: D.textMuted, marginBottom: 20, lineHeight: 1.55 }}>
               What matters: {course?.name} now has real mastery data. Your dashboard, Session Bundle, Cheat Sheet, and Coach Plan just came alive.
