@@ -309,7 +309,7 @@ Photosynthesis	The process by which plants convert light energy into chemical en
     var separators = {
       tab: /\t/,
       colon: /\s*:\s+/,
-      dash: /\s*\p{Pd}\s+/u,
+      dash: /\s*[\u2014-]\s+/, // em dash (written as \u2014) or hyphen, then whitespace
       qa: /^Q[:.]\s*/i
     };
     if (sep === 'qa') {
