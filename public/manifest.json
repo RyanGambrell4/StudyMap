@@ -1,7 +1,7 @@
 {
   "name": "StudyEdge AI",
   "short_name": "StudyEdge AI",
-  "description": "The complete AI study system for college students. Build your schedule, plan every session, and study smarter with flashcards, quizzes, an AI tutor, and grade tracking — all in one place.",
+  "description": "The complete AI study system for college students. Build your schedule, plan every session, and study smarter with flashcards, quizzes, an AI tutor, and grade tracking, all in one place.",
   "start_url": "/app",
   "scope": "/",
   "display": "standalone",

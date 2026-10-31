@@ -1,5 +1,5 @@
 /**
- * utm-propagate.js — Preserve UTM/ref attribution across internal navigation.
+ * utm-propagate.js: preserve UTM/ref attribution across internal navigation.
  *
  * When a visitor lands on any marketing page with ?utm_source=... (e.g. from
  * a TikTok link), this script rewrites every same-origin <a href> to carry

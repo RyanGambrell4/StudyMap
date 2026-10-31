@@ -5,7 +5,7 @@ function DIYComparison() {
     { name: 'Notion',          task: 'for notes',                   price: '$10/mo',    you: false },
     { name: 'Google Calendar', task: 'for scheduling',              price: 'free',      you: false },
     { name: 'ChatGPT',         task: 'for explanations',            price: '$20/mo',    you: false },
-    { name: 'You',             task: '— for holding it all together', price: 'priceless', you: true },
+    { name: 'You',             task: 'for holding it all together', price: 'priceless', you: true },
   ];
 
   const seItems = [
@@ -13,7 +13,7 @@ function DIYComparison() {
     { text: 'Built-in flashcards, quizzes, and active recall',   accent: false },
     { text: 'AI study coach that runs each session',             accent: false },
     { text: 'Grade tracking that shifts priorities automatically', accent: false },
-    { text: "Score projection — know if you'll hit your target", accent: false },
+    { text: "Score projection: know if you'll hit your target", accent: false },
     { text: 'You just study.',                                   accent: true },
   ];
 
@@ -220,7 +220,7 @@ function DIYComparison() {
             onClick={() => window.location.href = '/app?signup=1'}
             style={{ fontSize: 16, fontWeight: 700, padding: '14px 36px', borderRadius: 12, display: 'inline-flex', alignItems: 'center', gap: 10 }}
           >
-            Switch to one system — it's free
+            Switch to one system. It's free
             <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
           </button>
           <div style={{ marginTop: 14, fontSize: 11, fontWeight: 600, letterSpacing: '0.08em', color: 'rgba(255,255,255,0.18)', textTransform: 'uppercase' }}>

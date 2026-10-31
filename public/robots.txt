@@ -3,7 +3,7 @@ Allow: /
 Disallow: /app
 Disallow: /api/
 
-# AI search bots — explicitly allowed for citation and search
+# AI search bots: explicitly allowed for citation and search
 User-agent: GPTBot
 Allow: /
 
@@ -31,7 +31,7 @@ Allow: /
 User-agent: Bingbot
 Allow: /
 
-# Common Crawl training only — blocked (not a search engine)
+# Common Crawl training only: blocked (not a search engine)
 User-agent: CCBot
 Disallow: /
 

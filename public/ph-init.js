@@ -1,5 +1,5 @@
 /**
- * ph-init.js — PostHog analytics initialiser for StudyEdge AI marketing pages
+ * ph-init.js: PostHog analytics initialiser for StudyEdge AI marketing pages
  *
  * Included on every static HTML marketing page. Handles:
  *   - PostHog snippet init (via /ph reverse proxy, same as the React app)

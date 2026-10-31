@@ -46,7 +46,7 @@ function StatsBar(){
         </div>
         <div className="bento-grid">
 
-          {/* Left tall — social proof */}
+          {/* Left tall: social proof */}
           <div className="bento-card bento-tall bento-stagger-1">
             <div className="bento-dots"/>
             <div className="bento-tag">COMMUNITY</div>
@@ -100,7 +100,7 @@ function StatsBar(){
             <div className="bento-badge bento-badge-amber">Habit-forming</div>
           </div>
 
-          {/* Wide bottom — CTA */}
+          {/* Wide bottom: CTA */}
           <div className="bento-card bento-wide bento-cta bento-stagger-6">
             <div className="bento-cta-left">
               <div className="bento-cta-title">The complete study system. Free to start.</div>
