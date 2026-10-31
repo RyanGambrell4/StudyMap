@@ -134,7 +134,7 @@
   <div class="tool-panel">
     <h2>1. Paste your notes</h2>
     <div class="sub">One flashcard per line. Separate question and answer with a tab, colon, or hyphen.</div>
-    <textarea id="input" class="input-area" spellcheck="false" placeholder="What is the mitochondrion? — The organelle that produces ATP through cellular respiration.
+    <textarea id="input" class="input-area" spellcheck="false" placeholder="What is the mitochondrion? - The organelle that produces ATP through cellular respiration.
 What is the Krebs cycle: A series of chemical reactions that oxidize acetyl-CoA to CO2 and produce NADH and FADH2.
 Photosynthesis	The process by which plants convert light energy into chemical energy stored in glucose.
 "></textarea>
@@ -142,7 +142,7 @@ Photosynthesis	The process by which plants convert light energy into chemical en
       <button class="format-btn active" data-sep="auto" type="button">Auto-detect</button>
       <button class="format-btn" data-sep="tab" type="button">Tab</button>
       <button class="format-btn" data-sep="colon" type="button">Colon (:)</button>
-      <button class="format-btn" data-sep="dash" type="button">Dash (— or -)</button>
+      <button class="format-btn" data-sep="dash" type="button">Dash (hyphen or em dash)</button>
       <button class="format-btn" data-sep="qa" type="button">Q: / A:</button>
     </div>
     <button class="example-btn" id="load-example" type="button">Load example deck &rarr;</button>
@@ -231,7 +231,7 @@ Photosynthesis	The process by which plants convert light energy into chemical en
   <div class="container">
     <div class="cta-block">
       <h2>Skip the copy-paste. Generate cards from any source.</h2>
-      <p>StudyEdge AI generates flashcards from a PDF, syllabus, or a single topic name — then runs them inside a structured study session with quizzes and an AI tutor.</p>
+      <p>StudyEdge AI generates flashcards from a PDF, syllabus, or a single topic name, then runs them inside a structured study session with quizzes and an AI tutor.</p>
       <a href="/app?signup=1" class="btn btn-primary btn-lg">Try StudyEdge AI Free</a>
       <p class="cta-fine">7-day free trial. Card required. Cancel anytime.</p>
     </div>
@@ -309,7 +309,7 @@ Photosynthesis	The process by which plants convert light energy into chemical en
     var separators = {
       tab: /\t/,
       colon: /\s*:\s+/,
-      dash: /\s*[—-]\s+/,
+      dash: /\s*\p{Pd}\s+/u,
       qa: /^Q[:.]\s*/i
     };
     if (sep === 'qa') {

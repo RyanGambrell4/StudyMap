@@ -331,7 +331,7 @@
     gpaOut.textContent = gpa.toFixed(2);
     creditsOut.textContent = totalCredits.toString();
     pointsOut.textContent = totalPoints.toFixed(1);
-    standingOut.textContent = totalCredits > 0 ? gpaStanding(gpa) : '—';
+    standingOut.textContent = totalCredits > 0 ? gpaStanding(gpa) : 'n/a';
   }
 
   function attachRow(row) {
@@ -374,7 +374,7 @@
     var target = parseFloat(tgtEl.value);
     var weight = parseFloat(wtEl.value) / 100;
     if (isNaN(current) || isNaN(target) || isNaN(weight) || weight <= 0) {
-      scoreEl.textContent = '—';
+      scoreEl.textContent = 'n/a';
       verdictEl.innerHTML = 'Enter your current grade, target, and final exam weight to see the exact score you need.';
       return;
     }
@@ -391,7 +391,7 @@
     } else if (needed >= 70) {
       msg = 'You need a <strong>' + neededFmt + '</strong> on the final. Very achievable with a focused study plan for the exam material.';
     } else {
-      msg = 'You need a <strong>' + neededFmt + '</strong> on the final. Comfortable. Do not coast though — showing up unprepared can still cost you.';
+      msg = 'You need a <strong>' + neededFmt + '</strong> on the final. Comfortable. Do not coast, though. Showing up unprepared can still cost you.';
     }
     verdictEl.innerHTML = msg;
   }
