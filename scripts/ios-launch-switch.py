@@ -56,6 +56,12 @@ PHRASES = [
  (' A native iOS app is coming soon.',
   ' The native iOS app is on the App Store (search "StudyEdge AI").'),
 ]
+# Covers: product shots move from the browser frame to the phone frame (alternate kept in
+# scripts/build-covers.mjs). Rerunning the generator re-renders only the product covers,
+# because the device is part of each cover's signature.
+PHRASES.append(("const PRODUCT_DEVICE = process.env.COVER_DEVICE || 'browser'",
+                "const PRODUCT_DEVICE = process.env.COVER_DEVICE || 'phone'"))
+
 OS_OLD, OS_NEW = '"operatingSystem": "Web"', '"operatingSystem": "Web, iOS"'
 
 # file -> expected number of PHRASES replacements (recorded 2026-10-30)
@@ -77,7 +83,8 @@ PHRASE_FILES = {
  "public/quizlet-qchat-alternative.html": 1,
  "public/studyedge-ai.html": 1,
  "public/studyedge-company.html": 5,
- "public/what-is-studyedge-ai.html": 4
+ "public/what-is-studyedge-ai.html": 4,
+ "scripts/build-covers.mjs": 1
 }
 # files whose JSON-LD said "Web, iOS" before 2713eea1
 OS_FILES = [
@@ -155,7 +162,8 @@ def main():
     for rel, (_, b) in changes.items():
         open(os.path.join(ROOT, rel), 'w', encoding='utf-8').write(b)
     subprocess.run([sys.executable, os.path.join(ROOT, 'scripts', 'build-compare.py')], check=True)
-    print(f'\nApplied to {len(changes)} files and rebuilt /compare. Now run the build, npm test and facts:check.')
+    subprocess.run(['node', os.path.join(ROOT, 'scripts', 'build-covers.mjs')], check=True)
+    print(f'\nApplied to {len(changes)} files, rebuilt /compare and the product covers. Now run the build, npm test and facts:check.')
 
 
 if __name__ == '__main__':

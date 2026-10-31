@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "npm run seo:hidden && vite build && npm run landing:precompile",
+    "build": "node scripts/build-covers.mjs && npm run seo:hidden && vite build && npm run landing:precompile",
     "lint": "eslint .",
     "preview": "vite preview",
     "test": "vitest run && node scripts/check-facts.mjs",
@@ -20,7 +20,8 @@
     "android:sync": "VITE_ANDROID_BUILD=1 vite build && npx cap sync android",
     "seo:hidden": "node scripts/assertNoHiddenContent.mjs",
     "landing:precompile": "node scripts/precompileLanding.mjs",
-    "covers:samples": "node scripts/build-covers.mjs --samples"
+    "covers:samples": "node scripts/build-covers.mjs --samples",
+    "covers": "node scripts/build-covers.mjs"
   },
   "dependencies": {
     "@apple/app-store-server-library": "^3.1.0",

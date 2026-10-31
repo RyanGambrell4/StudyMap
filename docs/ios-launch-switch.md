@@ -16,6 +16,17 @@ The script refuses to write if any file below has changed since it was recorded,
 this list and the script if you edit one of these sentences in the meantime. Generated pages in
 `public/compare/` are rebuilt from `content/compare/*.json`, so the JSON is the source.
 
+## Cover images
+
+Product-shot covers (app, feature and comparison pages) show the web app in a browser
+window while the iOS app is coming soon. A phone-frame version is kept in the generator
+(samples: `docs/cover-samples/phone-alternate/`). The switch flips one line and the script
+then reruns the generator, which re-renders only the product covers:
+
+| File:line | Now | After launch |
+|---|---|---|
+| `scripts/build-covers.mjs`:49 | const PRODUCT_DEVICE = process.env.COVER_DEVICE \|\| 'browser' | const PRODUCT_DEVICE = process.env.COVER_DEVICE \|\| 'phone' |
+
 ## Every line (61 changes in 49 files)
 
 | File:line | Now | After launch |

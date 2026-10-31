@@ -356,3 +356,13 @@ h1 .italic, h2 .italic, .hero h1 span, .hero-title span, .hero h1 em {
 @media (max-width: 640px) {
   table.data-table, table.pt-table, .section table, main table, .container > table { display: block; overflow-x: auto; max-width: 100%; }
 }
+
+/* Generated cover and real app screens on product pages (replaced the stock photos). */
+img.page-cover { width: 100% !important; height: auto !important; aspect-ratio: 1200 / 630 !important; object-fit: contain !important; border-radius: 14px; background: #FBFAF7; }
+.hero-photo:has(img.page-cover), .hero-shot:has(img.page-cover) { height: auto !important; aspect-ratio: auto !important; min-height: 0 !important; background: none !important; }
+img.app-shot { width: 100% !important; height: auto !important; aspect-ratio: 1600 / 1000 !important; object-fit: cover !important; object-position: left top; border-radius: 12px; border: 1px solid rgba(0,0,0,0.07); }
+.fr-visual:has(img.app-shot), .ms-shot:has(img.app-shot), .visual-strip-card:has(img.app-shot) { height: auto !important; min-height: 0 !important; aspect-ratio: auto !important; }
+
+/* Decorative badges were placed over the old stock photos; they would cover the generated cover. */
+.hero-photo:has(img.page-cover) .badge, .hero-photo:has(img.page-cover) [class*="badge"], .hero-shot:has(img.page-cover) [class*="badge"] { display: none !important; }
+.hero-se h1 { font-family: var(--serif) !important; font-weight: 600 !important; letter-spacing: -0.015em !important; }

@@ -34,6 +34,9 @@ def base(url):
 
 def thumb(url, w=720, h=450):
     if not url: return url
+    # generated covers (scripts/build-covers.mjs): use the WebP next to the PNG
+    if '/covers/' in url:
+        return '/covers/' + url.split('/covers/', 1)[1].rsplit('.', 1)[0] + '.webp'
     url = re.sub(r'([?&])w=\d+', rf'\1w={w}', url)
     return re.sub(r'([?&])h=\d+', rf'\1h={h}', url)
 
@@ -55,14 +58,14 @@ for f in sorted(glob.glob('*.html')):
     hub = re.search(r'"@type":\s*"CollectionPage"', t)
     posts[slug] = dict(
         title=re.sub(r'\s+', ' ', re.sub(r'<[^>]+>', '', h1.group(1))).strip() if h1 else slug,
-        img=(hero.group(1) if hero else (og.group(1) if og else None)),
+        img=(og.group(1) if og and '/covers/' in og.group(1) else hero.group(1) if hero else (og.group(1) if og else None)),
         cat=category.get(slug), hub=bool(hub))
 
 # ---------------------------------------------------------------- index cards
 def card_cover(m):
     slug, cls, tag = m.group(1), m.group(2), m.group(3)
     img = thumb(posts.get(slug, {}).get('img'))
-    pic = f'<img src="{img}" alt="" loading="lazy" width="720" height="450">' if img else ''
+    pic = f'<img src="{img}" alt="" loading="lazy" width="1200" height="630">' if img else ''
     return (f'<a href="/blog/{slug}" class="b-card">\n        <div class="b-cover {cls}">\n          {pic}\n'
             f'          <span class="b-cover-tag">{tag}</span>\n        </div>')
 
@@ -95,7 +98,7 @@ def keep_reading(slug):
         c = p['cat'] or 'Study Techniques'
         cards.append(
             f'      <a class="kr-card" href="/blog/{s}">\n'
-            f'        <img src="{thumb(p["img"])}" alt="" loading="lazy" width="720" height="450">\n'
+            f'        <img src="{thumb(p["img"])}" alt="" loading="lazy" width="1200" height="630">\n'
             f'        <span class="kr-cat">{c}</span>\n'
             f'        <span class="kr-title">{html.escape(html.unescape(p["title"]), quote=False)}</span>\n'
             f'      </a>')

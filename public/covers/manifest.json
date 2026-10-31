@@ -1,0 +1,1622 @@
+{
+ "about.html": {
+  "sig": "0a2d8b75a73fae84b4202faa1bfb97aa8378d029",
+  "template": "product",
+  "alt": "Cover for \"The AI study app built for students done winging it.\": the StudyEdge AI Grade Hub screen shown in a browser window, beside the page title."
+ },
+ "active-recall-app.html": {
+  "sig": "1cffaa1573d0fcf1834db69cc627b9c703950764",
+  "template": "editorial",
+  "alt": "Cover for \"Re-reading your notesisn't studying.This is.\": the title in serif type with a line drawing of a stack of flashcards."
+ },
+ "ai-flashcard-maker.html": {
+  "sig": "c6589925a9c18bf3fcb9264bca518bc312af4ca6",
+  "template": "product",
+  "alt": "Cover for \"Free AI flashcard maker for college students\": the StudyEdge AI Review Queue screen shown in a browser window, beside the page title."
+ },
+ "ai-homework-helper.html": {
+  "sig": "20022301fa0a72bc68e593778de38abe8a981c6b",
+  "template": "product",
+  "alt": "Cover for \"An AI Homework Helper That Teaches You, Not Just Gives You Answers\": the StudyEdge AI Grade Hub screen shown in a browser window, beside the page title."
+ },
+ "ai-study-coach.html": {
+  "sig": "d84594f834ce89d308fad16c6bf3d7f2ee9e01ed",
+  "template": "product",
+  "alt": "Cover for \"The AI study coach that actually tells you what to study.\": the StudyEdge AI Grade Hub screen shown in a browser window, beside the page title."
+ },
+ "ai-study-planner.html": {
+  "sig": "25b4f6a936deb7e7e08b90e3095dd25dfb9279dc",
+  "template": "product",
+  "alt": "Cover for \"The AI study planner that actually runs the plan.\": the StudyEdge AI Grade Hub screen shown in a browser window, beside the page title."
+ },
+ "ai-study-tools.html": {
+  "sig": "26a2b9aeeb75bb3dd129d8e1f4fdfe31697e45f6",
+  "template": "product",
+  "alt": "Cover for \"AI Study Tools That Actually Help You Pass\": the StudyEdge AI Grade Hub screen shown in a browser window, beside the page title."
+ },
+ "ai-tutor.html": {
+  "sig": "f031e2f42b35079f1d63420df4d126069aa5a00d",
+  "template": "product",
+  "alt": "Cover for \"An AI tutor that explains it, then quizzes you on it\": the StudyEdge AI Grade Hub screen shown in a browser window, beside the page title."
+ },
+ "anki-alternative.html": {
+  "sig": "dae3783ef169f6702a74a9624024b081c74617a4",
+  "template": "product",
+  "alt": "Cover for \"The Anki Alternative That Does the Work For You\": the StudyEdge AI Review Queue screen shown in a browser window, beside the page title."
+ },
+ "anki-vs-quizlet.html": {
+  "sig": "be7aaa822368422f07425ad5a8f99973154d5e90",
+  "template": "editorial",
+  "alt": "Cover for \"Anki vs Quizlet, Which Is Actually Better for College?\": the title in serif type with a line drawing of a stack of flashcards."
+ },
+ "ap-biology-study-schedule.html": {
+  "sig": "764b3296e078edddd5c78dd56ba1dc7f478284d8",
+  "template": "editorial",
+  "alt": "Cover for \"AP Biology Study Schedule\": the title in serif type with a line drawing of a calendar."
+ },
+ "ap-calculus-ab-study-schedule.html": {
+  "sig": "eebd93d8d371a8f74348590092a984eff8c9c296",
+  "template": "editorial",
+  "alt": "Cover for \"AP Calculus AB Study Schedule\": the title in serif type with a line drawing of a calendar."
+ },
+ "ap-chemistry-study-schedule.html": {
+  "sig": "62e70085549ed2cb3563e1349954992bdbc25516",
+  "template": "editorial",
+  "alt": "Cover for \"AP Chemistry Study Schedule\": the title in serif type with a line drawing of a calendar."
+ },
+ "ap-english-language-study-schedule.html": {
+  "sig": "b18683b1aa230654985f846e935659a5d9e88d10",
+  "template": "editorial",
+  "alt": "Cover for \"AP English Language Study Schedule\": the title in serif type with a line drawing of a calendar."
+ },
+ "ap-exam-study-schedule-templates.html": {
+  "sig": "583e61dd4dc3811ce151b8094684ee31ed77e61b",
+  "template": "editorial",
+  "alt": "Cover for \"Free AP exam study schedules\": the title in serif type with a line drawing of a calendar."
+ },
+ "ap-physics-1-study-schedule.html": {
+  "sig": "d4747835012cb8d56d45386114c6e6d107804c86",
+  "template": "editorial",
+  "alt": "Cover for \"AP Physics 1 Study Schedule\": the title in serif type with a line drawing of a calendar."
+ },
+ "ap-psychology-study-schedule.html": {
+  "sig": "e18252d9effd89b029ddb43c3bf2af11b67f1824",
+  "template": "editorial",
+  "alt": "Cover for \"AP Psychology Study Schedule\": the title in serif type with a line drawing of a calendar."
+ },
+ "ap-score-calculator.html": {
+  "sig": "a9a302eceb19e61e3f2e8b0d46cb4530b8918ce4",
+  "template": "editorial",
+  "alt": "Cover for \"AP Score Calculator\": the title in serif type with a line drawing of a light bulb."
+ },
+ "ap-statistics-study-schedule.html": {
+  "sig": "af40851c11ed6847896350ee23d7e8307728519f",
+  "template": "editorial",
+  "alt": "Cover for \"AP Statistics Study Schedule\": the title in serif type with a line drawing of a calendar."
+ },
+ "ap-world-history-study-schedule.html": {
+  "sig": "6e28acf8df8f7ebdadcafac3dcf2a38c4c15cb98",
+  "template": "editorial",
+  "alt": "Cover for \"AP World History Study Schedule\": the title in serif type with a line drawing of a calendar."
+ },
+ "apush-study-schedule.html": {
+  "sig": "ceda803869ac2f88bb0849ea8534726dd44baeb9",
+  "template": "editorial",
+  "alt": "Cover for \"APUSH Study Schedule\": the title in serif type with a line drawing of a calendar."
+ },
+ "best-ai-for-students.html": {
+  "sig": "2d06fc07bbe9cbd1cf8c74e4e2ac1636a85fc15d",
+  "template": "product",
+  "alt": "Cover for \"The Best AI Tools for Students in 2026\": the StudyEdge AI Grade Hub screen shown in a browser window, beside the page title."
+ },
+ "best-study-app-by-major.html": {
+  "sig": "6b18a35842da7bc707ee4c520e1aea01684563bf",
+  "template": "product",
+  "alt": "Cover for \"Best study app for your major\": the StudyEdge AI Grade Hub screen shown in a browser window, beside the page title."
+ },
+ "best-study-app-by-university.html": {
+  "sig": "1cf295423ac5eb7bbfb048ff83581ec2b77c9e89",
+  "template": "product",
+  "alt": "Cover for \"Best study app for your school\": the StudyEdge AI Grade Hub screen shown in a browser window, beside the page title."
+ },
+ "best-study-app-for-accounting-students.html": {
+  "sig": "00da3ac02513bddca2e7cb9ad3c15e71869a5067",
+  "template": "product",
+  "alt": "Cover for \"The best study app for accounting students\": the StudyEdge AI Grade Hub screen shown in a browser window, beside the page title."
+ },
+ "best-study-app-for-architecture-students.html": {
+  "sig": "4b3a6697959d073a6008b624511bbf033551175e",
+  "template": "product",
+  "alt": "Cover for \"The best study app for architecture students\": the StudyEdge AI Grade Hub screen shown in a browser window, beside the page title."
+ },
+ "best-study-app-for-arizona-state-students.html": {
+  "sig": "de36ed8c9de40ab575c5c684e56aa383f10d6ac9",
+  "template": "product",
+  "alt": "Cover for \"The best study app for Arizona State students\": the StudyEdge AI Grade Hub screen shown in a browser window, beside the page title."
+ },
+ "best-study-app-for-biology-majors.html": {
+  "sig": "dbcf49f03705c9d75181b3f66f968e6c681053c3",
+  "template": "product",
+  "alt": "Cover for \"The best study app for biology majors\": the StudyEdge AI Grade Hub screen shown in a browser window, beside the page title."
+ },
+ "best-study-app-for-boston-university-students.html": {
+  "sig": "4a0ac44bdef30f12be1f6e1f9ebb031e5967d292",
+  "template": "product",
+  "alt": "Cover for \"The best study app for Boston University students\": the StudyEdge AI Grade Hub screen shown in a browser window, beside the page title."
+ },
+ "best-study-app-for-business-students.html": {
+  "sig": "51225b7a733c4d0485aff76a472953e290a72841",
+  "template": "product",
+  "alt": "Cover for \"The best study app for business students\": the StudyEdge AI Grade Hub screen shown in a browser window, beside the page title."
+ },
+ "best-study-app-for-canadian-university-students.html": {
+  "sig": "9bfff3b9d05079912f9ad0a7bdf05e63d6866717",
+  "template": "product",
+  "alt": "Cover for \"The Study App for Canadian University Students\": the StudyEdge AI Grade Hub screen shown in a browser window, beside the page title."
+ },
+ "best-study-app-for-carnegie-mellon-students.html": {
+  "sig": "3e8b740b9de6bc4433e9668685c2a1c12ddb5021",
+  "template": "product",
+  "alt": "Cover for \"The best study app for CMU students\": the StudyEdge AI Grade Hub screen shown in a browser window, beside the page title."
+ },
+ "best-study-app-for-case-western-students.html": {
+  "sig": "1d03f45ec67c269636e741d0c82a252c0f3cf0ca",
+  "template": "product",
+  "alt": "Cover for \"Best Study App for Case Western Reserve Students\": the StudyEdge AI Grade Hub screen shown in a browser window, beside the page title."
+ },
+ "best-study-app-for-chemistry-majors.html": {
+  "sig": "7976d7e6660741d3b39c8edd9f4bf01ec95a4993",
+  "template": "product",
+  "alt": "Cover for \"The best study app for chemistry majors\": the StudyEdge AI Grade Hub screen shown in a browser window, beside the page title."
+ },
+ "best-study-app-for-columbia-students.html": {
+  "sig": "ffa19b081067ac2a3508f4dd4648199c9785ba61",
+  "template": "product",
+  "alt": "Cover for \"The best study app for Columbia students\": the StudyEdge AI Grade Hub screen shown in a browser window, beside the page title."
+ },
+ "best-study-app-for-communications-students.html": {
+  "sig": "ce63be631576b906a4d81b35fdbac2963ca80c36",
+  "template": "product",
+  "alt": "Cover for \"The best study app for communications students\": the StudyEdge AI Grade Hub screen shown in a browser window, beside the page title."
+ },
+ "best-study-app-for-computer-science-students.html": {
+  "sig": "03a03c6692c1c80be23e2f7e6e6920d5687d30ee",
+  "template": "product",
+  "alt": "Cover for \"The best study app for computer science students\": the StudyEdge AI Grade Hub screen shown in a browser window, beside the page title."
+ },
+ "best-study-app-for-cornell-students.html": {
+  "sig": "2d9838db19cec80132d47513f41e4bd8ac1803f3",
+  "template": "product",
+  "alt": "Cover for \"The best study app for Cornell students\": the StudyEdge AI Grade Hub screen shown in a browser window, beside the page title."
+ },
+ "best-study-app-for-criminal-justice-students.html": {
+  "sig": "cdf2721525a8f84a77b58744beb0bf25e808095d",
+  "template": "product",
+  "alt": "Cover for \"The best study app for criminal justice students\": the StudyEdge AI Grade Hub screen shown in a browser window, beside the page title."
+ },
+ "best-study-app-for-data-science-students.html": {
+  "sig": "dca4847dad53545124d57fe08a6d360056cff044",
+  "template": "product",
+  "alt": "Cover for \"The best study app for data science students\": the StudyEdge AI Grade Hub screen shown in a browser window, beside the page title."
+ },
+ "best-study-app-for-dental-students.html": {
+  "sig": "da395af07f18bd39328be97979b0f06b6a74c56b",
+  "template": "product",
+  "alt": "Cover for \"The best study app for dental students\": the StudyEdge AI Grade Hub screen shown in a browser window, beside the page title."
+ },
+ "best-study-app-for-duke-students.html": {
+  "sig": "1a59d636f344f841b45cd7f02b9f86fbc97b948f",
+  "template": "product",
+  "alt": "Cover for \"The best study app for Duke students\": the StudyEdge AI Grade Hub screen shown in a browser window, beside the page title."
+ },
+ "best-study-app-for-economics-students.html": {
+  "sig": "f976364573d2356ec85d6a843dcb8962acd51e68",
+  "template": "product",
+  "alt": "Cover for \"The best study app for economics students\": the StudyEdge AI Grade Hub screen shown in a browser window, beside the page title."
+ },
+ "best-study-app-for-education-majors.html": {
+  "sig": "675942d41ffa2d52f7bbfcb05bea112b37ab5cd8",
+  "template": "product",
+  "alt": "Cover for \"The best study app for education majors\": the StudyEdge AI Grade Hub screen shown in a browser window, beside the page title."
+ },
+ "best-study-app-for-emory-students.html": {
+  "sig": "bc311d42a870614b39ace08e62c6012c1d3e67c4",
+  "template": "product",
+  "alt": "Cover for \"Best Study App for Emory University Students\": the StudyEdge AI Grade Hub screen shown in a browser window, beside the page title."
+ },
+ "best-study-app-for-engineering-students.html": {
+  "sig": "1214f6e5e9d83bec839c96d9ca1615dad76a7854",
+  "template": "product",
+  "alt": "Cover for \"The best study app for engineering students\": the StudyEdge AI Grade Hub screen shown in a browser window, beside the page title."
+ },
+ "best-study-app-for-english-majors.html": {
+  "sig": "9c28ede476530f2b6ba5f633375d4fe1768bd0a5",
+  "template": "product",
+  "alt": "Cover for \"The best study app for English majors\": the StudyEdge AI Grade Hub screen shown in a browser window, beside the page title."
+ },
+ "best-study-app-for-finance-students.html": {
+  "sig": "6612a6d96b8489b1fc247eacd7597fcebb452277",
+  "template": "product",
+  "alt": "Cover for \"The best study app for finance students\": the StudyEdge AI Grade Hub screen shown in a browser window, beside the page title."
+ },
+ "best-study-app-for-florida-state-students.html": {
+  "sig": "ec4c7fe381daafc81888c1638107bdab7c28811c",
+  "template": "product",
+  "alt": "Cover for \"The best study app for Florida State students\": the StudyEdge AI Grade Hub screen shown in a browser window, beside the page title."
+ },
+ "best-study-app-for-foreign-language-students.html": {
+  "sig": "302f6ae00d496a0725e1d8c5e08b3e67ef04ea11",
+  "template": "product",
+  "alt": "Cover for \"The best study app for language students\": the StudyEdge AI Grade Hub screen shown in a browser window, beside the page title."
+ },
+ "best-study-app-for-georgetown-students.html": {
+  "sig": "fc1fdf9a9ad5291dcf440f60e1f7f0ac29ecbd45",
+  "template": "product",
+  "alt": "Cover for \"Best Study App for Georgetown Students\": the StudyEdge AI Grade Hub screen shown in a browser window, beside the page title."
+ },
+ "best-study-app-for-georgia-tech-students.html": {
+  "sig": "a10c58cd23f007dd4b8b050731d9e708cda6fd8c",
+  "template": "product",
+  "alt": "Cover for \"The Best Study App for Georgia Tech Students\": the StudyEdge AI Grade Hub screen shown in a browser window, beside the page title."
+ },
+ "best-study-app-for-harvard-students.html": {
+  "sig": "ec11051f0394cee6058bd27aee4b1bee4d7a4f99",
+  "template": "product",
+  "alt": "Cover for \"The best study app for Harvard students\": the StudyEdge AI Grade Hub screen shown in a browser window, beside the page title."
+ },
+ "best-study-app-for-history-students.html": {
+  "sig": "1e911821f3b6a4be73a4875d6d49e0e3a8bfcea0",
+  "template": "product",
+  "alt": "Cover for \"The best study app for history students\": the StudyEdge AI Grade Hub screen shown in a browser window, beside the page title."
+ },
+ "best-study-app-for-kinesiology-students.html": {
+  "sig": "654bf2b40ffb35ecbfc4609fc879f5d2003993ac",
+  "template": "product",
+  "alt": "Cover for \"The best study app for kinesiology students\": the StudyEdge AI Grade Hub screen shown in a browser window, beside the page title."
+ },
+ "best-study-app-for-law-students.html": {
+  "sig": "778490cd538f52dd962384fe345b0402cf3184e9",
+  "template": "product",
+  "alt": "Cover for \"The best study app for law students\": the StudyEdge AI Grade Hub screen shown in a browser window, beside the page title."
+ },
+ "best-study-app-for-marketing-students.html": {
+  "sig": "34b4a6f725bce1b774f0944b85c9d22e332eecc9",
+  "template": "product",
+  "alt": "Cover for \"The best study app for marketing students\": the StudyEdge AI Grade Hub screen shown in a browser window, beside the page title."
+ },
+ "best-study-app-for-math-students.html": {
+  "sig": "37e9a54e07026b483e4988ddef40e8311ddabd42",
+  "template": "product",
+  "alt": "Cover for \"The best study app for math students\": the StudyEdge AI Grade Hub screen shown in a browser window, beside the page title."
+ },
+ "best-study-app-for-mcgill-students.html": {
+  "sig": "0ee77eec91508c381b612586c79d24ae021eff36",
+  "template": "product",
+  "alt": "Cover for \"The Best Study App for McGill Students\": the StudyEdge AI Grade Hub screen shown in a browser window, beside the page title."
+ },
+ "best-study-app-for-mcmaster-students.html": {
+  "sig": "633b49119f84e9b41838ddd4f3ba4adf317f245c",
+  "template": "product",
+  "alt": "Cover for \"The Best Study App for McMaster Students\": the StudyEdge AI Grade Hub screen shown in a browser window, beside the page title."
+ },
+ "best-study-app-for-michigan-state-students.html": {
+  "sig": "abfc415d1ac817b0ab41d2bda0b322cf48c00c98",
+  "template": "product",
+  "alt": "Cover for \"The best study app for Michigan State students\": the StudyEdge AI Grade Hub screen shown in a browser window, beside the page title."
+ },
+ "best-study-app-for-mit-students.html": {
+  "sig": "51b333bac138a473e8331089e74a56b1595f677d",
+  "template": "product",
+  "alt": "Cover for \"The best study app for MIT students\": the StudyEdge AI Grade Hub screen shown in a browser window, beside the page title."
+ },
+ "best-study-app-for-northeastern-university-students.html": {
+  "sig": "d87b30a3146df9dc02b8207bbfc60d86e977ac33",
+  "template": "product",
+  "alt": "Cover for \"Best Study App for Northeastern University Students\": the StudyEdge AI Grade Hub screen shown in a browser window, beside the page title."
+ },
+ "best-study-app-for-northwestern-students.html": {
+  "sig": "17f122d812ece17bf3ec79378f6b2728f55ef0f7",
+  "template": "product",
+  "alt": "Cover for \"The best study app for Northwestern students\": the StudyEdge AI Grade Hub screen shown in a browser window, beside the page title."
+ },
+ "best-study-app-for-notre-dame-students.html": {
+  "sig": "04720cfecc805c1891f9558e4088329f3c28170d",
+  "template": "product",
+  "alt": "Cover for \"The best study app for Notre Dame students\": the StudyEdge AI Grade Hub screen shown in a browser window, beside the page title."
+ },
+ "best-study-app-for-nursing-students.html": {
+  "sig": "0d7670fae151a5bcd6e0155e93f8a810d181cbc3",
+  "template": "product",
+  "alt": "Cover for \"The best study app for nursing students\": the StudyEdge AI Grade Hub screen shown in a browser window, beside the page title."
+ },
+ "best-study-app-for-nwu-students.html": {
+  "sig": "830b8e094faeaf30a831070c2e718b5ffcdcf97a",
+  "template": "product",
+  "alt": "Cover for \"The Best Study App for NWU Students\": the StudyEdge AI Grade Hub screen shown in a browser window, beside the page title."
+ },
+ "best-study-app-for-nyu-students.html": {
+  "sig": "f6c946e5e46070842f6824ba119c39f8f98f36ef",
+  "template": "product",
+  "alt": "Cover for \"The Best Study App for NYU Students\": the StudyEdge AI Grade Hub screen shown in a browser window, beside the page title."
+ },
+ "best-study-app-for-ohio-state-students.html": {
+  "sig": "a92f71c588aee6ab892ff3453cd722d61c0ec5de",
+  "template": "product",
+  "alt": "Cover for \"The Best Study App for Ohio State Students\": the StudyEdge AI Grade Hub screen shown in a browser window, beside the page title."
+ },
+ "best-study-app-for-penn-state-students.html": {
+  "sig": "d867b61ee1b47b8dd464fc3990804553dc7282f7",
+  "template": "product",
+  "alt": "Cover for \"The Best Study App for Penn State Students\": the StudyEdge AI Grade Hub screen shown in a browser window, beside the page title."
+ },
+ "best-study-app-for-pharmacy-students.html": {
+  "sig": "6648a89b61b27c3c73274efa234a37685269370d",
+  "template": "product",
+  "alt": "Cover for \"The best study app for pharmacy students\": the StudyEdge AI Grade Hub screen shown in a browser window, beside the page title."
+ },
+ "best-study-app-for-political-science-students.html": {
+  "sig": "4878e894c81d911c88a15189d3798574fec4c870",
+  "template": "product",
+  "alt": "Cover for \"The best study app for political science students\": the StudyEdge AI Grade Hub screen shown in a browser window, beside the page title."
+ },
+ "best-study-app-for-pre-med-students.html": {
+  "sig": "16e619e92e3bfa5876cc798e40feef6905140f4e",
+  "template": "product",
+  "alt": "Cover for \"The best study app for pre-med students\": the StudyEdge AI Grade Hub screen shown in a browser window, beside the page title."
+ },
+ "best-study-app-for-princeton-students.html": {
+  "sig": "322734297da669c10ad8643d2fb843e3412ff098",
+  "template": "product",
+  "alt": "Cover for \"Best Study App for Princeton Students\": the StudyEdge AI Grade Hub screen shown in a browser window, beside the page title."
+ },
+ "best-study-app-for-psychology-students.html": {
+  "sig": "94637045ec621d5f588aab1f83cfc6bc4e765075",
+  "template": "product",
+  "alt": "Cover for \"The best study app for psychology students\": the StudyEdge AI Grade Hub screen shown in a browser window, beside the page title."
+ },
+ "best-study-app-for-purdue-students.html": {
+  "sig": "12031b7174ab8e8503932c11b18fe37e946b149a",
+  "template": "product",
+  "alt": "Cover for \"The Best Study App for Purdue Students\": the StudyEdge AI Grade Hub screen shown in a browser window, beside the page title."
+ },
+ "best-study-app-for-queens-university-students.html": {
+  "sig": "2e613b23e26f8f848733125882a63b1cdfeed17e",
+  "template": "product",
+  "alt": "Cover for \"The Best Study App for Queen's University Students\": the StudyEdge AI Grade Hub screen shown in a browser window, beside the page title."
+ },
+ "best-study-app-for-rutgers-students.html": {
+  "sig": "0355b04173ba72478935e34a07d9ca6a61f48e8a",
+  "template": "product",
+  "alt": "Cover for \"The best study app for Rutgers students\": the StudyEdge AI Grade Hub screen shown in a browser window, beside the page title."
+ },
+ "best-study-app-for-sociology-students.html": {
+  "sig": "ef53be9b44496b723a25cd39b1a05d0e5dfb244c",
+  "template": "product",
+  "alt": "Cover for \"The best study app for sociology students\": the StudyEdge AI Grade Hub screen shown in a browser window, beside the page title."
+ },
+ "best-study-app-for-south-african-students.html": {
+  "sig": "4aa91d6acb256ff3996d8dcdd627102cbf3aef93",
+  "template": "product",
+  "alt": "Cover for \"The Study App Built for South African University Students\": the StudyEdge AI Grade Hub screen shown in a browser window, beside the page title."
+ },
+ "best-study-app-for-stanford-students.html": {
+  "sig": "8343880f343315f33c4ebaead113ec3f24524625",
+  "template": "product",
+  "alt": "Cover for \"The best study app for Stanford students\": the StudyEdge AI Grade Hub screen shown in a browser window, beside the page title."
+ },
+ "best-study-app-for-statistics-students.html": {
+  "sig": "2e7c044e6b646d0dd3d73dd983ef0d52e6b36522",
+  "template": "product",
+  "alt": "Cover for \"The best study app for statistics students\": the StudyEdge AI Grade Hub screen shown in a browser window, beside the page title."
+ },
+ "best-study-app-for-stellenbosch-students.html": {
+  "sig": "845f8d2b95c593bec9c29511d966d1b96af00441",
+  "template": "product",
+  "alt": "Cover for \"The Best Study App for Stellenbosch University Students\": the StudyEdge AI Grade Hub screen shown in a browser window, beside the page title."
+ },
+ "best-study-app-for-students.html": {
+  "sig": "ff86c32c78941a7f5544fde41997c1d3b2673096",
+  "template": "product",
+  "alt": "Cover for \"The Best Study App for College Students\": the StudyEdge AI Grade Hub screen shown in a browser window, beside the page title."
+ },
+ "best-study-app-for-texas-am-students.html": {
+  "sig": "f2c935041e71a622ddc15a7965a1a0f6a5fd7524",
+  "template": "product",
+  "alt": "Cover for \"The Best Study App for Texas A&M Students\": the StudyEdge AI Grade Hub screen shown in a browser window, beside the page title."
+ },
+ "best-study-app-for-tulane-students.html": {
+  "sig": "8d64337a0ae357afb642759279e0d4f1a2e316d6",
+  "template": "product",
+  "alt": "Cover for \"Best Study App for Tulane University Students\": the StudyEdge AI Grade Hub screen shown in a browser window, beside the page title."
+ },
+ "best-study-app-for-ubc-students.html": {
+  "sig": "b946c0c1896b762a5ef284d6a84df2f879aecc61",
+  "template": "product",
+  "alt": "Cover for \"The Best Study App for UBC Students\": the StudyEdge AI Grade Hub screen shown in a browser window, beside the page title."
+ },
+ "best-study-app-for-uc-berkeley-students.html": {
+  "sig": "6b630abbbdd5326163d09a60afeed8b19acafba8",
+  "template": "product",
+  "alt": "Cover for \"The best study app for UC Berkeley students\": the StudyEdge AI Grade Hub screen shown in a browser window, beside the page title."
+ },
+ "best-study-app-for-ucla-students.html": {
+  "sig": "1ba0274435a94c0bbf1338401737794b269f16a4",
+  "template": "product",
+  "alt": "Cover for \"The Best Study App for UCLA Students\": the StudyEdge AI Grade Hub screen shown in a browser window, beside the page title."
+ },
+ "best-study-app-for-uct-students.html": {
+  "sig": "4a1648fd8788179dd31807bb956a5686b2a2c2cd",
+  "template": "product",
+  "alt": "Cover for \"The Best Study App for UCT Students\": the StudyEdge AI Grade Hub screen shown in a browser window, beside the page title."
+ },
+ "best-study-app-for-uiuc-students.html": {
+  "sig": "0633c1084dc63fea02adbf16ad9190d1a060d300",
+  "template": "product",
+  "alt": "Cover for \"Best Study App for UIUC Students\": the StudyEdge AI Grade Hub screen shown in a browser window, beside the page title."
+ },
+ "best-study-app-for-uj-students.html": {
+  "sig": "a511a15aa885e37978215497d18e9e82bfc9eebf",
+  "template": "product",
+  "alt": "Cover for \"The Best Study App for UJ Students\": the StudyEdge AI Grade Hub screen shown in a browser window, beside the page title."
+ },
+ "best-study-app-for-ukzn-students.html": {
+  "sig": "890102beddec73ac7348be4c4e152b828b4b28b0",
+  "template": "product",
+  "alt": "Cover for \"The Best Study App for UKZN Students\": the StudyEdge AI Grade Hub screen shown in a browser window, beside the page title."
+ },
+ "best-study-app-for-unc-chapel-hill-students.html": {
+  "sig": "5d078a9d2a8886e2b0d8fe2b1ed412e93ae46552",
+  "template": "product",
+  "alt": "Cover for \"Best Study App for UNC Chapel Hill Students\": the StudyEdge AI Grade Hub screen shown in a browser window, beside the page title."
+ },
+ "best-study-app-for-unisa-students.html": {
+  "sig": "473ffb58ae59634fb4a01b4f05e4ea13ce82fbfc",
+  "template": "product",
+  "alt": "Cover for \"The Best Study App for UNISA Students\": the StudyEdge AI Grade Hub screen shown in a browser window, beside the page title."
+ },
+ "best-study-app-for-university-of-alberta-students.html": {
+  "sig": "db2cfc0589dc1a6586158026c8a4e02da6951173",
+  "template": "product",
+  "alt": "Cover for \"The Best Study App for University of Alberta Students\": the StudyEdge AI Grade Hub screen shown in a browser window, beside the page title."
+ },
+ "best-study-app-for-university-of-arizona-students.html": {
+  "sig": "b7013e43d4f920a15b4f02a3f1293f590c9936f6",
+  "template": "product",
+  "alt": "Cover for \"Best Study App for University of Arizona Students (2026)\": the StudyEdge AI Grade Hub screen shown in a browser window, beside the page title."
+ },
+ "best-study-app-for-university-of-florida-students.html": {
+  "sig": "de08b3ec86b3ed50903e98e226ca415fa3244106",
+  "template": "product",
+  "alt": "Cover for \"The Best Study App for University of Florida Students\": the StudyEdge AI Grade Hub screen shown in a browser window, beside the page title."
+ },
+ "best-study-app-for-university-of-georgia-students.html": {
+  "sig": "ee1f3fa32e025a052f1dbde80f3c47f9cc9afd52",
+  "template": "product",
+  "alt": "Cover for \"The best study app for University of Georgia students\": the StudyEdge AI Grade Hub screen shown in a browser window, beside the page title."
+ },
+ "best-study-app-for-university-of-michigan-students.html": {
+  "sig": "5e10541a1d0422903009c6d1b7bbbf4420328d1e",
+  "template": "product",
+  "alt": "Cover for \"The Best Study App for University of Michigan Students\": the StudyEdge AI Grade Hub screen shown in a browser window, beside the page title."
+ },
+ "best-study-app-for-university-of-minnesota-students.html": {
+  "sig": "1d1065df7f7b5e0cf0fc437e9d6d6b9f6a9c2e25",
+  "template": "product",
+  "alt": "Cover for \"The best study app for University of Minnesota students\": the StudyEdge AI Grade Hub screen shown in a browser window, beside the page title."
+ },
+ "best-study-app-for-university-of-pittsburgh-students.html": {
+  "sig": "95ad7579c956cfae48af33dfdbbef5a0ad246eca",
+  "template": "product",
+  "alt": "Cover for \"The best study app for University of Pittsburgh students\": the StudyEdge AI Grade Hub screen shown in a browser window, beside the page title."
+ },
+ "best-study-app-for-university-of-rochester-students.html": {
+  "sig": "1c6bac596754860479dd52471cfe9a322b962db9",
+  "template": "product",
+  "alt": "Cover for \"Best Study App for University of Rochester Students (2026)\": the StudyEdge AI Grade Hub screen shown in a browser window, beside the page title."
+ },
+ "best-study-app-for-university-of-toronto-students.html": {
+  "sig": "660b7b257be80d348a46dec115d1c1fee19e0044",
+  "template": "product",
+  "alt": "Cover for \"The Best Study App for University of Toronto Students\": the StudyEdge AI Grade Hub screen shown in a browser window, beside the page title."
+ },
+ "best-study-app-for-university-of-virginia-students.html": {
+  "sig": "b1ef6d9a32fb21dfdbfc5970daea4e869f1a1ce7",
+  "template": "product",
+  "alt": "Cover for \"Best Study App for UVA Students\": the StudyEdge AI Grade Hub screen shown in a browser window, beside the page title."
+ },
+ "best-study-app-for-university-of-washington-students.html": {
+  "sig": "38cb6f5301f883cd71fa2d8b13f9df3334bdd87c",
+  "template": "product",
+  "alt": "Cover for \"Best Study App for University of Washington Students\": the StudyEdge AI Grade Hub screen shown in a browser window, beside the page title."
+ },
+ "best-study-app-for-university-of-wisconsin-madison-students.html": {
+  "sig": "e820584ca95c1b13a57603027e06bd074bb06d38",
+  "template": "product",
+  "alt": "Cover for \"The best study app for University of Wisconsin-Madison students\": the StudyEdge AI Grade Hub screen shown in a browser window, beside the page title."
+ },
+ "best-study-app-for-up-students.html": {
+  "sig": "cd557fa7372baa70aac4872a20c241a98402a3f3",
+  "template": "product",
+  "alt": "Cover for \"The Best Study App for UP Students\": the StudyEdge AI Grade Hub screen shown in a browser window, beside the page title."
+ },
+ "best-study-app-for-upenn-students.html": {
+  "sig": "1f9a21a36a05729374a3a405132beef42ec07b58",
+  "template": "product",
+  "alt": "Cover for \"The best study app for UPenn students\": the StudyEdge AI Grade Hub screen shown in a browser window, beside the page title."
+ },
+ "best-study-app-for-us-college-students.html": {
+  "sig": "a0da9ef723ede433a8dc1322f55160bfa343b233",
+  "template": "product",
+  "alt": "Cover for \"The Best Study App for US College Students\": the StudyEdge AI Grade Hub screen shown in a browser window, beside the page title."
+ },
+ "best-study-app-for-usc-students.html": {
+  "sig": "65135247788b81ba2c7360f93cf34909b916aa45",
+  "template": "product",
+  "alt": "Cover for \"Best Study App for USC Students\": the StudyEdge AI Grade Hub screen shown in a browser window, beside the page title."
+ },
+ "best-study-app-for-ut-austin-students.html": {
+  "sig": "39a6b56e16c215f15b89bb64d8d90a319d20c734",
+  "template": "product",
+  "alt": "Cover for \"The Best Study App for UT Austin Students\": the StudyEdge AI Grade Hub screen shown in a browser window, beside the page title."
+ },
+ "best-study-app-for-vanderbilt-students.html": {
+  "sig": "024c6d7d129872f45805e26f05e8abf374a3f5e0",
+  "template": "product",
+  "alt": "Cover for \"The best study app for Vanderbilt students\": the StudyEdge AI Grade Hub screen shown in a browser window, beside the page title."
+ },
+ "best-study-app-for-wake-forest-students.html": {
+  "sig": "64597a3e77022f07a8fed09c41d49a411d2b0bad",
+  "template": "product",
+  "alt": "Cover for \"Best Study App for Wake Forest University Students\": the StudyEdge AI Grade Hub screen shown in a browser window, beside the page title."
+ },
+ "best-study-app-for-waterloo-students.html": {
+  "sig": "38409454a66a4e17e6e8b89d0be1713e352ce5ea",
+  "template": "product",
+  "alt": "Cover for \"The Best Study App for Waterloo Students\": the StudyEdge AI Grade Hub screen shown in a browser window, beside the page title."
+ },
+ "best-study-app-for-western-university-students.html": {
+  "sig": "c915c7d1e72fc33ffbf5d04e18798e6b6eab8253",
+  "template": "product",
+  "alt": "Cover for \"The Best Study App for Western University Students\": the StudyEdge AI Grade Hub screen shown in a browser window, beside the page title."
+ },
+ "best-study-app-for-wits-students.html": {
+  "sig": "e9340680a2a28a43821e15075136492bd8b98fa5",
+  "template": "product",
+  "alt": "Cover for \"The Best Study App for Wits Students\": the StudyEdge AI Grade Hub screen shown in a browser window, beside the page title."
+ },
+ "best-study-app-for-yale-students.html": {
+  "sig": "fb4648b14d01167ee3f187995d2cadad6e063d38",
+  "template": "product",
+  "alt": "Cover for \"Best Study App for Yale Students\": the StudyEdge AI Grade Hub screen shown in a browser window, beside the page title."
+ },
+ "best-study-apps.html": {
+  "sig": "f59d7278938526c4c6b76d7a7da7dbb1b6a35842",
+  "template": "product",
+  "alt": "Cover for \"Best Study Apps by University and Major (2026)\": the StudyEdge AI Grade Hub screen shown in a browser window, beside the page title."
+ },
+ "best-time-to-study-quiz.html": {
+  "sig": "1207d305a792a82a6429b2fe5c17683dc20a29e3",
+  "template": "editorial",
+  "alt": "Cover for \"When should you study?\": the title in serif type with a line drawing of a light bulb."
+ },
+ "blog/act-study-guide.html": {
+  "sig": "2a1b62e4c5f14c348b725a9a33da2bd907281f13",
+  "template": "editorial",
+  "alt": "Cover for \"ACT study guide (2026)\": the title in serif type with a line drawing of a pencil."
+ },
+ "blog/active-recall-study-technique.html": {
+  "sig": "aad6c1a89723718e91571eb0a6349112b80c26da",
+  "template": "editorial",
+  "alt": "Cover for \"Active Recall: The Study Technique That Actually Improves Grades (Science Explained)\": the title in serif type with a line drawing of a stack of flashcards."
+ },
+ "blog/anki-vs-quizlet-vs-studyedge.html": {
+  "sig": "dc01bfde0bccd7599619261a31412a55996a23dc",
+  "template": "editorial",
+  "alt": "Cover for \"Anki vs Quizlet vs StudyEdge AI (2026): Full Comparison for College Students\": the title in serif type with a line drawing of a stack of flashcards."
+ },
+ "blog/author.html": {
+  "sig": "c67df576fa0773c090c66247b6607c2076e4b9d1",
+  "template": "editorial",
+  "alt": "Cover for \"StudyEdge AI\": the title in serif type with a line drawing of a light bulb."
+ },
+ "blog/best-flashcard-apps-for-college.html": {
+  "sig": "3c95893286162418e18c39c2f9a384a059f70cc6",
+  "template": "editorial",
+  "alt": "Cover for \"Best Flashcard Apps for College Students (2026)\": the title in serif type with a line drawing of a stack of flashcards."
+ },
+ "blog/best-note-taking-apps-for-college-students.html": {
+  "sig": "134ac98670b10067d441b31d6c01208c52548d51",
+  "template": "editorial",
+  "alt": "Cover for \"Best Note-Taking Apps for College Students (2026)\": the title in serif type with a line drawing of a book."
+ },
+ "blog/best-study-apps-for-college-students.html": {
+  "sig": "a473bba7263a3f32325e8f16e3d298de3ac80650",
+  "template": "editorial",
+  "alt": "Cover for \"Best Study Apps for College Students (2026): What Actually Works\": the title in serif type with a line drawing of a graduation cap."
+ },
+ "blog/best-study-schedule-for-college-students.html": {
+  "sig": "7b49abe254cd9a8efb51c4b87d7594364389dd64",
+  "template": "editorial",
+  "alt": "Cover for \"The Best Study Schedule for College Students\": the title in serif type with a line drawing of a calendar."
+ },
+ "blog/best-study-techniques-science.html": {
+  "sig": "6ac7fe222e6d3920e40c79faa89d7cbbc12c1165",
+  "template": "editorial",
+  "alt": "Cover for \"The 5 Study Techniques That Actually Work (According to Research)\": the title in serif type with a line drawing of a light bulb."
+ },
+ "blog/chatgpt-vs-studyedge-for-studying.html": {
+  "sig": "89a1a3fa16704445a8626a0ebe5599131459c286",
+  "template": "editorial",
+  "alt": "Cover for \"ChatGPT vs StudyEdge AI for Studying (2026): Which Is Better for College?\": the title in serif type with a line drawing of a light bulb."
+ },
+ "blog/cornell-note-taking-method.html": {
+  "sig": "46755006e4c740db50bbe56a7237bf4ef9cbe3cb",
+  "template": "editorial",
+  "alt": "Cover for \"Cornell Note Taking Method\": the title in serif type with a line drawing of a book."
+ },
+ "blog/editorial-policy.html": {
+  "sig": "72a4e9d445c182f6477da5a6f213ec72e9662983",
+  "template": "editorial",
+  "alt": "Cover for \"Editorial Policy\": the title in serif type with a line drawing of a light bulb."
+ },
+ "blog/exam-prep.html": {
+  "sig": "4bf04a047c1faf606cfca8b4f46fc625c40720ea",
+  "template": "editorial",
+  "alt": "Cover for \"Exam prep that actually works\": the title in serif type with a line drawing of a pencil."
+ },
+ "blog/feynman-technique.html": {
+  "sig": "7e4b72405d8deaafdaf460185478111535eef0fb",
+  "template": "editorial",
+  "alt": "Cover for \"The Feynman Technique: How to Learn Anything by Teaching It Back\": the title in serif type with a line drawing of a light bulb."
+ },
+ "blog/gpa-grades.html": {
+  "sig": "a1ffd627c11a896fe7119d4e9aa827bd0b401b96",
+  "template": "editorial",
+  "alt": "Cover for \"Raise your GPA. Get better grades.\": the title in serif type with a line drawing of a bar chart."
+ },
+ "blog/how-to-balance-a-heavy-course-load.html": {
+  "sig": "1c8b326edf636f69ca4d8e2a7b8c0e8c11c4da64",
+  "template": "editorial",
+  "alt": "Cover for \"How to Balance a Heavy Course Load\": the title in serif type with a line drawing of a calendar."
+ },
+ "blog/how-to-cram-for-an-exam.html": {
+  "sig": "97c9021c803f2310d98b5be7ec4f890c7ee2c1c8",
+  "template": "editorial",
+  "alt": "Cover for \"How to Cram for an Exam (The Honest, Practical Guide)\": the title in serif type with a line drawing of a timer."
+ },
+ "blog/how-to-focus-while-studying.html": {
+  "sig": "d31fe60f1449ceda962c7a6428c56e26784875c2",
+  "template": "editorial",
+  "alt": "Cover for \"How to Focus While Studying\": the title in serif type with a line drawing of a timer."
+ },
+ "blog/how-to-get-an-a-in-any-class.html": {
+  "sig": "56cd7195a4b20a045a4088660c76770b19025360",
+  "template": "editorial",
+  "alt": "Cover for \"How to Get an A in Any Class\": the title in serif type with a line drawing of a target."
+ },
+ "blog/how-to-improve-your-grades-in-college.html": {
+  "sig": "8fa33ac38c099ffb62ab1cb9b299b83d2505cc71",
+  "template": "editorial",
+  "alt": "Cover for \"How to Actually Improve Your Grades in College\": the title in serif type with a line drawing of a bar chart."
+ },
+ "blog/how-to-make-flashcards.html": {
+  "sig": "79ad3ac0fdd8fa06e31ef2a023d5309ddfbd8d48",
+  "template": "editorial",
+  "alt": "Cover for \"How to Make Flashcards That Actually Work: The Evidence-Based Method\": the title in serif type with a line drawing of a stack of flashcards."
+ },
+ "blog/how-to-memorize-notes-fast.html": {
+  "sig": "30d6e42d16e6d3b42c133f2a8e4224a00d31cdc6",
+  "template": "editorial",
+  "alt": "Cover for \"How to Memorize Notes Fast\": the title in serif type with a line drawing of a stack of flashcards."
+ },
+ "blog/how-to-memorize-things.html": {
+  "sig": "0912378ec5de3a2a802fcc6122a485262f94029e",
+  "template": "editorial",
+  "alt": "Cover for \"How to Memorize Things: 7 Techniques That Actually Work\": the title in serif type with a line drawing of a stack of flashcards."
+ },
+ "blog/how-to-overcome-test-anxiety.html": {
+  "sig": "f1a06f2ccbdc1c3ce7fefbcdb658db3be86980c4",
+  "template": "editorial",
+  "alt": "Cover for \"How to Overcome Test Anxiety\": the title in serif type with a line drawing of a two people."
+ },
+ "blog/how-to-prepare-for-midterms.html": {
+  "sig": "71dd2b72016b751d596df39238ed16b81ca85dda",
+  "template": "editorial",
+  "alt": "Cover for \"How to Prepare for Midterms\": the title in serif type with a line drawing of a calendar."
+ },
+ "blog/how-to-pull-an-all-nighter.html": {
+  "sig": "54290a759921f96d117d7f2038ea7c76dae6db44",
+  "template": "editorial",
+  "alt": "Cover for \"How to Pull an All-Nighter\": the title in serif type with a line drawing of a timer."
+ },
+ "blog/how-to-raise-your-gpa-after-a-bad-semester.html": {
+  "sig": "c8702e562f3e9078bd9b296337582cbe79979f2a",
+  "template": "editorial",
+  "alt": "Cover for \"How to Raise Your GPA After a Bad Semester\": the title in serif type with a line drawing of a calendar."
+ },
+ "blog/how-to-read-a-textbook.html": {
+  "sig": "2ff46e35d9a40c7547a970d3db74a48f6a1d8c03",
+  "template": "editorial",
+  "alt": "Cover for \"How to Read a Textbook Effectively: The System That Works\": the title in serif type with a line drawing of a book."
+ },
+ "blog/how-to-stop-procrastinating-when-studying.html": {
+  "sig": "4e467369946c49a23328fdce98eee4f3bc402eb4",
+  "template": "editorial",
+  "alt": "Cover for \"How to Stop Procrastinating When Studying\": the title in serif type with a line drawing of a timer."
+ },
+ "blog/how-to-study-effectively.html": {
+  "sig": "381b51df08df9c7b0f4294a6a286f436ac04c85c",
+  "template": "editorial",
+  "alt": "Cover for \"How to Study Effectively: A Science-Backed System That Actually Works\": the title in serif type with a line drawing of a target."
+ },
+ "blog/how-to-study-for-a-test.html": {
+  "sig": "a95cdb0ecc6440d956aa3e12afa1ffab810d0453",
+  "template": "editorial",
+  "alt": "Cover for \"How to Study for a Test: A 5-Step System That Works\": the title in serif type with a line drawing of a pencil."
+ },
+ "blog/how-to-study-for-accounting.html": {
+  "sig": "75a05713e0180307ebc0612fc59a2d9735f56cc7",
+  "template": "editorial",
+  "alt": "Cover for \"How to Study for Accounting\": the title in serif type with a line drawing of a bar chart."
+ },
+ "blog/how-to-study-for-anatomy-and-physiology.html": {
+  "sig": "6a6e5302d09d3ec98d3e3bf0f3fd6c880998e646",
+  "template": "editorial",
+  "alt": "Cover for \"How to Study for Anatomy and Physiology\": the title in serif type with a line drawing of a lab flask."
+ },
+ "blog/how-to-study-for-biochemistry.html": {
+  "sig": "ff8e6d5328463d2d4823b37f7fc81c1f44123432",
+  "template": "editorial",
+  "alt": "Cover for \"How to Study for Biochemistry\": the title in serif type with a line drawing of a lab flask."
+ },
+ "blog/how-to-study-for-biology.html": {
+  "sig": "797fbce7d88ba241d2a138edf224c78dec0bd8a3",
+  "template": "editorial",
+  "alt": "Cover for \"How to Study for Biology\": the title in serif type with a line drawing of a lab flask."
+ },
+ "blog/how-to-study-for-business.html": {
+  "sig": "4267cb8a4315448d43a793533c7db9bb410b8bf8",
+  "template": "editorial",
+  "alt": "Cover for \"How to Study for Business Courses\": the title in serif type with a line drawing of a bar chart."
+ },
+ "blog/how-to-study-for-calculus.html": {
+  "sig": "e978ffbd5e7bdbe764761849daa11e14e5313076",
+  "template": "editorial",
+  "alt": "Cover for \"How to Study for Calculus\": the title in serif type with a line drawing of a light bulb."
+ },
+ "blog/how-to-study-for-chemistry.html": {
+  "sig": "92b3e30cfa835c7b41d0c27373b2cc6990301979",
+  "template": "editorial",
+  "alt": "Cover for \"How to study for chemistry\": the title in serif type with a line drawing of a lab flask."
+ },
+ "blog/how-to-study-for-computer-science.html": {
+  "sig": "2715bbbfd85d8b89b14b286a5158a0ca4d6e5f36",
+  "template": "editorial",
+  "alt": "Cover for \"How to Study for Computer Science\": the title in serif type with a line drawing of a light bulb."
+ },
+ "blog/how-to-study-for-criminal-justice.html": {
+  "sig": "c7b5d74695c1e3966f912b49dce55f1b19c71b40",
+  "template": "editorial",
+  "alt": "Cover for \"How to Study for Criminal Justice\": the title in serif type with a line drawing of a light bulb."
+ },
+ "blog/how-to-study-for-english-literature.html": {
+  "sig": "b93f3ef5888e8786f64c52d1c5e37564a4ff6d82",
+  "template": "editorial",
+  "alt": "Cover for \"How to Study for English Literature\": the title in serif type with a line drawing of a book."
+ },
+ "blog/how-to-study-for-finals-week.html": {
+  "sig": "7550328c5c996a86a3a1c6cb42d6a470d57b282c",
+  "template": "editorial",
+  "alt": "Cover for \"How to Study for Finals Week Without Burning Out\": the title in serif type with a line drawing of a calendar."
+ },
+ "blog/how-to-study-for-finance.html": {
+  "sig": "b8ef0e80832e3d06244e5ed3ed5f694b0181131c",
+  "template": "editorial",
+  "alt": "Cover for \"How to Study for Finance\": the title in serif type with a line drawing of a bar chart."
+ },
+ "blog/how-to-study-for-history.html": {
+  "sig": "e550aad55d64689deeedc7911f8a8aa1265615b2",
+  "template": "editorial",
+  "alt": "Cover for \"How to study for history\": the title in serif type with a line drawing of a book."
+ },
+ "blog/how-to-study-for-macroeconomics.html": {
+  "sig": "abbe37db682e688968379889cc7fb08783f14ae7",
+  "template": "editorial",
+  "alt": "Cover for \"How to Study for Macroeconomics\": the title in serif type with a line drawing of a bar chart."
+ },
+ "blog/how-to-study-for-marketing.html": {
+  "sig": "927630acef94fe923c4e2ab3604dc7c655861e91",
+  "template": "editorial",
+  "alt": "Cover for \"How to Study for Marketing\": the title in serif type with a line drawing of a bar chart."
+ },
+ "blog/how-to-study-for-microeconomics.html": {
+  "sig": "ef0b1f8d7aff7acd2ae91b78c6e59969677fe120",
+  "template": "editorial",
+  "alt": "Cover for \"How to Study for Microeconomics\": the title in serif type with a line drawing of a bar chart."
+ },
+ "blog/how-to-study-for-multiple-choice-exams.html": {
+  "sig": "b330a55bf24b86f0e3ca8b88ffe0b33b5b5f4bdd",
+  "template": "editorial",
+  "alt": "Cover for \"How to Study for Multiple Choice Exams: The System That Works\": the title in serif type with a line drawing of a pencil."
+ },
+ "blog/how-to-study-for-multiple-exams-in-one-week.html": {
+  "sig": "f373d35d9390d3ab88c811979124e276c2208527",
+  "template": "editorial",
+  "alt": "Cover for \"How to Study for Multiple Exams in One Week\": the title in serif type with a line drawing of a calendar."
+ },
+ "blog/how-to-study-for-nursing-school.html": {
+  "sig": "dd92618d08b67405b89262ff076e957cbf895875",
+  "template": "editorial",
+  "alt": "Cover for \"How to Study for Nursing School\": the title in serif type with a line drawing of a lab flask."
+ },
+ "blog/how-to-study-for-organic-chemistry.html": {
+  "sig": "9550fa026db5a6a1a494ba13ae04dbaff2ee1090",
+  "template": "editorial",
+  "alt": "Cover for \"How to Study for Organic Chemistry\": the title in serif type with a line drawing of a lab flask."
+ },
+ "blog/how-to-study-for-philosophy.html": {
+  "sig": "9bed4917aaa09d2c63b701e86186ff81bd9ca84f",
+  "template": "editorial",
+  "alt": "Cover for \"How to Study for Philosophy\": the title in serif type with a line drawing of a book."
+ },
+ "blog/how-to-study-for-physics.html": {
+  "sig": "e43279f272bb6c64a6eb37255ad4d8b1d0441f83",
+  "template": "editorial",
+  "alt": "Cover for \"How to Study for Physics\": the title in serif type with a line drawing of a lab flask."
+ },
+ "blog/how-to-study-for-political-science.html": {
+  "sig": "fcf2c53408c4a3af00b345c2f77e1e9360e30d33",
+  "template": "editorial",
+  "alt": "Cover for \"How to Study for Political Science\": the title in serif type with a line drawing of a light bulb."
+ },
+ "blog/how-to-study-for-psychology.html": {
+  "sig": "bb9bce225d8595e76d6adc7aaaba70e2165ffa13",
+  "template": "editorial",
+  "alt": "Cover for \"How to Study for Psychology\": the title in serif type with a line drawing of a light bulb."
+ },
+ "blog/how-to-study-for-sociology.html": {
+  "sig": "f187e3c6ffff8386d606e35a2f03be04277da7bf",
+  "template": "editorial",
+  "alt": "Cover for \"How to Study for Sociology\": the title in serif type with a line drawing of a light bulb."
+ },
+ "blog/how-to-study-for-spanish.html": {
+  "sig": "41856fb13fddad1611b71a737e3a1231e72724d3",
+  "template": "editorial",
+  "alt": "Cover for \"How to Study for Spanish (and Any Foreign Language)\": the title in serif type with a line drawing of a book."
+ },
+ "blog/how-to-study-for-statistics.html": {
+  "sig": "46643f483b2842dff3819688d1bb7ba1b2e23b0a",
+  "template": "editorial",
+  "alt": "Cover for \"How to Study for Statistics\": the title in serif type with a line drawing of a bar chart."
+ },
+ "blog/how-to-study-for-the-bar-exam.html": {
+  "sig": "8931a6f72290140c8145846080f9c7c2f3356473",
+  "template": "editorial",
+  "alt": "Cover for \"How to Study for the Bar Exam: A 10-Week Study Plan\": the title in serif type with a line drawing of a pencil."
+ },
+ "blog/how-to-study-for-the-gmat.html": {
+  "sig": "541af1d834c4dfca77c1dc34785b5c614448aff5",
+  "template": "editorial",
+  "alt": "Cover for \"How to Study for GMAT\": the title in serif type with a line drawing of a pencil."
+ },
+ "blog/how-to-study-for-the-gre.html": {
+  "sig": "0a1c2a6d0086b7884edf9e729711067327660673",
+  "template": "editorial",
+  "alt": "Cover for \"How to Study for GRE\": the title in serif type with a line drawing of a pencil."
+ },
+ "blog/how-to-study-for-the-lsat.html": {
+  "sig": "5325429a83f458115fef53ac39f790b1a97143ef",
+  "template": "editorial",
+  "alt": "Cover for \"How to Study for LSAT\": the title in serif type with a line drawing of a pencil."
+ },
+ "blog/how-to-study-for-the-nclex.html": {
+  "sig": "79b3a6d1fc101d83470338d2ba8b4a7aae78546c",
+  "template": "editorial",
+  "alt": "Cover for \"How to Study for NCLEX\": the title in serif type with a line drawing of a lab flask."
+ },
+ "blog/how-to-study-for-the-sat.html": {
+  "sig": "a4bc9840be99074464473eb09d9f19f0c479213b",
+  "template": "editorial",
+  "alt": "Cover for \"How to Study for SAT\": the title in serif type with a line drawing of a pencil."
+ },
+ "blog/how-to-study-for-usmle-step-1.html": {
+  "sig": "3182c8c7daa0a8ecc79da21af14502b80d6edb3e",
+  "template": "editorial",
+  "alt": "Cover for \"How to Study for USMLE Step 1\": the title in serif type with a line drawing of a lab flask."
+ },
+ "blog/how-to-study-smarter-not-harder.html": {
+  "sig": "e09b1ca1f10aa70c79b2b11312784dd4529b1258",
+  "template": "editorial",
+  "alt": "Cover for \"How to Study Smarter, Not Harder: 8 Evidence-Based Strategies\": the title in serif type with a line drawing of a target."
+ },
+ "blog/how-to-study-the-night-before-an-exam.html": {
+  "sig": "31ce2a39313b536937926b866f30990b3f71eb5b",
+  "template": "editorial",
+  "alt": "Cover for \"How to Study the Night Before an Exam\": the title in serif type with a line drawing of a timer."
+ },
+ "blog/how-to-study-while-working-full-time.html": {
+  "sig": "986f572f38661f232da50338929ad754ebaf65c5",
+  "template": "editorial",
+  "alt": "Cover for \"How to Study While Working Full-Time: A Realistic System\": the title in serif type with a line drawing of a timer."
+ },
+ "blog/how-to-study-with-adhd-in-college.html": {
+  "sig": "e0d4a11d9b915acae99ea0784b43441b59b764e7",
+  "template": "editorial",
+  "alt": "Cover for \"How to Study With ADHD in College\": the title in serif type with a line drawing of a two people."
+ },
+ "blog/how-to-study-with-music.html": {
+  "sig": "2df09c948146758d99b6baef43337af000078d51",
+  "template": "editorial",
+  "alt": "Cover for \"Does Music Help You Study? What the Research Actually Says\": the title in serif type with a line drawing of a music note."
+ },
+ "blog/how-to-take-notes-in-college.html": {
+  "sig": "85630f8731b4e25355ed87bfeb881787000781d5",
+  "template": "editorial",
+  "alt": "Cover for \"How to Take Notes in College: 4 Methods That Work in Lectures\": the title in serif type with a line drawing of a book."
+ },
+ "blog/how-to-use-ai-for-studying.html": {
+  "sig": "ccb66c579660d0e0d64cfc7d84483999daf2ecff",
+  "template": "editorial",
+  "alt": "Cover for \"How to Use AI for Studying\": the title in serif type with a line drawing of a light bulb."
+ },
+ "blog/index.html": {
+  "sig": "6d44b2c8c156d54a9bf7a69fb55984958c07175c",
+  "template": "editorial",
+  "alt": "Cover for \"How to study, according to the research\": the title in serif type with a line drawing of a light bulb."
+ },
+ "blog/mcat-study-schedule-6-months.html": {
+  "sig": "b36552a15f10c4c0b57608dcbaef4774fc10292f",
+  "template": "editorial",
+  "alt": "Cover for \"MCAT Study Schedule: 6 Months Out\": the title in serif type with a line drawing of a calendar."
+ },
+ "blog/mind-mapping-for-studying.html": {
+  "sig": "914bd7c5def11c9595d54e8ba5f475f40d7dd788",
+  "template": "editorial",
+  "alt": "Cover for \"Mind Mapping for Studying: Does It Actually Work?\": the title in serif type with a line drawing of a light bulb."
+ },
+ "blog/pomodoro-technique-for-studying.html": {
+  "sig": "65129eae08ac123a56ca7e338338845f3ee7d8df",
+  "template": "editorial",
+  "alt": "Cover for \"The Pomodoro Technique for College Students: A No-BS Guide (2026)\": the title in serif type with a line drawing of a timer."
+ },
+ "blog/retrieval-practice-vs-rereading.html": {
+  "sig": "7903188aab4060e5c1609bc211a0aba4d7fca5a2",
+  "template": "editorial",
+  "alt": "Cover for \"Retrieval Practice vs. Re-Reading: Why One Works and One Doesn't\": the title in serif type with a line drawing of a stack of flashcards."
+ },
+ "blog/spaced-repetition-study-technique.html": {
+  "sig": "b29e08e2eea6f60e6f67a43adebf8c47b8e55447",
+  "template": "editorial",
+  "alt": "Cover for \"Spaced Repetition: The Science Behind Why It Works (and How to Use It)\": the title in serif type with a line drawing of a stack of flashcards."
+ },
+ "blog/study-groups-vs-solo-studying.html": {
+  "sig": "91112430ad43237ff45909aedc4022b9e45736b4",
+  "template": "editorial",
+  "alt": "Cover for \"Study Groups vs. Solo Studying: What the Research Says\": the title in serif type with a line drawing of a two people."
+ },
+ "blog/study-myths.html": {
+  "sig": "a6e78bfae9ddb28c70ebf4863d4f75bac82c4d04",
+  "template": "editorial",
+  "alt": "Cover for \"7 Study Habits That Are Actually Hurting Your Grades\": the title in serif type with a line drawing of a light bulb."
+ },
+ "blog/study-schedule-tips.html": {
+  "sig": "b3861f6f6e4851f63ff43a67afd2bf3e2218248d",
+  "template": "editorial",
+  "alt": "Cover for \"Study Schedule Tips: How to Build a Schedule That Survives Week 2\": the title in serif type with a line drawing of a calendar."
+ },
+ "blog/study-techniques.html": {
+  "sig": "032c32d18376423a28947f1978f68389649b3103",
+  "template": "editorial",
+  "alt": "Cover for \"Study techniques that actually work\": the title in serif type with a line drawing of a light bulb."
+ },
+ "blog/subject-guides.html": {
+  "sig": "29b925696195873042ff36be30050c2da67e0ffd",
+  "template": "editorial",
+  "alt": "Cover for \"How to study for every subject\": the title in serif type with a line drawing of a light bulb."
+ },
+ "blog/time-management-tips-for-college-students.html": {
+  "sig": "f57c45e81f4673857e00dc2a8395e0557e657c99",
+  "template": "editorial",
+  "alt": "Cover for \"Time Management Tips for College Students\": the title in serif type with a line drawing of a timer."
+ },
+ "blog/what-gpa-do-you-need-for-medical-school.html": {
+  "sig": "f139c0f9b04a26ec3157381144c55d90bea2aa14",
+  "template": "editorial",
+  "alt": "Cover for \"What GPA Do You Need for Medical School?\": the title in serif type with a line drawing of a lab flask."
+ },
+ "brainscape-alternative.html": {
+  "sig": "c2a27cb888155e0a4694732575295fbfcad7db53",
+  "template": "product",
+  "alt": "Cover for \"Brainscape wants you to build every deck by hand. StudyEdge AI generates them in seconds.\": the StudyEdge AI Review Queue screen shown in a browser window, beside the page title."
+ },
+ "chatgpt-alternative-for-students.html": {
+  "sig": "7c47bc70f299deebcb0e2113ff5a871e28a87ceb",
+  "template": "editorial",
+  "alt": "Cover for \"A ChatGPT Alternative Built for Your Exam\": the title in serif type with a line drawing of a light bulb."
+ },
+ "chatgpt-for-studying.html": {
+  "sig": "70172d7cdbd3e1bbb1a1037ab109e2d63597890c",
+  "template": "editorial",
+  "alt": "Cover for \"Using ChatGPT for Studying: A Realistic Guide\": the title in serif type with a line drawing of a light bulb."
+ },
+ "chegg-alternative.html": {
+  "sig": "ba5e27dc3eb48ad9cce99c47ae230dae96943048",
+  "template": "product",
+  "alt": "Cover for \"Chegg raised prices. Lost 3M subscribers. This is what they lost them to.\": the StudyEdge AI Review Queue screen shown in a browser window, beside the page title."
+ },
+ "compare/index.html": {
+  "sig": "ed53dc6fc45471e49a2f3eeb4b2ec21be9250c1d",
+  "template": "product",
+  "alt": "Cover for \"How StudyEdge AI compares\": the StudyEdge AI Review Queue screen shown in a browser window, beside the page title."
+ },
+ "compare/studyedge-vs-knowt.html": {
+  "sig": "08068a3fcd2c233cdf1965b15db41a599fd4a34d",
+  "template": "product",
+  "alt": "Cover for \"StudyEdge AI vs Knowt\": the StudyEdge AI Review Queue screen shown in a browser window, beside the page title."
+ },
+ "compare/studyedge-vs-quizlet.html": {
+  "sig": "2f170bcb13092f393b1873508fea5400562a08f6",
+  "template": "product",
+  "alt": "Cover for \"StudyEdge AI vs Quizlet\": the StudyEdge AI Review Queue screen shown in a browser window, beside the page title."
+ },
+ "compare/studyedge-vs-studyfetch.html": {
+  "sig": "a1825267302cb0f66ee3a8a15d9d01ea1b86f1a1",
+  "template": "product",
+  "alt": "Cover for \"StudyEdge AI vs StudyFetch\": the StudyEdge AI Review Queue screen shown in a browser window, beside the page title."
+ },
+ "cornell-notes-template.html": {
+  "sig": "3e16d2858ecf8e48c9785fe0360ae8c72b13cf34",
+  "template": "editorial",
+  "alt": "Cover for \"Cornell Notes Template\": the title in serif type with a line drawing of a book."
+ },
+ "coursehero-alternative.html": {
+  "sig": "d555970fdda51a9281e8a5bd9e6c13ac0ed2e092",
+  "template": "product",
+  "alt": "Cover for \"Course Hero is a library. StudyEdge AI is the study system.\": the StudyEdge AI Review Queue screen shown in a browser window, beside the page title."
+ },
+ "cumulative-gpa-calculator.html": {
+  "sig": "51e5e5e84795bd5a0230806c740a81b01cc14a93",
+  "template": "editorial",
+  "alt": "Cover for \"Cumulative GPA Calculator\": the title in serif type with a line drawing of a bar chart."
+ },
+ "final-exam-calculator.html": {
+  "sig": "666accfb75099813b74b947fb42c587f4672427b",
+  "template": "editorial",
+  "alt": "Cover for \"Final Exam Calculator\": the title in serif type with a line drawing of a pencil."
+ },
+ "flashcard-converter.html": {
+  "sig": "bb2e6867766846d1e9b5e8d66ac4d9f15b08818f",
+  "template": "editorial",
+  "alt": "Cover for \"Free flashcard converter\": the title in serif type with a line drawing of a stack of flashcards."
+ },
+ "forest-app-alternative.html": {
+  "sig": "d6c566af9d28b6c56a235bb005f6ec21a1ede0aa",
+  "template": "product",
+  "alt": "Cover for \"Forest locks your phone for a timer. StudyEdge AI locks your phone and gives you a plan.\": the StudyEdge AI Review Queue screen shown in a browser window, beside the page title."
+ },
+ "free-study-tools.html": {
+  "sig": "8030e27758be7651f7e8c66e6939667e0de18e66",
+  "template": "editorial",
+  "alt": "Cover for \"Free study tools for college students\": the title in serif type with a line drawing of a light bulb."
+ },
+ "goconqr-alternative.html": {
+  "sig": "ed93f63725f399af9fc3e23694923a13f341a2cd",
+  "template": "product",
+  "alt": "Cover for \"GoConqr makes you build everything. StudyEdge AI builds it for you.\": the StudyEdge AI Review Queue screen shown in a browser window, beside the page title."
+ },
+ "gpa-calculator.html": {
+  "sig": "db08edf6c4ed52c49204d0dcfc87711322dc3139",
+  "template": "editorial",
+  "alt": "Cover for \"GPA Calculator\": the title in serif type with a line drawing of a bar chart."
+ },
+ "gpa-requirements.html": {
+  "sig": "5c1e5aa44c6f8568b16bf45327391909cc777545",
+  "template": "editorial",
+  "alt": "Cover for \"GPA Requirements by School and Program (2026)\": the title in serif type with a line drawing of a bar chart."
+ },
+ "grad-school-gpa-requirements.html": {
+  "sig": "2f281b956c4c7c0051324813b493fdb131226fc5",
+  "template": "editorial",
+  "alt": "Cover for \"Grad School GPA Requirements\": the title in serif type with a line drawing of a bar chart."
+ },
+ "grade-calculator-college.html": {
+  "sig": "bfb5b1778c48a3d32db7ad0a19f0bf5bc71200b7",
+  "template": "editorial",
+  "alt": "Cover for \"What do you actually needon that final?Find out in 60 seconds.\": the title in serif type with a line drawing of a bar chart."
+ },
+ "grade-calculator.html": {
+  "sig": "95b78689cce64cb68af2b34dbaa554f13b29d081",
+  "template": "editorial",
+  "alt": "Cover for \"Grade Calculator\": the title in serif type with a line drawing of a bar chart."
+ },
+ "how-to-get-a-4-0-gpa-in-college.html": {
+  "sig": "383a9a856c45fbf5a5e63e7ddb313813b9a534b2",
+  "template": "editorial",
+  "alt": "Cover for \"How to Get a 4.0 GPA in College\": the title in serif type with a line drawing of a bar chart."
+ },
+ "how-to-make-a-study-schedule.html": {
+  "sig": "88d9da2c8c1831edcb15e6728900a67aba443a50",
+  "template": "editorial",
+  "alt": "Cover for \"How to Make a Study Schedule That Actually Works\": the title in serif type with a line drawing of a calendar."
+ },
+ "how-to-study-for-finals.html": {
+  "sig": "fe6b8c122115f56459bed268a5e911dc92e6357c",
+  "template": "editorial",
+  "alt": "Cover for \"How to Study for Finals\": the title in serif type with a line drawing of a calendar."
+ },
+ "how-to-study-in-college.html": {
+  "sig": "8d70214472350266c2264ad5bea78ff31cae75bb",
+  "template": "editorial",
+  "alt": "Cover for \"How to study in college: the method that actually works.\": the title in serif type with a line drawing of a graduation cap."
+ },
+ "is-a-2-0-gpa-good.html": {
+  "sig": "b1c33830a3a1902d11f58987fe143ae952cf6131",
+  "template": "number",
+  "alt": "Cover for \"Is a 2.0 GPA good?\": the number 2.0 on a GPA scale from 0.0 to 4.0, with a marker at that point."
+ },
+ "is-a-2-5-gpa-good.html": {
+  "sig": "86c8ce7419a9f8b094d06cf3a8b6061558f6f1e8",
+  "template": "number",
+  "alt": "Cover for \"Is a 2.5 GPA good?\": the number 2.5 on a GPA scale from 0.0 to 4.0, with a marker at that point."
+ },
+ "is-a-2-7-gpa-good.html": {
+  "sig": "640d65b76d749d2cab136fb207e7e63ac0b1ecc7",
+  "template": "number",
+  "alt": "Cover for \"Is a 2.7 GPA good?\": the number 2.7 on a GPA scale from 0.0 to 4.0, with a marker at that point."
+ },
+ "is-a-3-0-gpa-good.html": {
+  "sig": "1d244d16e8ac42e0f83895d89ff8d80e16c1ce9d",
+  "template": "number",
+  "alt": "Cover for \"Is a 3.0 GPA good?\": the number 3.0 on a GPA scale from 0.0 to 4.0, with a marker at that point."
+ },
+ "is-a-3-2-gpa-good.html": {
+  "sig": "5a3c6d8a01f4cf12aceed04e72198fe50a10751e",
+  "template": "number",
+  "alt": "Cover for \"Is a 3.2 GPA good?\": the number 3.2 on a GPA scale from 0.0 to 4.0, with a marker at that point."
+ },
+ "is-a-3-3-gpa-good.html": {
+  "sig": "d299275f13233f0d16d49e46e8e585dbd007866e",
+  "template": "number",
+  "alt": "Cover for \"Is a 3.3 GPA good?\": the number 3.3 on a GPA scale from 0.0 to 4.0, with a marker at that point."
+ },
+ "is-a-3-4-gpa-good.html": {
+  "sig": "db70beaef6a6ca8416adaab3b56043f1c13d1d05",
+  "template": "number",
+  "alt": "Cover for \"Is a 3.4 GPA good?\": the number 3.4 on a GPA scale from 0.0 to 4.0, with a marker at that point."
+ },
+ "is-a-3-5-gpa-good.html": {
+  "sig": "2ea763feec1f0994b3b2122f2635b03269994c80",
+  "template": "number",
+  "alt": "Cover for \"Is a 3.5 GPA good?\": the number 3.5 on a GPA scale from 0.0 to 4.0, with a marker at that point."
+ },
+ "is-a-3-6-gpa-good.html": {
+  "sig": "85fbdb05b74f25634dc44caf239cb175551ad4bd",
+  "template": "number",
+  "alt": "Cover for \"Is a 3.6 GPA good?\": the number 3.6 on a GPA scale from 0.0 to 4.0, with a marker at that point."
+ },
+ "is-a-3-7-gpa-good.html": {
+  "sig": "c53c41739a44662f41b7857de2b65c2e88c11db6",
+  "template": "number",
+  "alt": "Cover for \"Is a 3.7 GPA good?\": the number 3.7 on a GPA scale from 0.0 to 4.0, with a marker at that point."
+ },
+ "is-a-3-8-gpa-good.html": {
+  "sig": "65b2747d988facfbfe415d019228e4ac2f340733",
+  "template": "number",
+  "alt": "Cover for \"Is a 3.8 GPA good?\": the number 3.8 on a GPA scale from 0.0 to 4.0, with a marker at that point."
+ },
+ "is-a-4-0-gpa-good.html": {
+  "sig": "a438421e52d9d8a52a9b5f8759c199d6087deb16",
+  "template": "number",
+  "alt": "Cover for \"Is a 4.0 GPA good?\": the number 4.0 on a GPA scale from 0.0 to 4.0, with a marker at that point."
+ },
+ "khan-academy-alternative.html": {
+  "sig": "9d0a996ece7be08d06cfd07fdb88ee259b38be9f",
+  "template": "product",
+  "alt": "Cover for \"Khan Academy taught you the basics. StudyEdge AI runs your semester.\": the StudyEdge AI Review Queue screen shown in a browser window, beside the page title."
+ },
+ "microsoft-onenote-for-studying.html": {
+  "sig": "119c3d5a4e9ba5f6db15967ca384ef4bba781519",
+  "template": "editorial",
+  "alt": "Cover for \"OneNote captures your notes. StudyEdge AI turns them into something you learn.\": the title in serif type with a line drawing of a light bulb."
+ },
+ "not-affiliated-with-study-edge.html": {
+  "sig": "7622aff405e0440fc84b66d32fa64ad6786f9a38",
+  "template": "editorial",
+  "alt": "Cover for \"StudyEdge AI is not Study Edge.\": the title in serif type with a line drawing of a light bulb."
+ },
+ "note-taking-apps-for-students.html": {
+  "sig": "0119d9210e4bb220e7ffa7c0a153b7ce7b3bcea0",
+  "template": "editorial",
+  "alt": "Cover for \"Best note-taking apps for college students in 2026.\": the title in serif type with a line drawing of a book."
+ },
+ "notion-alternative.html": {
+  "sig": "3d6362195218f4ba1f3a917b45a1544fd80e46db",
+  "template": "product",
+  "alt": "Cover for \"Notion is a blank canvas. StudyEdge AI is the study system.\": the StudyEdge AI Review Queue screen shown in a browser window, beside the page title."
+ },
+ "notion-for-studying.html": {
+  "sig": "575d6231c02968ea02b09bd3cbf2ac0b9c0b1921",
+  "template": "editorial",
+  "alt": "Cover for \"Notion is a blank canvas. StudyEdge AI is the study system.\": the title in serif type with a line drawing of a light bulb."
+ },
+ "photomath-alternative.html": {
+  "sig": "e45baaf2089ea7d571c5407a20b0443746ee9345",
+  "template": "product",
+  "alt": "Cover for \"Photomath solves it for you. StudyEdge AI teaches you to solve it yourself.\": the StudyEdge AI Review Queue screen shown in a browser window, beside the page title."
+ },
+ "pomodoro-timer.html": {
+  "sig": "7bb3c9ba1a95b659b234ae47c18e98783656119f",
+  "template": "editorial",
+  "alt": "Cover for \"Pomodoro Timer\": the title in serif type with a line drawing of a timer."
+ },
+ "pre-med-study-guide.html": {
+  "sig": "9611ee59bb568ad1c9cb58f97dbea46ab6985014",
+  "template": "editorial",
+  "alt": "Cover for \"Pre-Med Study Guide\": the title in serif type with a line drawing of a light bulb."
+ },
+ "pricing.html": {
+  "sig": "06855bf515e7f631b03bdc5af45544cf3a1e063a",
+  "template": "product",
+  "alt": "Cover for \"Less than a coffee. Built around the GPA you want.\": the StudyEdge AI Grade Hub screen shown in a browser window, beside the page title."
+ },
+ "printable-study-schedule-template.html": {
+  "sig": "7575a26468d36bd276d556d794ee1d5a48fd65bd",
+  "template": "editorial",
+  "alt": "Cover for \"Printable Weekly Study Schedule Template\": the title in serif type with a line drawing of a calendar."
+ },
+ "privacy.html": {
+  "sig": "e9d336488a6c900d40aebb3b19100f3cfc50ea3a",
+  "template": "editorial",
+  "alt": "Cover for \"Privacy Policy\": the title in serif type with a line drawing of a light bulb."
+ },
+ "quizlet-alternative.html": {
+  "sig": "e9dd08752d8cdaaedb607d0a72abad37b7a2f4b0",
+  "template": "product",
+  "alt": "Cover for \"Quizlet killed Q-Chat.StudyEdge AI picked upwhere it left off — and went further.\": the StudyEdge AI Review Queue screen shown in a browser window, beside the page title."
+ },
+ "quizlet-qchat-alternative.html": {
+  "sig": "2aa4b0639693a88f1bfe7400ad8ae4004766817d",
+  "template": "product",
+  "alt": "Cover for \"Q-Chat is gone.Here's what replaced it.\": the StudyEdge AI Review Queue screen shown in a browser window, beside the page title."
+ },
+ "resources.html": {
+  "sig": "7a414fc254903645de7a95f247c6e3820843fdea",
+  "template": "editorial",
+  "alt": "Cover for \"Every study resource. One page.\": the title in serif type with a line drawing of a light bulb."
+ },
+ "scholarship-gpa-requirements.html": {
+  "sig": "f0ef15da064104afe0674e06ac258d1e1e46ea5c",
+  "template": "editorial",
+  "alt": "Cover for \"Scholarship GPA Requirements\": the title in serif type with a line drawing of a bar chart."
+ },
+ "semester-gpa-calculator.html": {
+  "sig": "e61053a29fdd7e2870e57cbbb5b65a87c2e08ea6",
+  "template": "editorial",
+  "alt": "Cover for \"Semester GPA Calculator\": the title in serif type with a line drawing of a calendar."
+ },
+ "socratic-alternative.html": {
+  "sig": "b9a348de8d1df3c28d00124b9e066c2bff64ed85",
+  "template": "product",
+  "alt": "Cover for \"Socratic is K-12 homework help. StudyEdge AI is built for college.\": the StudyEdge AI Review Queue screen shown in a browser window, beside the page title."
+ },
+ "spaced-repetition-explained.html": {
+  "sig": "a6adb64055231d4b9a05ed465464390da75f47a1",
+  "template": "editorial",
+  "alt": "Cover for \"Spaced Repetition: The Study Method Backed by Memory Science\": the title in serif type with a line drawing of a stack of flashcards."
+ },
+ "spaced-repetition-vs-cramming.html": {
+  "sig": "b33356f3fc2d440b947f78ad1147d848e3aed9d2",
+  "template": "editorial",
+  "alt": "Cover for \"Spaced repetition vs cramming: the research breakdown\": the title in serif type with a line drawing of a timer."
+ },
+ "studocu-alternative.html": {
+  "sig": "daf5127d14624a5b7deb074f38d096913fc9ead1",
+  "template": "product",
+  "alt": "Cover for \"Studocu hosts other students' notes. StudyEdge AI generates yours.\": the StudyEdge AI Review Queue screen shown in a browser window, beside the page title."
+ },
+ "study-hours-by-major.html": {
+  "sig": "5282160835e89dd8a0746378812fe7d1cd38fd33",
+  "template": "editorial",
+  "alt": "Cover for \"Average Study Hours by College Major\": the title in serif type with a line drawing of a light bulb."
+ },
+ "study-planner-for-college-students.html": {
+  "sig": "524a9308d487f1cb7a47ae7343c6e86f1a74f376",
+  "template": "editorial",
+  "alt": "Cover for \"Study Planner for College Students\": the title in serif type with a line drawing of a calendar."
+ },
+ "study-schedule-generator.html": {
+  "sig": "bb32a62d1787f7b9d864ffacf9e35ddfd43295d1",
+  "template": "editorial",
+  "alt": "Cover for \"Stop making your schedule by hand.Let the AI figure it out.\": the title in serif type with a line drawing of a calendar."
+ },
+ "study-schedule-maker.html": {
+  "sig": "1cf0f2b1c3dce89c6985f02e1019176c4cb02c0c",
+  "template": "editorial",
+  "alt": "Cover for \"Study Schedule Maker\": the title in serif type with a line drawing of a calendar."
+ },
+ "study-schedule-template.html": {
+  "sig": "5229e8f254ee1531cf26eaa503cf05598d38268d",
+  "template": "editorial",
+  "alt": "Cover for \"Study Schedule Template\": the title in serif type with a line drawing of a calendar."
+ },
+ "study-statistics.html": {
+  "sig": "acb6a406ba9bd5d0bcdb883c4459401bfafca8f0",
+  "template": "editorial",
+  "alt": "Cover for \"Study Statistics 2026: What the Research Actually Says\": the title in serif type with a line drawing of a bar chart."
+ },
+ "studyedge-ai.html": {
+  "sig": "066c09f24e3c3a0f19902ca8cb29e081f949919c",
+  "template": "product",
+  "alt": "Cover for \"The AI study planner built for college students.\": the StudyEdge AI Grade Hub screen shown in a browser window, beside the page title."
+ },
+ "studyedge-app.html": {
+  "sig": "74da67a45b09069ff1cbcfe7462a9592b35a6029",
+  "template": "product",
+  "alt": "Cover for \"Open StudyEdge AI\": the StudyEdge AI Grade Hub screen shown in a browser window, beside the page title."
+ },
+ "studyedge-company.html": {
+  "sig": "8e8525c3580f702e5a4b40e746ebbfe439908691",
+  "template": "product",
+  "alt": "Cover for \"StudyEdge AI is an AI software company.\": the StudyEdge AI Grade Hub screen shown in a browser window, beside the page title."
+ },
+ "support.html": {
+  "sig": "b758e98868a9077a8f355f324de5e735f9a4c8b9",
+  "template": "editorial",
+  "alt": "Cover for \"Help & Support\": the title in serif type with a line drawing of a light bulb."
+ },
+ "terms.html": {
+  "sig": "4f5fb8fffdc94d9027558caa0625f40ece00d167",
+  "template": "editorial",
+  "alt": "Cover for \"Terms of Service\": the title in serif type with a line drawing of a light bulb."
+ },
+ "test-taking-strategies.html": {
+  "sig": "479912f18cfa0d8b56e2b468d470488bd552643b",
+  "template": "editorial",
+  "alt": "Cover for \"Test Taking Strategies That Work\": the title in serif type with a line drawing of a pencil."
+ },
+ "time-management-for-college-students.html": {
+  "sig": "5ce01b5a7c6d3ba572ae8e0a4186b029b8dafb59",
+  "template": "editorial",
+  "alt": "Cover for \"Time management for college students: the system that actually holds.\": the title in serif type with a line drawing of a timer."
+ },
+ "weighted-gpa-calculator.html": {
+  "sig": "99909affdc107ba0c43dc8c5c954f8e6368470d3",
+  "template": "editorial",
+  "alt": "Cover for \"Weighted GPA Calculator\": the title in serif type with a line drawing of a bar chart."
+ },
+ "what-gpa-do-you-need-for-architecture-school-admissions.html": {
+  "sig": "55a922592a02ea2ef193e5b47b917b872b80dfd9",
+  "template": "editorial",
+  "alt": "Cover for \"What GPA Do You Need for Architecture School?\": the title in serif type with a line drawing of a bar chart."
+ },
+ "what-gpa-do-you-need-for-arizona-state-university.html": {
+  "sig": "888bf566454067b57dfa6f0d2fbf056cf3698781",
+  "template": "number",
+  "alt": "Cover for \"What GPA do you need for Arizona State University?\": the number 3.0 on a GPA scale from 2.0 to 4.0, with a marker at that point."
+ },
+ "what-gpa-do-you-need-for-boston-university.html": {
+  "sig": "ef37bb2e2231025187f11d70a9dced11f28f967a",
+  "template": "number",
+  "alt": "Cover for \"What GPA do you need for Boston University?\": the number 3.8 on a GPA scale from 2.0 to 4.0, with a marker at that point."
+ },
+ "what-gpa-do-you-need-for-case-western-reserve.html": {
+  "sig": "5ce32bd9aea9815820deba6866ff7e9064ebee25",
+  "template": "number",
+  "alt": "Cover for \"What GPA do you need for Case Western Reserve University?\": the number 3.8 on a GPA scale from 2.0 to 4.0, with a marker at that point."
+ },
+ "what-gpa-do-you-need-for-columbia.html": {
+  "sig": "bd4f9310d395f5404711214e499a46073a6fa294",
+  "template": "number",
+  "alt": "Cover for \"What GPA do you need for Columbia?\": the number 3.9 on a GPA scale from 2.0 to 4.0, with the 3.9 to 4 range highlighted."
+ },
+ "what-gpa-do-you-need-for-dental-school-admissions.html": {
+  "sig": "9179e0fb6e40587df9fc7e1b9d35764fa878620e",
+  "template": "editorial",
+  "alt": "Cover for \"What GPA do you need for Dental School?\": the title in serif type with a line drawing of a bar chart."
+ },
+ "what-gpa-do-you-need-for-duke.html": {
+  "sig": "2d0a87e372355eb0548817af2cdb3a7e5986f448",
+  "template": "number",
+  "alt": "Cover for \"What GPA do you need for Duke?\": the number 3.9 on a GPA scale from 2.0 to 4.0, with the 3.9 to 4 range highlighted."
+ },
+ "what-gpa-do-you-need-for-emory-university.html": {
+  "sig": "980f9c849109cb60793f3f68131f37d1641e90e6",
+  "template": "number",
+  "alt": "Cover for \"What GPA do you need for Emory University?\": the number 3.8 on a GPA scale from 2.0 to 4.0, with a marker at that point."
+ },
+ "what-gpa-do-you-need-for-engineering-grad-school-admissions.html": {
+  "sig": "b36f9ea7f5ed08b395eb03b6d154e8d3429b8558",
+  "template": "editorial",
+  "alt": "Cover for \"What GPA Do You Need for Engineering Grad School?\": the title in serif type with a line drawing of a bar chart."
+ },
+ "what-gpa-do-you-need-for-georgetown-university.html": {
+  "sig": "bb23788a0c77766517716e04c32c60f22f28a678",
+  "template": "number",
+  "alt": "Cover for \"What GPA do you need for Georgetown University?\": the number 4.0 on a GPA scale from 2.0 to 4.0, with a marker at that point."
+ },
+ "what-gpa-do-you-need-for-georgia-tech.html": {
+  "sig": "06f159f685ee78967118a113a1daaa113da0a7e8",
+  "template": "number",
+  "alt": "Cover for \"What GPA do you need for Georgia Tech?\": the number 4.0 on a GPA scale from 2.0 to 4.0, with a marker at that point."
+ },
+ "what-gpa-do-you-need-for-harvard.html": {
+  "sig": "a619f255df5fe91d153303f7f006560a6e83af4f",
+  "template": "number",
+  "alt": "Cover for \"What GPA do you need for Harvard?\": the number 3.9 on a GPA scale from 2.0 to 4.0, with the 3.9 to 4.18 range highlighted."
+ },
+ "what-gpa-do-you-need-for-law-school-admissions.html": {
+  "sig": "245683c9d6c5c8d62073bd4f8c681f504ec7f665",
+  "template": "editorial",
+  "alt": "Cover for \"What GPA do you need for Law School?\": the title in serif type with a line drawing of a bar chart."
+ },
+ "what-gpa-do-you-need-for-mba-programs.html": {
+  "sig": "dc12a65c638058ee8290abe368858f11e555b768",
+  "template": "editorial",
+  "alt": "Cover for \"What GPA do you need for Mba Programs?\": the title in serif type with a line drawing of a bar chart."
+ },
+ "what-gpa-do-you-need-for-medical-school-admissions.html": {
+  "sig": "03615f638d865ddc6775760271ef3b2530b0cc36",
+  "template": "editorial",
+  "alt": "Cover for \"What GPA do you need for Medical School?\": the title in serif type with a line drawing of a lab flask."
+ },
+ "what-gpa-do-you-need-for-michigan-state-university.html": {
+  "sig": "b201602cf807a91070586414729ce735faedf5ca",
+  "template": "number",
+  "alt": "Cover for \"What GPA do you need for Michigan State University?\": the number 3.5 on a GPA scale from 2.0 to 4.0, with a marker at that point."
+ },
+ "what-gpa-do-you-need-for-mit.html": {
+  "sig": "8b6723deabb19a823a3e12f9ae79c52f322a6448",
+  "template": "number",
+  "alt": "Cover for \"What GPA do you need for MIT?\": the number 3.95 on a GPA scale from 2.0 to 4.0, with the 3.95 to 4 range highlighted."
+ },
+ "what-gpa-do-you-need-for-northeastern-university.html": {
+  "sig": "859115d2aaa48195f0cb6ca5576b28837bdd1f14",
+  "template": "number",
+  "alt": "Cover for \"What GPA do you need for Northeastern University?\": the number 4.0 on a GPA scale from 2.0 to 4.0, with a marker at that point."
+ },
+ "what-gpa-do-you-need-for-nursing-school-admissions.html": {
+  "sig": "f845843e06e539e36528d5f53c19b533be95c071",
+  "template": "editorial",
+  "alt": "Cover for \"What GPA Do You Need for Nursing School?\": the title in serif type with a line drawing of a lab flask."
+ },
+ "what-gpa-do-you-need-for-nyu.html": {
+  "sig": "1e36a16770abe23ec8bf7b82038dc9bc15852df1",
+  "template": "number",
+  "alt": "Cover for \"What GPA do you need for NYU?\": the number 3.7 on a GPA scale from 2.0 to 4.0, with the 3.7 to 4 range highlighted."
+ },
+ "what-gpa-do-you-need-for-ohio-state-university.html": {
+  "sig": "87e9d4262291e22760d6364930fc5011e3fe3a8e",
+  "template": "number",
+  "alt": "Cover for \"What GPA do you need for Ohio State University?\": the number 3.7 on a GPA scale from 2.0 to 4.0, with a marker at that point."
+ },
+ "what-gpa-do-you-need-for-penn-state-university.html": {
+  "sig": "7d505022af806f774c72fe409bdd02d51b05bbbe",
+  "template": "number",
+  "alt": "Cover for \"What GPA do you need for Penn State University?\": the number 3.6 on a GPA scale from 2.0 to 4.0, with a marker at that point."
+ },
+ "what-gpa-do-you-need-for-pharmacy-school-admissions.html": {
+  "sig": "837d10a7bc76389359e8e4199de9a6d33886a6d4",
+  "template": "editorial",
+  "alt": "Cover for \"What GPA Do You Need for Pharmacy School?\": the title in serif type with a line drawing of a bar chart."
+ },
+ "what-gpa-do-you-need-for-princeton.html": {
+  "sig": "82bc88c77677edb566e7c7de1dca31019ab3bab3",
+  "template": "number",
+  "alt": "Cover for \"What GPA do you need for Princeton?\": the number 3.9 on a GPA scale from 2.0 to 4.0, with the 3.9 to 4 range highlighted."
+ },
+ "what-gpa-do-you-need-for-purdue-university.html": {
+  "sig": "f04dac469c512cbca2cbe4281ae775a83323dc5b",
+  "template": "number",
+  "alt": "Cover for \"What GPA do you need for Purdue University?\": the number 3.5 on a GPA scale from 2.0 to 4.0, with a marker at that point."
+ },
+ "what-gpa-do-you-need-for-stanford.html": {
+  "sig": "d7feab01aa677ffe6e84806abd60908da0987124",
+  "template": "number",
+  "alt": "Cover for \"What GPA do you need for Stanford?\": the number 3.9 on a GPA scale from 2.0 to 4.0, with the 3.9 to 4 range highlighted."
+ },
+ "what-gpa-do-you-need-for-tulane-university.html": {
+  "sig": "613f7dca995c6cee28d26e1934a85da02c66fcc2",
+  "template": "number",
+  "alt": "Cover for \"What GPA do you need for Tulane University?\": the number 3.6 on a GPA scale from 2.0 to 4.0, with a marker at that point."
+ },
+ "what-gpa-do-you-need-for-uc-berkeley.html": {
+  "sig": "2c2eb3c36367373bec7752fb64b36414fb279ffa",
+  "template": "number",
+  "alt": "Cover for \"What GPA do you need for UC Berkeley?\": the number 3.85 on a GPA scale from 2.0 to 4.0, with the 3.85 to 4 range highlighted."
+ },
+ "what-gpa-do-you-need-for-ucla.html": {
+  "sig": "8818e382284605860825caba482ad39dca972012",
+  "template": "number",
+  "alt": "Cover for \"What GPA do you need for UCLA?\": the number 3.85 on a GPA scale from 2.0 to 4.0, with the 3.85 to 4 range highlighted."
+ },
+ "what-gpa-do-you-need-for-unc-chapel-hill.html": {
+  "sig": "d3c0b0a5b52f53fbdfec7ed281d1cb52f641ccfc",
+  "template": "number",
+  "alt": "Cover for \"What GPA do you need for UNC Chapel Hill?\": the number 4.5 on a GPA scale from 2.0 to 4.0, with a marker at that point."
+ },
+ "what-gpa-do-you-need-for-university-of-arizona.html": {
+  "sig": "8beb8cc2dfe2ffd0b832268a62afd235cc8a1b62",
+  "template": "number",
+  "alt": "Cover for \"What GPA do you need for University of Arizona?\": the number 3.0 on a GPA scale from 2.0 to 4.0, with a marker at that point."
+ },
+ "what-gpa-do-you-need-for-university-of-florida.html": {
+  "sig": "346c849349b6478b3a54baabf63d414f82b8d8ac",
+  "template": "number",
+  "alt": "Cover for \"What GPA do you need for University of Florida?\": the number 3.85 on a GPA scale from 2.0 to 4.0, with a marker at that point."
+ },
+ "what-gpa-do-you-need-for-university-of-illinois-urbana-champaign.html": {
+  "sig": "8c5239fb8e06171cf45a128ee706f8a4eae6daaf",
+  "template": "number",
+  "alt": "Cover for \"What GPA do you need for University of Illinois Urbana-Champaign?\": the number 3.8 on a GPA scale from 2.0 to 4.0, with a marker at that point."
+ },
+ "what-gpa-do-you-need-for-university-of-michigan.html": {
+  "sig": "e9bc1322b51b54d1e12f9a8f03e164ea6ce3e77d",
+  "template": "number",
+  "alt": "Cover for \"What GPA do you need for University of Michigan?\": the number 3.9 on a GPA scale from 2.0 to 4.0, with a marker at that point."
+ },
+ "what-gpa-do-you-need-for-university-of-notre-dame.html": {
+  "sig": "4ccead15a9cd9319c610c301f0242771df0830d2",
+  "template": "number",
+  "alt": "Cover for \"What GPA do you need for University of Notre Dame?\": the number 4.06 on a GPA scale from 2.0 to 4.0, with a marker at that point."
+ },
+ "what-gpa-do-you-need-for-university-of-rochester.html": {
+  "sig": "0ce36c85d79d015a59b555a99c36162735d2b282",
+  "template": "number",
+  "alt": "Cover for \"What GPA do you need for University of Rochester?\": the number 3.8 on a GPA scale from 2.0 to 4.0, with a marker at that point."
+ },
+ "what-gpa-do-you-need-for-university-of-texas-austin.html": {
+  "sig": "2ce01efc0f4b64a305e74200dc265dc4ccfa0aa1",
+  "template": "editorial",
+  "alt": "Cover for \"What GPA do you need for UT Austin?\": the title in serif type with a line drawing of a bar chart."
+ },
+ "what-gpa-do-you-need-for-university-of-virginia.html": {
+  "sig": "79304429d1928f63cb699f744016cdda0a28b50d",
+  "template": "number",
+  "alt": "Cover for \"What GPA do you need for University of Virginia?\": the number 4.3 on a GPA scale from 2.0 to 4.0, with a marker at that point."
+ },
+ "what-gpa-do-you-need-for-university-of-washington.html": {
+  "sig": "ebcaa7abc0f6b118e296ca9d4b3f0d3ffb2c29e8",
+  "template": "number",
+  "alt": "Cover for \"What GPA do you need for University of Washington?\": the number 3.8 on a GPA scale from 2.0 to 4.0, with a marker at that point."
+ },
+ "what-gpa-do-you-need-for-university-of-wisconsin-madison.html": {
+  "sig": "d282eed19d38c830cea9de860eb81280c90f4324",
+  "template": "number",
+  "alt": "Cover for \"What GPA do you need for University of Wisconsin-Madison?\": the number 3.8 on a GPA scale from 2.0 to 4.0, with a marker at that point."
+ },
+ "what-gpa-do-you-need-for-usc.html": {
+  "sig": "538f40b8d3c332af86e335d22f94833ae16b1ea3",
+  "template": "number",
+  "alt": "Cover for \"What GPA do you need for USC?\": the number 3.85 on a GPA scale from 2.0 to 4.0, with the 3.85 to 4 range highlighted."
+ },
+ "what-gpa-do-you-need-for-vanderbilt-university.html": {
+  "sig": "1163015cb4b16e8336e17a861a24440e6d8e2780",
+  "template": "number",
+  "alt": "Cover for \"What GPA do you need for Vanderbilt University?\": the number 3.9 on a GPA scale from 2.0 to 4.0, with a marker at that point."
+ },
+ "what-gpa-do-you-need-for-veterinary-school-admissions.html": {
+  "sig": "c26433c80892e2d703461a007e1ed29af2e33960",
+  "template": "editorial",
+  "alt": "Cover for \"What GPA Do You Need for Veterinary School?\": the title in serif type with a line drawing of a bar chart."
+ },
+ "what-gpa-do-you-need-for-wake-forest-university.html": {
+  "sig": "ca76836d266bcb19b0c3c3b1feb3f3cc371de1d3",
+  "template": "number",
+  "alt": "Cover for \"What GPA do you need for Wake Forest University?\": the number 3.8 on a GPA scale from 2.0 to 4.0, with a marker at that point."
+ },
+ "what-gpa-do-you-need-for-yale.html": {
+  "sig": "b9f998002cde86b6eb44c47bd6bf540420dd4c25",
+  "template": "number",
+  "alt": "Cover for \"What GPA do you need for Yale?\": the number 3.9 on a GPA scale from 2.0 to 4.0, with the 3.9 to 4 range highlighted."
+ },
+ "what-is-studyedge-ai.html": {
+  "sig": "e7dd4b2a4b5c65219831694333b233018d97e689",
+  "template": "editorial",
+  "alt": "Cover for \"What is StudyEdge AI?\": the title in serif type with a line drawing of a light bulb."
+ },
+ "wolfram-alpha-alternative.html": {
+  "sig": "25091634942e8f2d4090db7209aa8e863de1f2b4",
+  "template": "product",
+  "alt": "Cover for \"Wolfram Alpha answers the question. StudyEdge AI teaches you to answer it yourself.\": the StudyEdge AI Review Queue screen shown in a browser window, beside the page title."
+ }
+}

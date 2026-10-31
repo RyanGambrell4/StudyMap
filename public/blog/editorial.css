@@ -428,3 +428,14 @@ body .ed-page .tier-label { font: 600 12px var(--ed-sans) !important; letter-spa
 body .ed-page table { width: 100%; border-collapse: collapse; font-size: 15px; }
 body .ed-page th { text-align: left; border-bottom: 2px solid var(--ed-ink); padding: 10px 12px; background: none !important; color: var(--ed-ink) !important; }
 body .ed-page td { border-bottom: 1px solid var(--ed-rule); padding: 10px 12px; }
+
+/* Generated covers (scripts/build-covers.mjs) are 1200x630 with the headline set inside the
+   image, so every slot that shows one keeps that ratio and never crops. */
+body img.ed-cover { aspect-ratio: 1200 / 630 !important; object-fit: contain !important; background: #FBFAF7; }
+body .kr-card img, body .b-cover img, body .featured-article-img img, body img.hub-cover {
+  aspect-ratio: 1200 / 630 !important; object-fit: cover; height: auto !important; max-height: none !important;
+}
+body .hub-intro img.hub-cover { width: 100% !important; border-radius: 10px; }
+body .featured-article-img { aspect-ratio: auto !important; height: auto !important; }
+body .featured-article-img img { width: 100%; display: block; }
+@media (max-width: 760px) { body img.ed-cover { aspect-ratio: 1200 / 630 !important; } }

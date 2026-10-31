@@ -5,7 +5,9 @@
  *
  *   node scripts/build-covers.mjs --samples      6 samples into docs/cover-samples/ (for review)
  *   node scripts/build-covers.mjs --only <slug>  render one page
- *   node scripts/build-covers.mjs                every page into public/covers/ (after approval)
+ *   node scripts/build-covers.mjs                every page: render (only new or changed) into
+ *                                                public/covers/ and wire into the HTML
+ *   node scripts/build-covers.mjs --force        re-render everything
  *
  * Three templates, picked from the page slug:
  *   number     GPA and stat pages. The number is parsed from the page itself; if no number
@@ -26,6 +28,7 @@ import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 import satori from 'satori'
 import sharp from 'sharp'
+import crypto from 'node:crypto'
 
 const ROOT = path.join(path.dirname(fileURLToPath(import.meta.url)), '..')
 const W = 1200, H = 630
@@ -268,6 +271,105 @@ async function render(tree, outBase) {
   return png
 }
 
+
+// ── Rollout: render every page, then wire the covers into the HTML ────────────────────
+const VERSION = 'v1'
+const ORIGIN = 'https://getstudyedge.com'
+const SKIP = new Set(['login.html', 'unsubscribe.html', 'utm-builder.html', 'og-hero-render.html', 'landing-hero.html', 'embed-gpa-calculator.html'])
+// Secondary stock photos on product pages become real web-app screens (harness, fixture data).
+const APP_SHOTS = {
+  'grade-hub': { src: 'web-gradehub.png', alt: 'StudyEdge AI Grade Hub showing a course average, the score needed on remaining work and the grade components' },
+  'review-queue': { src: 'web-review.png', alt: 'StudyEdge AI Review Queue listing topics that are due for review, with mastery scores and how overdue each one is' },
+}
+
+function listPages() {
+  const out = []
+  for (const dir of ['', 'blog/', 'compare/']) {
+    for (const f of fs.readdirSync(path.join(ROOT, 'public', dir))) {
+      if (!f.endsWith('.html') || SKIP.has(f)) continue
+      const rel = dir + f
+      if (!/<h1[\s>]/.test(fs.readFileSync(path.join(ROOT, 'public', rel), 'utf8'))) continue
+      out.push(rel)
+    }
+  }
+  return out.sort()
+}
+
+const keyOf = rel => rel.replace(/\.html$/, '')
+const coverUrl = (rel, ext) => `/covers/${keyOf(rel)}.${ext}`
+const escAttr = s => s.replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;')
+
+function pictureTag(rel, alt, cls, eager) {
+  return `<picture><source srcset="${coverUrl(rel, 'webp')}" type="image/webp"><img${cls ? ` class="${cls}"` : ''} src="${coverUrl(rel, 'png')}" alt="${escAttr(alt)}" width="1200" height="630" ${eager ? 'loading="eager" fetchpriority="high"' : 'loading="lazy"'}></picture>`
+}
+
+function wire(rel, alt) {
+  const file = path.join(ROOT, 'public', rel)
+  let t = fs.readFileSync(file, 'utf8')
+  const t0 = t
+  const abs = ORIGIN + coverUrl(rel, 'png')
+  // 1. social meta: drop the old image/card tags, add one marked block
+  t = t.replace(/[ \t]*<meta\b(?=[^>]*\b(?:property|name)="(?:og:image(?::\w+)?|twitter:image(?::alt)?|twitter:card)")[^>]*>\s*\n?/g, '')
+  t = t.replace(/[ \t]*<!-- cover:meta -->[\s\S]*?<!-- \/cover:meta -->\n?/, '')
+  const meta = `  <!-- cover:meta -->\n  <meta property="og:image" content="${abs}" />\n  <meta property="og:image:width" content="1200" />\n  <meta property="og:image:height" content="630" />\n  <meta property="og:image:alt" content="${escAttr(alt)}" />\n  <meta name="twitter:card" content="summary_large_image" />\n  <meta name="twitter:image" content="${abs}" />\n  <meta name="twitter:image:alt" content="${escAttr(alt)}" />\n  <!-- /cover:meta -->\n`
+  t = t.replace('</head>', meta + '</head>')
+  // 2. stock-photo preloads/preconnects go; JSON-LD images point at the cover
+  t = t.replace(/[ \t]*<link rel="preconnect" href="https:\/\/images\.unsplash\.com"[^>]*>\s*\n?/g, '')
+  // blog index: the featured article shows that post's cover
+  t = t.replace(/(<a href="\/blog\/([^"]+)" class="featured-article">\s*<div class="featured-article-img">\s*)<img src="https:\/\/images\.unsplash\.com[^"]*"[^>]*>/,
+    (m, a, slug) => a + `<picture><source srcset="/covers/blog/${slug}.webp" type="image/webp"><img src="/covers/blog/${slug}.png" alt="" width="1200" height="630" loading="eager"></picture>`)
+  t = t.replace(/[ \t]*<link rel="preload" as="image" href="https:\/\/images\.unsplash\.com[^"]*"[^>]*>\s*\n?/g, '')
+  t = t.replace(/(<script type="application\/ld\+json">[\s\S]*?<\/script>)/g, s => s.replace(/https:\/\/images\.unsplash\.com\/[^"\s]+/g, abs))
+  // 3. hero: the post cover (blog), the hub photo, or the first stock photo on a product page
+  let heroDone = false
+  t = t.replace(/<img class="ed-cover" src="https:\/\/images\.unsplash\.com[^"]*"[^>]*>/, () => { heroDone = true; return pictureTag(rel, alt, 'ed-cover', true) })
+  if (!heroDone) t = t.replace(/(<div class="hub-intro">\s*)<img src="https:\/\/images\.unsplash\.com[^"]*"[^>]*>/, (m, a) => { heroDone = true; return a + pictureTag(rel, alt, 'hub-cover', true) })
+  if (!heroDone && !rel.startsWith('blog/')) {
+    t = t.replace(/<img\b[^>]*src="https:\/\/images\.unsplash\.com[^"]*"[^>]*>/, m => { heroDone = true; return pictureTag(rel, alt, 'page-cover', true) })
+    // any further stock photos on the page: real app screens, alternating
+    let i = 0
+    t = t.replace(/<img\b[^>]*src="https:\/\/images\.unsplash\.com[^"]*"[^>]*>/g, () => {
+      const k = ['grade-hub', 'review-queue'][i++ % 2]
+      return `<picture><source srcset="/covers/app/${k}.webp" type="image/webp"><img class="app-shot" src="/covers/app/${k}.png" alt="${escAttr(APP_SHOTS[k].alt)}" width="1600" height="1000" loading="lazy"></picture>`
+    })
+  }
+  if (t !== t0) fs.writeFileSync(file, t)
+  return t !== t0
+}
+
+async function rollout(args) {
+  const force = args.includes('--force')
+  const manifestPath = path.join(ROOT, 'public', 'covers', 'manifest.json')
+  const manifest = fs.existsSync(manifestPath) ? JSON.parse(fs.readFileSync(manifestPath, 'utf8')) : {}
+  fs.mkdirSync(path.join(ROOT, 'public', 'covers', 'app'), { recursive: true })
+  for (const [k, v] of Object.entries(APP_SHOTS)) {
+    const src = path.join(ROOT, 'scripts', 'cover-assets', 'screens', v.src)
+    const out = path.join(ROOT, 'public', 'covers', 'app', k)
+    if (force || !fs.existsSync(out + '.webp')) {
+      await sharp(src).resize(1600).png({ compressionLevel: 9 }).toFile(out + '.png')
+      await sharp(src).resize(1600).webp({ quality: 84 }).toFile(out + '.webp')
+    }
+  }
+  let rendered = 0, wired = 0, failed = []
+  const pages = listPages()
+  for (const rel of pages) {
+    try {
+      const c = coverFor(rel)
+      const sig = crypto.createHash('sha1').update(VERSION + PRODUCT_DEVICE + JSON.stringify(c.tree)).digest('hex')
+      const base = path.join(ROOT, 'public', 'covers', keyOf(rel))
+      if (force || manifest[rel]?.sig !== sig || !fs.existsSync(base + '.png')) {
+        await render(c.tree, base); rendered++
+      }
+      manifest[rel] = { sig, template: c.tpl, alt: c.alt }
+      if (wire(rel, c.alt)) wired++
+    } catch (e) { failed.push(`${rel}: ${e.message}`) }
+  }
+  fs.writeFileSync(manifestPath, JSON.stringify(manifest, null, 1) + '\n')
+  console.log(`covers: ${pages.length} pages, ${rendered} rendered, ${wired} wired, ${failed.length} failed`)
+  for (const f of failed) console.log('  FAILED', f)
+  if (failed.length) process.exit(1)
+}
+
 const SAMPLES = ['is-a-3-5-gpa-good.html', 'what-gpa-do-you-need-for-ucla.html', 'compare/studyedge-vs-quizlet.html', 'ai-study-coach.html',
   'blog/how-to-study-effectively.html', 'blog/pomodoro-technique-for-studying.html']
 
@@ -295,7 +397,6 @@ async function main() {
       .png().toFile(path.join(outDir, 'contact-sheet.png'))
     return
   }
-  console.error('Full rollout is gated on sample approval; run with --samples.')
-  process.exit(1)
+  await rollout(args)
 }
 main().catch(e => { console.error(e); process.exit(1) })
