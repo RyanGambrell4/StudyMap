@@ -338,6 +338,90 @@
       "destination": "/blog/index.html"
     },
     {
+      "source": "/gpa-raise-calculator",
+      "destination": "/gpa-raise-calculator.html"
+    },
+    {
+      "source": "/study-schedule-maker",
+      "destination": "/study-schedule-maker.html"
+    },
+    {
+      "source": "/is-a-3-on-ap-biology-good",
+      "destination": "/is-a-3-on-ap-biology-good.html"
+    },
+    {
+      "source": "/is-a-3-on-ap-chemistry-good",
+      "destination": "/is-a-3-on-ap-chemistry-good.html"
+    },
+    {
+      "source": "/is-a-3-on-ap-physics-1-good",
+      "destination": "/is-a-3-on-ap-physics-1-good.html"
+    },
+    {
+      "source": "/is-a-3-on-ap-environmental-science-good",
+      "destination": "/is-a-3-on-ap-environmental-science-good.html"
+    },
+    {
+      "source": "/is-a-3-on-ap-calculus-ab-good",
+      "destination": "/is-a-3-on-ap-calculus-ab-good.html"
+    },
+    {
+      "source": "/is-a-3-on-ap-calculus-bc-good",
+      "destination": "/is-a-3-on-ap-calculus-bc-good.html"
+    },
+    {
+      "source": "/is-a-3-on-ap-precalculus-good",
+      "destination": "/is-a-3-on-ap-precalculus-good.html"
+    },
+    {
+      "source": "/is-a-3-on-ap-statistics-good",
+      "destination": "/is-a-3-on-ap-statistics-good.html"
+    },
+    {
+      "source": "/is-a-3-on-ap-computer-science-a-good",
+      "destination": "/is-a-3-on-ap-computer-science-a-good.html"
+    },
+    {
+      "source": "/is-a-3-on-ap-computer-science-principles-good",
+      "destination": "/is-a-3-on-ap-computer-science-principles-good.html"
+    },
+    {
+      "source": "/is-a-3-on-ap-english-language-good",
+      "destination": "/is-a-3-on-ap-english-language-good.html"
+    },
+    {
+      "source": "/is-a-3-on-ap-english-literature-good",
+      "destination": "/is-a-3-on-ap-english-literature-good.html"
+    },
+    {
+      "source": "/is-a-3-on-ap-us-history-good",
+      "destination": "/is-a-3-on-ap-us-history-good.html"
+    },
+    {
+      "source": "/is-a-3-on-ap-world-history-good",
+      "destination": "/is-a-3-on-ap-world-history-good.html"
+    },
+    {
+      "source": "/is-a-3-on-ap-us-government-good",
+      "destination": "/is-a-3-on-ap-us-government-good.html"
+    },
+    {
+      "source": "/is-a-3-on-ap-human-geography-good",
+      "destination": "/is-a-3-on-ap-human-geography-good.html"
+    },
+    {
+      "source": "/is-a-3-on-ap-psychology-good",
+      "destination": "/is-a-3-on-ap-psychology-good.html"
+    },
+    {
+      "source": "/is-a-3-on-ap-macroeconomics-good",
+      "destination": "/is-a-3-on-ap-macroeconomics-good.html"
+    },
+    {
+      "source": "/is-a-3-on-ap-microeconomics-good",
+      "destination": "/is-a-3-on-ap-microeconomics-good.html"
+    },
+    {
       "source": "/blog/:slug",
       "destination": "/blog/:slug.html"
     },
