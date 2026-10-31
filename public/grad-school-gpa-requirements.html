@@ -49,7 +49,7 @@
       {
         "@type": "Question",
         "name": "What GPA do you need for law school?",
-        "acceptedAnswer": { "@type": "Answer", "text": "For T14 law schools (the top 14 by US News ranking), median admitted GPAs range from 3.7 to 3.95. Yale Law is highest at around 3.93 median. Outside the T14, a 3.5 is generally competitive for schools ranked 15-50, and a 3.3 is workable for many accredited law schools when paired with a strong LSAT score. LSAT score can partially compensate for a weaker GPA at many schools." }
+        "acceptedAnswer": { "@type": "Answer", "text": "At the 14 law schools usually called the T14, median GPAs for the Fall 2025 entering class ran from 3.88 (Michigan Law) to 3.99 (University of Virginia School of Law), per ABA Standard 509 disclosures. Harvard, Yale and Stanford reported 3.96, 3.96 and 3.96. Across all 196 ABA-accredited law schools, the median of school medians is 3.67, and half of schools report a median between 3.50 and 3.81. LSAT score can partially compensate for a weaker GPA at many schools." }
       },
       {
         "@type": "Question",
@@ -141,7 +141,7 @@
   <div class="hero-inner" style="max-width:640px;margin:0 auto;padding:0 24px;text-align:center">
     <div class="eyebrow">2025-2026 Admissions Data</div>
     <h1>Grad School GPA Requirements</h1>
-    <p class="hero-sub">Average admitted GPA across 40+ graduate and professional programs. Filter by program type and search by school name. Data from AAMC, LSAC, GMAT official reports, and school Common Data Sets.</p>
+    <p class="hero-sub">Average admitted GPA across 40+ graduate and professional programs. Filter by program type and search by school name. Data from AAMC, ABA Standard 509 disclosures, GMAT official reports, and school Common Data Sets.</p>
   </div>
 </section>
 
@@ -152,9 +152,9 @@
     <div class="s">AAMC 2023-24 cycle median for accepted applicants</div>
   </div>
   <div class="stat-card">
-    <div class="n">3.80</div>
-    <div class="l">Avg T14 law school GPA</div>
-    <div class="s">Median GPA at top 14 US News ranked law schools</div>
+    <div class="n"><span data-law="t14.gpa50.min">3.88</span>&ndash;<span data-law="t14.gpa50.max">3.99</span></div>
+    <div class="l">T14 law school median GPAs</div>
+    <div class="s">Lowest (<span data-law="t14.gpa50.minSchool">Michigan Law</span>) to highest (<span data-law="t14.gpa50.maxSchool">University of Virginia School of Law</span>), <span data-law="class">Fall 2025</span> class</div>
   </div>
   <div class="stat-card">
     <div class="n">3.67</div>
@@ -194,7 +194,7 @@
   </table>
 
   <p class="table-note">
-    Sources: <a href="https://www.aamc.org/data-reports/students-residents/data/2024-facts-applicants-and-matriculants-data" target="_blank" rel="noopener">AAMC 2023-24 Applicant and Matriculant Data</a>; <a href="https://www.lsac.org/data-research/data/class-profile" target="_blank" rel="noopener">LSAC Class Profile Data</a>; GMAC Official MBA Data; individual school Common Data Sets and admissions profile pages. Figures reflect average or median GPA of accepted/enrolled students in the most recent available cycle. <span style="display:inline-block;background:var(--bg-card-h);border:1px solid var(--border);color:var(--text-muted);font-size:11px;padding:2px 8px;border-radius:20px;margin-left:4px">CC BY 4.0</span>
+    Sources: <a href="https://www.aamc.org/data-reports/students-residents/data/2024-facts-applicants-and-matriculants-data" target="_blank" rel="noopener">AAMC 2023-24 Applicant and Matriculant Data</a>; GMAC Official MBA Data; individual school Common Data Sets and admissions profile pages. Figures reflect average or median GPA of accepted/enrolled students in the most recent available cycle. Law school figures: ABA Standard 509 disclosures, <span data-law="year">2025</span> entering class (<a href="https://www.abarequireddisclosures.org/requiredDisclosure/" target="_blank" rel="noopener">abarequireddisclosures.org</a>). For individual law schools, Range is the 25th to 75th percentile GPA. <span style="display:inline-block;background:var(--bg-card-h);border:1px solid var(--border);color:var(--text-muted);font-size:11px;padding:2px 8px;border-radius:20px;margin-left:4px">CC BY 4.0</span>
   </p>
 </div>
 
@@ -249,14 +249,15 @@
     { name: "Yale School of Medicine", cat: "med", gpa: "3.87", range: "3.6 – 4.0", notes: "No grades until MS3. ~100 students per class." },
     { name: "Penn Perelman School of Medicine", cat: "med", gpa: "3.86", range: "3.6 – 4.0", notes: "Avg MCAT ~522." },
     { name: "DO Programs (osteopathic avg)", cat: "med", gpa: "3.54", range: "3.2 – 3.8", notes: "AAMC-adjacent data. Less competitive than MD on avg." },
-    { name: "T14 Law Schools (avg)", cat: "law", gpa: "3.80", range: "3.60 – 3.95", notes: "Median across top 14 by US News ranking." },
-    { name: "Yale Law School", cat: "law", gpa: "3.93", range: "3.82 – 4.0", notes: "LSAT median ~174. Median GPA highest in T14." },
-    { name: "Harvard Law School", cat: "law", gpa: "3.92", range: "3.82 – 4.0", notes: "LSAT median ~174." },
-    { name: "Stanford Law School", cat: "law", gpa: "3.90", range: "3.78 – 4.0", notes: "LSAT median ~174." },
-    { name: "Columbia Law School", cat: "law", gpa: "3.88", range: "3.78 – 4.0", notes: "LSAT median ~174." },
-    { name: "NYU School of Law", cat: "law", gpa: "3.85", range: "3.72 – 4.0", notes: "LSAT median ~173." },
-    { name: "Schools ranked 15-50 (avg)", cat: "law", gpa: "3.55", range: "3.3 – 3.8", notes: "Strong LSAT can compensate for GPA below median." },
-    { name: "ABA-accredited schools overall (avg)", cat: "law", gpa: "3.40", range: "2.9 – 3.8", notes: "Many schools admit below 3.0 with high LSAT scores." },
+    { name: "T14 Law Schools (range of medians)", cat: "law", gpa: "3.88 – 3.99", range: "See schools below", notes: "Lowest median: Michigan Law. Highest: University of Virginia School of Law. LSAT medians 170 to 174. ABA 509, Fall 2025." },
+    { name: "University of Virginia School of Law", cat: "law", gpa: "3.99", range: "3.83 – 4.04", notes: "LSAT median 173. Highest median GPA in the T14." },
+    { name: "Yale Law School", cat: "law", gpa: "3.96", range: "3.90 – 4.00", notes: "LSAT median 174." },
+    { name: "Harvard Law School", cat: "law", gpa: "3.96", range: "3.89 – 4.00", notes: "LSAT median 174." },
+    { name: "Stanford Law School", cat: "law", gpa: "3.96", range: "3.87 – 4.00", notes: "LSAT median 173." },
+    { name: "Columbia Law School", cat: "law", gpa: "3.92", range: "3.85 – 3.98", notes: "LSAT median 173." },
+    { name: "NYU School of Law", cat: "law", gpa: "3.92", range: "3.81 – 3.97", notes: "LSAT median 172." },
+    { name: "Michigan Law", cat: "law", gpa: "3.88", range: "3.74 – 3.95", notes: "LSAT median 171. Lowest median GPA in the T14." },
+    { name: "All 196 ABA-accredited schools (median of medians)", cat: "law", gpa: "3.67", range: "3.50 – 3.81", notes: "Range is the middle half of school medians. Strong LSAT can compensate for GPA below median." },
     { name: "Harvard Business School (HBS)", cat: "mba", gpa: "3.70", range: "3.3 – 4.0", notes: "GPA less decisive than at law/med. Essays matter more." },
     { name: "Stanford GSB", cat: "mba", gpa: "3.79", range: "3.4 – 4.0", notes: "Avg GMAT ~738. Most selective MBA program." },
     { name: "Wharton (Penn)", cat: "mba", gpa: "3.60", range: "3.2 – 4.0", notes: "Avg GMAT ~732." },

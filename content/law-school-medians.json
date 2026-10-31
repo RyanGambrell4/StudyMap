@@ -1,0 +1,2002 @@
+{
+ "_about": "Undergraduate GPA and LSAT percentiles for each ABA-approved law school's entering class, copied from the ABA Standard 509 Required Disclosures (all first-year students, full- and part-time combined). Pages show these numbers through data-law spans. After editing, run `node scripts/sync-law-medians.mjs`; src/lib/lawSchoolMedians.test.js fails if a page drifts.",
+ "entering_class": "Fall 2025",
+ "report_year": 2025,
+ "source_name": "ABA Standard 509 Required Disclosures, 2025",
+ "source_url": "https://www.abarequireddisclosures.org/requiredDisclosure/",
+ "source_data_url": "https://backend.abarequireddisclosures.org/api/AnnualQuestionnaire/GetAllCompilationData?year=2025&scetionName=First%20Year%20Class",
+ "retrieved": "2026-10-31",
+ "t14": [
+  "yale",
+  "stanford",
+  "harvard",
+  "chicago",
+  "columbia",
+  "nyu",
+  "penn",
+  "virginia",
+  "michigan",
+  "duke",
+  "northwestern",
+  "berkeley",
+  "cornell",
+  "georgetown"
+ ],
+ "schools": [
+  {
+   "slug": "akron-the-university-of",
+   "abaName": "Akron, The University of",
+   "gpa25": 3.22,
+   "gpa50": 3.51,
+   "gpa75": 3.76,
+   "lsat25": 151,
+   "lsat50": 154,
+   "lsat75": 157
+  },
+  {
+   "slug": "alabama-the-university-of",
+   "abaName": "Alabama, The University of",
+   "gpa25": 3.76,
+   "gpa50": 3.97,
+   "gpa75": 4.05,
+   "lsat25": 161,
+   "lsat50": 167,
+   "lsat75": 168
+  },
+  {
+   "slug": "albany-law-school",
+   "abaName": "Albany Law School",
+   "gpa25": 3.16,
+   "gpa50": 3.54,
+   "gpa75": 3.75,
+   "lsat25": 154,
+   "lsat50": 158,
+   "lsat75": 161
+  },
+  {
+   "slug": "american-university",
+   "abaName": "American University",
+   "gpa25": 3.32,
+   "gpa50": 3.63,
+   "gpa75": 3.75,
+   "lsat25": 157,
+   "lsat50": 162,
+   "lsat75": 163
+  },
+  {
+   "slug": "appalachian-school-of-law",
+   "abaName": "Appalachian School of Law",
+   "gpa25": 2.72,
+   "gpa50": 3.2,
+   "gpa75": 3.53,
+   "lsat25": 145,
+   "lsat50": 146,
+   "lsat75": 151
+  },
+  {
+   "slug": "arizona-state-university",
+   "abaName": "Arizona State University",
+   "gpa25": 3.58,
+   "gpa50": 3.91,
+   "gpa75": 3.98,
+   "lsat25": 158,
+   "lsat50": 165,
+   "lsat75": 167
+  },
+  {
+   "slug": "arizona-the-university-of",
+   "abaName": "Arizona, The University of",
+   "gpa25": 3.54,
+   "gpa50": 3.78,
+   "gpa75": 3.9,
+   "lsat25": 162,
+   "lsat50": 163,
+   "lsat75": 165
+  },
+  {
+   "slug": "arkansas-at-little-rock-university-of",
+   "abaName": "Arkansas at Little Rock, University of",
+   "gpa25": 2.98,
+   "gpa50": 3.41,
+   "gpa75": 3.72,
+   "lsat25": 150,
+   "lsat50": 153,
+   "lsat75": 158
+  },
+  {
+   "slug": "arkansas-university-of",
+   "abaName": "Arkansas, University of",
+   "gpa25": 3.54,
+   "gpa50": 3.71,
+   "gpa75": 3.87,
+   "lsat25": 155,
+   "lsat50": 158,
+   "lsat75": 161
+  },
+  {
+   "slug": "atlanta-s-john-marshall-law-school",
+   "abaName": "Atlanta's John Marshall Law School",
+   "gpa25": 2.78,
+   "gpa50": 3.13,
+   "gpa75": 3.49,
+   "lsat25": 150,
+   "lsat50": 152,
+   "lsat75": 155
+  },
+  {
+   "slug": "ave-maria-school-of-law",
+   "abaName": "Ave Maria School of Law",
+   "gpa25": 3.07,
+   "gpa50": 3.36,
+   "gpa75": 3.66,
+   "lsat25": 152,
+   "lsat50": 155,
+   "lsat75": 158
+  },
+  {
+   "slug": "baltimore-university-of",
+   "abaName": "Baltimore, University of",
+   "gpa25": 3.12,
+   "gpa50": 3.45,
+   "gpa75": 3.7,
+   "lsat25": 152,
+   "lsat50": 155,
+   "lsat75": 158
+  },
+  {
+   "slug": "barry-university",
+   "abaName": "Barry University",
+   "gpa25": 2.93,
+   "gpa50": 3.23,
+   "gpa75": 3.48,
+   "lsat25": 148,
+   "lsat50": 150,
+   "lsat75": 152
+  },
+  {
+   "slug": "baylor-university",
+   "abaName": "Baylor University",
+   "gpa25": 3.49,
+   "gpa50": 3.77,
+   "gpa75": 3.89,
+   "lsat25": 159,
+   "lsat50": 164,
+   "lsat75": 165
+  },
+  {
+   "slug": "belmont-university",
+   "abaName": "Belmont University",
+   "gpa25": 3.66,
+   "gpa50": 3.84,
+   "gpa75": 3.94,
+   "lsat25": 158,
+   "lsat50": 161,
+   "lsat75": 163
+  },
+  {
+   "slug": "boston-college",
+   "abaName": "Boston College",
+   "gpa25": 3.67,
+   "gpa50": 3.83,
+   "gpa75": 3.9,
+   "lsat25": 162,
+   "lsat50": 168,
+   "lsat75": 169
+  },
+  {
+   "slug": "boston-university",
+   "abaName": "Boston University",
+   "gpa25": 3.71,
+   "gpa50": 3.88,
+   "gpa75": 3.93,
+   "lsat25": 164,
+   "lsat50": 170,
+   "lsat75": 171
+  },
+  {
+   "slug": "brigham-young-university",
+   "abaName": "Brigham Young University",
+   "gpa25": 3.82,
+   "gpa50": 3.95,
+   "gpa75": 3.98,
+   "lsat25": 168,
+   "lsat50": 170,
+   "lsat75": 172
+  },
+  {
+   "slug": "brooklyn-law-school",
+   "abaName": "Brooklyn Law School",
+   "gpa25": 3.37,
+   "gpa50": 3.59,
+   "gpa75": 3.75,
+   "lsat25": 158,
+   "lsat50": 161,
+   "lsat75": 163
+  },
+  {
+   "slug": "buffalo-university-at",
+   "abaName": "Buffalo, University at",
+   "gpa25": 3.51,
+   "gpa50": 3.71,
+   "gpa75": 3.88,
+   "lsat25": 155,
+   "lsat50": 157,
+   "lsat75": 161
+  },
+  {
+   "slug": "california-western-school-of-law",
+   "abaName": "California Western School of Law",
+   "gpa25": 3.16,
+   "gpa50": 3.5,
+   "gpa75": 3.66,
+   "lsat25": 152,
+   "lsat50": 155,
+   "lsat75": 158
+  },
+  {
+   "slug": "berkeley",
+   "abaName": "California-Berkeley, University of",
+   "name": "Berkeley Law",
+   "gpa25": 3.84,
+   "gpa50": 3.92,
+   "gpa75": 3.99,
+   "lsat25": 167,
+   "lsat50": 170,
+   "lsat75": 172
+  },
+  {
+   "slug": "california-davis-university-of",
+   "abaName": "California-Davis, University of",
+   "gpa25": 3.49,
+   "gpa50": 3.7,
+   "gpa75": 3.87,
+   "lsat25": 160,
+   "lsat50": 165,
+   "lsat75": 167
+  },
+  {
+   "slug": "california-irvine-university-of",
+   "abaName": "California-Irvine, University of",
+   "gpa25": 3.59,
+   "gpa50": 3.8,
+   "gpa75": 3.9,
+   "lsat25": 166,
+   "lsat50": 169,
+   "lsat75": 170
+  },
+  {
+   "slug": "ucla",
+   "abaName": "California-Los Angeles, University of",
+   "name": "UCLA School of Law",
+   "gpa25": 3.73,
+   "gpa50": 3.95,
+   "gpa75": 4.0,
+   "lsat25": 166,
+   "lsat50": 171,
+   "lsat75": 172
+  },
+  {
+   "slug": "california-san-francisco-university-of",
+   "abaName": "California-San Francisco, University of",
+   "gpa25": 3.55,
+   "gpa50": 3.71,
+   "gpa75": 3.83,
+   "lsat25": 158,
+   "lsat50": 161,
+   "lsat75": 163
+  },
+  {
+   "slug": "campbell-university",
+   "abaName": "Campbell University",
+   "gpa25": 3.21,
+   "gpa50": 3.51,
+   "gpa75": 3.77,
+   "lsat25": 152,
+   "lsat50": 156,
+   "lsat75": 159
+  },
+  {
+   "slug": "capital-university-law-school",
+   "abaName": "Capital University Law School",
+   "gpa25": 3.07,
+   "gpa50": 3.44,
+   "gpa75": 3.66,
+   "lsat25": 148,
+   "lsat50": 151,
+   "lsat75": 157
+  },
+  {
+   "slug": "cardozo-yeshiva-university",
+   "abaName": "Cardozo, Yeshiva University",
+   "gpa25": 3.56,
+   "gpa50": 3.78,
+   "gpa75": 3.87,
+   "lsat25": 162,
+   "lsat50": 165,
+   "lsat75": 167
+  },
+  {
+   "slug": "case-western-reserve-university",
+   "abaName": "Case Western Reserve University",
+   "gpa25": 3.51,
+   "gpa50": 3.76,
+   "gpa75": 3.89,
+   "lsat25": 156,
+   "lsat50": 162,
+   "lsat75": 164
+  },
+  {
+   "slug": "catholic-university-of-america-the",
+   "abaName": "Catholic University of America, The",
+   "gpa25": 3.46,
+   "gpa50": 3.68,
+   "gpa75": 3.85,
+   "lsat25": 158,
+   "lsat50": 161,
+   "lsat75": 163
+  },
+  {
+   "slug": "chapman-university",
+   "abaName": "Chapman University",
+   "gpa25": 3.32,
+   "gpa50": 3.7,
+   "gpa75": 3.82,
+   "lsat25": 156,
+   "lsat50": 163,
+   "lsat75": 164
+  },
+  {
+   "slug": "charleston-school-of-law",
+   "abaName": "Charleston School of Law",
+   "gpa25": 3.26,
+   "gpa50": 3.51,
+   "gpa75": 3.75,
+   "lsat25": 152,
+   "lsat50": 154,
+   "lsat75": 157
+  },
+  {
+   "slug": "chicago",
+   "abaName": "Chicago, The University of",
+   "name": "University of Chicago Law School",
+   "gpa25": 3.87,
+   "gpa50": 3.97,
+   "gpa75": 4.0,
+   "lsat25": 171,
+   "lsat50": 174,
+   "lsat75": 176
+  },
+  {
+   "slug": "chicago-kent-illinois-institute-of-technology",
+   "abaName": "Chicago-Kent, Illinois Institute of Technology",
+   "gpa25": 3.45,
+   "gpa50": 3.72,
+   "gpa75": 3.89,
+   "lsat25": 156,
+   "lsat50": 161,
+   "lsat75": 164
+  },
+  {
+   "slug": "cincinnati-university-of",
+   "abaName": "Cincinnati, University of",
+   "gpa25": 3.64,
+   "gpa50": 3.8,
+   "gpa75": 3.91,
+   "lsat25": 156,
+   "lsat50": 159,
+   "lsat75": 161
+  },
+  {
+   "slug": "city-university-of-new-york-university-of",
+   "abaName": "City University of New York, University of",
+   "gpa25": 3.26,
+   "gpa50": 3.54,
+   "gpa75": 3.77,
+   "lsat25": 152,
+   "lsat50": 155,
+   "lsat75": 161
+  },
+  {
+   "slug": "cleveland-state-university",
+   "abaName": "Cleveland State University",
+   "gpa25": 3.11,
+   "gpa50": 3.5,
+   "gpa75": 3.76,
+   "lsat25": 152,
+   "lsat50": 155,
+   "lsat75": 158
+  },
+  {
+   "slug": "colorado-university-of",
+   "abaName": "Colorado, University of",
+   "gpa25": 3.62,
+   "gpa50": 3.81,
+   "gpa75": 3.91,
+   "lsat25": 161,
+   "lsat50": 164,
+   "lsat75": 167
+  },
+  {
+   "slug": "columbia",
+   "abaName": "Columbia University",
+   "name": "Columbia Law School",
+   "gpa25": 3.85,
+   "gpa50": 3.92,
+   "gpa75": 3.98,
+   "lsat25": 169,
+   "lsat50": 173,
+   "lsat75": 175
+  },
+  {
+   "slug": "connecticut-university-of",
+   "abaName": "Connecticut, University of",
+   "gpa25": 3.55,
+   "gpa50": 3.78,
+   "gpa75": 3.9,
+   "lsat25": 160,
+   "lsat50": 162,
+   "lsat75": 164
+  },
+  {
+   "slug": "cooley-law-school",
+   "abaName": "Cooley Law School",
+   "gpa25": 2.67,
+   "gpa50": 3.09,
+   "gpa75": 3.45,
+   "lsat25": 145,
+   "lsat50": 147,
+   "lsat75": 151
+  },
+  {
+   "slug": "cornell",
+   "abaName": "Cornell University",
+   "name": "Cornell Law School",
+   "gpa25": 3.75,
+   "gpa50": 3.92,
+   "gpa75": 3.97,
+   "lsat25": 168,
+   "lsat50": 173,
+   "lsat75": 175
+  },
+  {
+   "slug": "creighton-university",
+   "abaName": "Creighton University",
+   "gpa25": 3.14,
+   "gpa50": 3.51,
+   "gpa75": 3.74,
+   "lsat25": 150,
+   "lsat50": 153,
+   "lsat75": 156
+  },
+  {
+   "slug": "dayton-university-of",
+   "abaName": "Dayton, University of",
+   "gpa25": 3.31,
+   "gpa50": 3.6,
+   "gpa75": 3.87,
+   "lsat25": 154,
+   "lsat50": 157,
+   "lsat75": 160
+  },
+  {
+   "slug": "denver-university-of",
+   "abaName": "Denver, University of",
+   "gpa25": 3.36,
+   "gpa50": 3.66,
+   "gpa75": 3.8,
+   "lsat25": 156,
+   "lsat50": 160,
+   "lsat75": 162
+  },
+  {
+   "slug": "depaul-university",
+   "abaName": "DePaul University",
+   "gpa25": 3.17,
+   "gpa50": 3.61,
+   "gpa75": 3.8,
+   "lsat25": 154,
+   "lsat50": 158,
+   "lsat75": 160
+  },
+  {
+   "slug": "detroit-mercy-university-of",
+   "abaName": "Detroit Mercy, University of",
+   "gpa25": 3.16,
+   "gpa50": 3.52,
+   "gpa75": 3.73,
+   "lsat25": 154,
+   "lsat50": 156,
+   "lsat75": 159
+  },
+  {
+   "slug": "district-of-columbia-university-of",
+   "abaName": "District of Columbia, University of",
+   "gpa25": 3.05,
+   "gpa50": 3.28,
+   "gpa75": 3.55,
+   "lsat25": 148,
+   "lsat50": 151,
+   "lsat75": 153
+  },
+  {
+   "slug": "drake-university",
+   "abaName": "Drake University",
+   "gpa25": 3.38,
+   "gpa50": 3.67,
+   "gpa75": 3.89,
+   "lsat25": 153,
+   "lsat50": 156,
+   "lsat75": 159
+  },
+  {
+   "slug": "drexel-university",
+   "abaName": "Drexel University",
+   "gpa25": 3.35,
+   "gpa50": 3.76,
+   "gpa75": 3.87,
+   "lsat25": 154,
+   "lsat50": 160,
+   "lsat75": 162
+  },
+  {
+   "slug": "duke",
+   "abaName": "Duke University",
+   "name": "Duke Law",
+   "gpa25": 3.83,
+   "gpa50": 3.91,
+   "gpa75": 3.96,
+   "lsat25": 169,
+   "lsat50": 171,
+   "lsat75": 172
+  },
+  {
+   "slug": "duquesne-university",
+   "abaName": "Duquesne University",
+   "gpa25": 3.35,
+   "gpa50": 3.62,
+   "gpa75": 3.85,
+   "lsat25": 155,
+   "lsat50": 157,
+   "lsat75": 160
+  },
+  {
+   "slug": "elon-university",
+   "abaName": "Elon University",
+   "gpa25": 3.11,
+   "gpa50": 3.4,
+   "gpa75": 3.7,
+   "lsat25": 151,
+   "lsat50": 154,
+   "lsat75": 158
+  },
+  {
+   "slug": "emory-university",
+   "abaName": "Emory University",
+   "gpa25": 3.68,
+   "gpa50": 3.82,
+   "gpa75": 3.87,
+   "lsat25": 162,
+   "lsat50": 166,
+   "lsat75": 168
+  },
+  {
+   "slug": "faulkner-university",
+   "abaName": "Faulkner University",
+   "gpa25": 2.99,
+   "gpa50": 3.33,
+   "gpa75": 3.66,
+   "lsat25": 148,
+   "lsat50": 150,
+   "lsat75": 154
+  },
+  {
+   "slug": "florida-a-m-university",
+   "abaName": "Florida A&M University",
+   "gpa25": 3.18,
+   "gpa50": 3.48,
+   "gpa75": 3.74,
+   "lsat25": 149,
+   "lsat50": 152,
+   "lsat75": 155
+  },
+  {
+   "slug": "florida-international-university",
+   "abaName": "Florida International University",
+   "gpa25": 3.66,
+   "gpa50": 3.8,
+   "gpa75": 3.89,
+   "lsat25": 159,
+   "lsat50": 161,
+   "lsat75": 162
+  },
+  {
+   "slug": "florida-state-university",
+   "abaName": "Florida State University",
+   "gpa25": 3.6,
+   "gpa50": 3.93,
+   "gpa75": 3.99,
+   "lsat25": 158,
+   "lsat50": 166,
+   "lsat75": 167
+  },
+  {
+   "slug": "florida-university-of",
+   "abaName": "Florida, University of",
+   "gpa25": 3.7,
+   "gpa50": 3.91,
+   "gpa75": 3.97,
+   "lsat25": 165,
+   "lsat50": 169,
+   "lsat75": 170
+  },
+  {
+   "slug": "fordham-university",
+   "abaName": "Fordham University",
+   "gpa25": 3.6,
+   "gpa50": 3.79,
+   "gpa75": 3.88,
+   "lsat25": 165,
+   "lsat50": 168,
+   "lsat75": 170
+  },
+  {
+   "slug": "george-mason-university",
+   "abaName": "George Mason University",
+   "gpa25": 3.55,
+   "gpa50": 3.93,
+   "gpa75": 3.98,
+   "lsat25": 162,
+   "lsat50": 169,
+   "lsat75": 171
+  },
+  {
+   "slug": "george-washington-university-the",
+   "abaName": "George Washington University, The",
+   "gpa25": 3.55,
+   "gpa50": 3.86,
+   "gpa75": 3.93,
+   "lsat25": 162,
+   "lsat50": 168,
+   "lsat75": 170
+  },
+  {
+   "slug": "georgetown",
+   "abaName": "Georgetown University",
+   "name": "Georgetown Law",
+   "gpa25": 3.75,
+   "gpa50": 3.93,
+   "gpa75": 3.98,
+   "lsat25": 166,
+   "lsat50": 171,
+   "lsat75": 173
+  },
+  {
+   "slug": "georgia-state-university",
+   "abaName": "Georgia State University",
+   "gpa25": 3.45,
+   "gpa50": 3.64,
+   "gpa75": 3.82,
+   "lsat25": 158,
+   "lsat50": 160,
+   "lsat75": 163
+  },
+  {
+   "slug": "georgia-university-of",
+   "abaName": "Georgia, University of",
+   "gpa25": 3.7,
+   "gpa50": 3.92,
+   "gpa75": 3.97,
+   "lsat25": 159,
+   "lsat50": 169,
+   "lsat75": 171
+  },
+  {
+   "slug": "gonzaga-university",
+   "abaName": "Gonzaga University",
+   "gpa25": 3.24,
+   "gpa50": 3.55,
+   "gpa75": 3.76,
+   "lsat25": 153,
+   "lsat50": 155,
+   "lsat75": 158
+  },
+  {
+   "slug": "harvard",
+   "abaName": "Harvard University",
+   "name": "Harvard Law School",
+   "gpa25": 3.89,
+   "gpa50": 3.96,
+   "gpa75": 4.0,
+   "lsat25": 171,
+   "lsat50": 174,
+   "lsat75": 176
+  },
+  {
+   "slug": "hawaii-university-of",
+   "abaName": "Hawaii, University of",
+   "gpa25": 3.4,
+   "gpa50": 3.62,
+   "gpa75": 3.8,
+   "lsat25": 155,
+   "lsat50": 158,
+   "lsat75": 162
+  },
+  {
+   "slug": "hofstra-university",
+   "abaName": "Hofstra University",
+   "gpa25": 3.35,
+   "gpa50": 3.65,
+   "gpa75": 3.83,
+   "lsat25": 154,
+   "lsat50": 157,
+   "lsat75": 160
+  },
+  {
+   "slug": "houston-university-of",
+   "abaName": "Houston, University of",
+   "gpa25": 3.56,
+   "gpa50": 3.79,
+   "gpa75": 3.9,
+   "lsat25": 160,
+   "lsat50": 163,
+   "lsat75": 165
+  },
+  {
+   "slug": "howard-university",
+   "abaName": "Howard University",
+   "gpa25": 3.4,
+   "gpa50": 3.63,
+   "gpa75": 3.8,
+   "lsat25": 153,
+   "lsat50": 156,
+   "lsat75": 160
+  },
+  {
+   "slug": "idaho-university-of",
+   "abaName": "Idaho, University of",
+   "gpa25": 3.07,
+   "gpa50": 3.54,
+   "gpa75": 3.81,
+   "lsat25": 149,
+   "lsat50": 153,
+   "lsat75": 157
+  },
+  {
+   "slug": "illinois-university-of",
+   "abaName": "Illinois, University of",
+   "gpa25": 3.55,
+   "gpa50": 3.81,
+   "gpa75": 3.92,
+   "lsat25": 160,
+   "lsat50": 166,
+   "lsat75": 168
+  },
+  {
+   "slug": "illinois-chicago-university-of",
+   "abaName": "Illinois-Chicago, University of",
+   "gpa25": 3.13,
+   "gpa50": 3.4,
+   "gpa75": 3.64,
+   "lsat25": 150,
+   "lsat50": 153,
+   "lsat75": 156
+  },
+  {
+   "slug": "indiana-university-bloomington",
+   "abaName": "Indiana University-Bloomington",
+   "gpa25": 3.63,
+   "gpa50": 3.91,
+   "gpa75": 3.98,
+   "lsat25": 158,
+   "lsat50": 164,
+   "lsat75": 166
+  },
+  {
+   "slug": "indiana-university-indianapolis",
+   "abaName": "Indiana University-Indianapolis",
+   "gpa25": 3.33,
+   "gpa50": 3.58,
+   "gpa75": 3.82,
+   "lsat25": 152,
+   "lsat50": 155,
+   "lsat75": 159
+  },
+  {
+   "slug": "inter-american-university-of-puerto-rico",
+   "abaName": "Inter American University of Puerto Rico",
+   "gpa25": 3.18,
+   "gpa50": 3.39,
+   "gpa75": 3.65,
+   "lsat25": 140,
+   "lsat50": 144,
+   "lsat75": 148
+  },
+  {
+   "slug": "iowa-university-of",
+   "abaName": "Iowa, University of",
+   "gpa25": 3.62,
+   "gpa50": 3.78,
+   "gpa75": 3.92,
+   "lsat25": 161,
+   "lsat50": 164,
+   "lsat75": 165
+  },
+  {
+   "slug": "jacksonville-university",
+   "abaName": "Jacksonville University",
+   "gpa25": 3.28,
+   "gpa50": 3.48,
+   "gpa75": 3.68,
+   "lsat25": 154,
+   "lsat50": 156,
+   "lsat75": 159
+  },
+  {
+   "slug": "kansas-the-university-of",
+   "abaName": "Kansas, The University of",
+   "gpa25": 3.58,
+   "gpa50": 3.85,
+   "gpa75": 3.95,
+   "lsat25": 158,
+   "lsat50": 162,
+   "lsat75": 164
+  },
+  {
+   "slug": "kentucky-university-of",
+   "abaName": "Kentucky, University of",
+   "gpa25": 3.52,
+   "gpa50": 3.72,
+   "gpa75": 3.9,
+   "lsat25": 156,
+   "lsat50": 159,
+   "lsat75": 162
+  },
+  {
+   "slug": "lewis-clark-law-school",
+   "abaName": "Lewis & Clark Law School",
+   "gpa25": 3.24,
+   "gpa50": 3.59,
+   "gpa75": 3.79,
+   "lsat25": 158,
+   "lsat50": 161,
+   "lsat75": 166
+  },
+  {
+   "slug": "liberty-university",
+   "abaName": "Liberty University",
+   "gpa25": 3.36,
+   "gpa50": 3.54,
+   "gpa75": 3.81,
+   "lsat25": 151,
+   "lsat50": 154,
+   "lsat75": 158
+  },
+  {
+   "slug": "lincoln-memorial-university",
+   "abaName": "Lincoln Memorial University",
+   "gpa25": 3.08,
+   "gpa50": 3.44,
+   "gpa75": 3.68,
+   "lsat25": 150,
+   "lsat50": 153,
+   "lsat75": 156
+  },
+  {
+   "slug": "louisiana-state-university",
+   "abaName": "Louisiana State University",
+   "gpa25": 3.48,
+   "gpa50": 3.74,
+   "gpa75": 3.93,
+   "lsat25": 155,
+   "lsat50": 157,
+   "lsat75": 160
+  },
+  {
+   "slug": "louisville-university-of",
+   "abaName": "Louisville, University of",
+   "gpa25": 3.32,
+   "gpa50": 3.67,
+   "gpa75": 3.9,
+   "lsat25": 154,
+   "lsat50": 157,
+   "lsat75": 161
+  },
+  {
+   "slug": "loyola-marymount-university-los-angeles",
+   "abaName": "Loyola Marymount University-Los Angeles",
+   "gpa25": 3.52,
+   "gpa50": 3.74,
+   "gpa75": 3.89,
+   "lsat25": 160,
+   "lsat50": 163,
+   "lsat75": 165
+  },
+  {
+   "slug": "loyola-university-chicago",
+   "abaName": "Loyola University-Chicago",
+   "gpa25": 3.55,
+   "gpa50": 3.7,
+   "gpa75": 3.83,
+   "lsat25": 159,
+   "lsat50": 161,
+   "lsat75": 163
+  },
+  {
+   "slug": "loyola-university-new-orleans",
+   "abaName": "Loyola University-New Orleans",
+   "gpa25": 3.21,
+   "gpa50": 3.47,
+   "gpa75": 3.71,
+   "lsat25": 151,
+   "lsat50": 154,
+   "lsat75": 157
+  },
+  {
+   "slug": "maine-university-of",
+   "abaName": "Maine, University of",
+   "gpa25": 3.41,
+   "gpa50": 3.7,
+   "gpa75": 3.8,
+   "lsat25": 154,
+   "lsat50": 158,
+   "lsat75": 162
+  },
+  {
+   "slug": "marquette-university",
+   "abaName": "Marquette University",
+   "gpa25": 3.5,
+   "gpa50": 3.7,
+   "gpa75": 3.83,
+   "lsat25": 156,
+   "lsat50": 158,
+   "lsat75": 160
+  },
+  {
+   "slug": "maryland-university-of",
+   "abaName": "Maryland, University of",
+   "gpa25": 3.37,
+   "gpa50": 3.72,
+   "gpa75": 3.88,
+   "lsat25": 156,
+   "lsat50": 164,
+   "lsat75": 166
+  },
+  {
+   "slug": "massachusetts-dartmouth-university-of",
+   "abaName": "Massachusetts/Dartmouth, University of",
+   "gpa25": 3.1,
+   "gpa50": 3.36,
+   "gpa75": 3.69,
+   "lsat25": 149,
+   "lsat50": 152,
+   "lsat75": 155
+  },
+  {
+   "slug": "memphis-the-university-of",
+   "abaName": "Memphis, The University of",
+   "gpa25": 3.22,
+   "gpa50": 3.53,
+   "gpa75": 3.77,
+   "lsat25": 152,
+   "lsat50": 155,
+   "lsat75": 159
+  },
+  {
+   "slug": "mercer-university",
+   "abaName": "Mercer University",
+   "gpa25": 3.3,
+   "gpa50": 3.62,
+   "gpa75": 3.8,
+   "lsat25": 155,
+   "lsat50": 157,
+   "lsat75": 160
+  },
+  {
+   "slug": "miami-university-of",
+   "abaName": "Miami, University of",
+   "gpa25": 3.58,
+   "gpa50": 3.79,
+   "gpa75": 3.88,
+   "lsat25": 160,
+   "lsat50": 164,
+   "lsat75": 165
+  },
+  {
+   "slug": "michigan-state-university",
+   "abaName": "Michigan State University",
+   "gpa25": 3.47,
+   "gpa50": 3.73,
+   "gpa75": 3.87,
+   "lsat25": 158,
+   "lsat50": 162,
+   "lsat75": 164
+  },
+  {
+   "slug": "michigan",
+   "abaName": "Michigan, University of",
+   "name": "Michigan Law",
+   "gpa25": 3.74,
+   "gpa50": 3.88,
+   "gpa75": 3.95,
+   "lsat25": 168,
+   "lsat50": 171,
+   "lsat75": 173
+  },
+  {
+   "slug": "minnesota-university-of",
+   "abaName": "Minnesota, University of",
+   "gpa25": 3.62,
+   "gpa50": 3.88,
+   "gpa75": 3.95,
+   "lsat25": 166,
+   "lsat50": 171,
+   "lsat75": 173
+  },
+  {
+   "slug": "mississippi-christian-university",
+   "abaName": "Mississippi Christian University",
+   "gpa25": 3.03,
+   "gpa50": 3.37,
+   "gpa75": 3.73,
+   "lsat25": 148,
+   "lsat50": 152,
+   "lsat75": 155
+  },
+  {
+   "slug": "mississippi-the-university-of",
+   "abaName": "Mississippi, The University of",
+   "gpa25": 3.44,
+   "gpa50": 3.68,
+   "gpa75": 3.87,
+   "lsat25": 155,
+   "lsat50": 157,
+   "lsat75": 160
+  },
+  {
+   "slug": "missouri-university-of",
+   "abaName": "Missouri, University of",
+   "gpa25": 3.47,
+   "gpa50": 3.72,
+   "gpa75": 3.91,
+   "lsat25": 156,
+   "lsat50": 161,
+   "lsat75": 162
+  },
+  {
+   "slug": "missouri-kansas-city-university-of",
+   "abaName": "Missouri-Kansas City, University of",
+   "gpa25": 3.33,
+   "gpa50": 3.65,
+   "gpa75": 3.8,
+   "lsat25": 154,
+   "lsat50": 156,
+   "lsat75": 159
+  },
+  {
+   "slug": "mitchell-hamline-school-of-law",
+   "abaName": "Mitchell/Hamline School of Law",
+   "gpa25": 2.96,
+   "gpa50": 3.29,
+   "gpa75": 3.6,
+   "lsat25": 151,
+   "lsat50": 154,
+   "lsat75": 158
+  },
+  {
+   "slug": "montana-university-of",
+   "abaName": "Montana, University of",
+   "gpa25": 3.33,
+   "gpa50": 3.64,
+   "gpa75": 3.8,
+   "lsat25": 153,
+   "lsat50": 156,
+   "lsat75": 159
+  },
+  {
+   "slug": "nebraska-university-of",
+   "abaName": "Nebraska, University of",
+   "gpa25": 3.6,
+   "gpa50": 3.81,
+   "gpa75": 3.98,
+   "lsat25": 156,
+   "lsat50": 160,
+   "lsat75": 162
+  },
+  {
+   "slug": "nevada-las-vegas-university-of",
+   "abaName": "Nevada-Las Vegas, University of",
+   "gpa25": 3.39,
+   "gpa50": 3.76,
+   "gpa75": 3.88,
+   "lsat25": 156,
+   "lsat50": 160,
+   "lsat75": 162
+  },
+  {
+   "slug": "new-england-law-boston",
+   "abaName": "New England Law/Boston",
+   "gpa25": 3.06,
+   "gpa50": 3.37,
+   "gpa75": 3.68,
+   "lsat25": 149,
+   "lsat50": 153,
+   "lsat75": 157
+  },
+  {
+   "slug": "new-hampshire-university-of",
+   "abaName": "New Hampshire, University of",
+   "gpa25": 3.1,
+   "gpa50": 3.5,
+   "gpa75": 3.72,
+   "lsat25": 151,
+   "lsat50": 155,
+   "lsat75": 159
+  },
+  {
+   "slug": "new-mexico-the-university-of",
+   "abaName": "New Mexico, The University of",
+   "gpa25": 3.12,
+   "gpa50": 3.56,
+   "gpa75": 3.82,
+   "lsat25": 154,
+   "lsat50": 157,
+   "lsat75": 161
+  },
+  {
+   "slug": "new-york-law-school",
+   "abaName": "New York Law School",
+   "gpa25": 3.41,
+   "gpa50": 3.63,
+   "gpa75": 3.78,
+   "lsat25": 154,
+   "lsat50": 157,
+   "lsat75": 160
+  },
+  {
+   "slug": "nyu",
+   "abaName": "New York University",
+   "name": "NYU School of Law",
+   "gpa25": 3.81,
+   "gpa50": 3.92,
+   "gpa75": 3.97,
+   "lsat25": 169,
+   "lsat50": 172,
+   "lsat75": 174
+  },
+  {
+   "slug": "north-carolina-central-university",
+   "abaName": "North Carolina Central University",
+   "gpa25": 3.05,
+   "gpa50": 3.31,
+   "gpa75": 3.56,
+   "lsat25": 149,
+   "lsat50": 151,
+   "lsat75": 154
+  },
+  {
+   "slug": "north-carolina-university-of",
+   "abaName": "North Carolina, University of",
+   "gpa25": 3.78,
+   "gpa50": 3.89,
+   "gpa75": 3.97,
+   "lsat25": 165,
+   "lsat50": 168,
+   "lsat75": 169
+  },
+  {
+   "slug": "north-dakota-university-of",
+   "abaName": "North Dakota, University of",
+   "gpa25": 3.24,
+   "gpa50": 3.48,
+   "gpa75": 3.75,
+   "lsat25": 148,
+   "lsat50": 151,
+   "lsat75": 155
+  },
+  {
+   "slug": "north-texas-at-dallas-university-of",
+   "abaName": "North Texas at Dallas, University of",
+   "gpa25": 3.18,
+   "gpa50": 3.41,
+   "gpa75": 3.66,
+   "lsat25": 151,
+   "lsat50": 153,
+   "lsat75": 156
+  },
+  {
+   "slug": "northeastern-university",
+   "abaName": "Northeastern University",
+   "gpa25": 3.61,
+   "gpa50": 3.77,
+   "gpa75": 3.86,
+   "lsat25": 161,
+   "lsat50": 164,
+   "lsat75": 166
+  },
+  {
+   "slug": "northern-illinois-university",
+   "abaName": "Northern Illinois University",
+   "gpa25": 3.17,
+   "gpa50": 3.41,
+   "gpa75": 3.64,
+   "lsat25": 148,
+   "lsat50": 150,
+   "lsat75": 154
+  },
+  {
+   "slug": "northern-kentucky-university",
+   "abaName": "Northern Kentucky University",
+   "gpa25": 3.15,
+   "gpa50": 3.41,
+   "gpa75": 3.68,
+   "lsat25": 152,
+   "lsat50": 154,
+   "lsat75": 157
+  },
+  {
+   "slug": "northwestern",
+   "abaName": "Northwestern University",
+   "name": "Northwestern Pritzker School of Law",
+   "gpa25": 3.76,
+   "gpa50": 3.96,
+   "gpa75": 4.0,
+   "lsat25": 167,
+   "lsat50": 173,
+   "lsat75": 175
+  },
+  {
+   "slug": "notre-dame-university-of",
+   "abaName": "Notre Dame, University of",
+   "gpa25": 3.78,
+   "gpa50": 3.89,
+   "gpa75": 3.95,
+   "lsat25": 166,
+   "lsat50": 170,
+   "lsat75": 171
+  },
+  {
+   "slug": "nova-southeastern-university",
+   "abaName": "Nova Southeastern University",
+   "gpa25": 3.34,
+   "gpa50": 3.52,
+   "gpa75": 3.71,
+   "lsat25": 152,
+   "lsat50": 155,
+   "lsat75": 158
+  },
+  {
+   "slug": "ohio-northern-university",
+   "abaName": "Ohio Northern University",
+   "gpa25": 3.06,
+   "gpa50": 3.34,
+   "gpa75": 3.67,
+   "lsat25": 146,
+   "lsat50": 149,
+   "lsat75": 151
+  },
+  {
+   "slug": "oklahoma-city-university",
+   "abaName": "Oklahoma City University",
+   "gpa25": 3.21,
+   "gpa50": 3.56,
+   "gpa75": 3.78,
+   "lsat25": 149,
+   "lsat50": 151,
+   "lsat75": 155
+  },
+  {
+   "slug": "oklahoma-university-of",
+   "abaName": "Oklahoma, University of",
+   "gpa25": 3.42,
+   "gpa50": 3.73,
+   "gpa75": 3.88,
+   "lsat25": 159,
+   "lsat50": 162,
+   "lsat75": 164
+  },
+  {
+   "slug": "oregon-university-of",
+   "abaName": "Oregon, University of",
+   "gpa25": 3.32,
+   "gpa50": 3.62,
+   "gpa75": 3.79,
+   "lsat25": 157,
+   "lsat50": 160,
+   "lsat75": 162
+  },
+  {
+   "slug": "pace-university",
+   "abaName": "Pace University",
+   "gpa25": 3.31,
+   "gpa50": 3.54,
+   "gpa75": 3.74,
+   "lsat25": 151,
+   "lsat50": 154,
+   "lsat75": 157
+  },
+  {
+   "slug": "pacific-university-of-the",
+   "abaName": "Pacific, University of the",
+   "gpa25": 3.17,
+   "gpa50": 3.52,
+   "gpa75": 3.73,
+   "lsat25": 153,
+   "lsat50": 156,
+   "lsat75": 160
+  },
+  {
+   "slug": "penn-state-dickinson-law",
+   "abaName": "Penn State Dickinson Law",
+   "gpa25": 3.5,
+   "gpa50": 3.71,
+   "gpa75": 3.86,
+   "lsat25": 157,
+   "lsat50": 159,
+   "lsat75": 161
+  },
+  {
+   "slug": "penn",
+   "abaName": "Pennsylvania, University of",
+   "name": "Penn Carey Law",
+   "gpa25": 3.77,
+   "gpa50": 3.95,
+   "gpa75": 4.0,
+   "lsat25": 167,
+   "lsat50": 173,
+   "lsat75": 174
+  },
+  {
+   "slug": "pepperdine-university",
+   "abaName": "Pepperdine University",
+   "gpa25": 3.61,
+   "gpa50": 3.85,
+   "gpa75": 3.94,
+   "lsat25": 161,
+   "lsat50": 164,
+   "lsat75": 167
+  },
+  {
+   "slug": "pittsburgh-university-of",
+   "abaName": "Pittsburgh, University of",
+   "gpa25": 3.26,
+   "gpa50": 3.54,
+   "gpa75": 3.74,
+   "lsat25": 158,
+   "lsat50": 160,
+   "lsat75": 163
+  },
+  {
+   "slug": "pontifical-catholic-university-of-puerto-rico",
+   "abaName": "Pontifical Catholic University of Puerto Rico",
+   "gpa25": 2.97,
+   "gpa50": 3.33,
+   "gpa75": 3.61,
+   "lsat25": 136,
+   "lsat50": 139,
+   "lsat75": 143
+  },
+  {
+   "slug": "puerto-rico-university-of",
+   "abaName": "Puerto Rico, University of",
+   "gpa25": 3.57,
+   "gpa50": 3.77,
+   "gpa75": 3.9,
+   "lsat25": 146,
+   "lsat50": 152,
+   "lsat75": 156
+  },
+  {
+   "slug": "quinnipiac-university",
+   "abaName": "Quinnipiac University",
+   "gpa25": 3.41,
+   "gpa50": 3.65,
+   "gpa75": 3.84,
+   "lsat25": 153,
+   "lsat50": 155,
+   "lsat75": 158
+  },
+  {
+   "slug": "regent-university",
+   "abaName": "Regent University",
+   "gpa25": 3.37,
+   "gpa50": 3.68,
+   "gpa75": 3.89,
+   "lsat25": 153,
+   "lsat50": 158,
+   "lsat75": 161
+  },
+  {
+   "slug": "richmond-university-of",
+   "abaName": "Richmond, University of",
+   "gpa25": 3.66,
+   "gpa50": 3.81,
+   "gpa75": 3.92,
+   "lsat25": 159,
+   "lsat50": 164,
+   "lsat75": 167
+  },
+  {
+   "slug": "roger-williams-university",
+   "abaName": "Roger Williams University",
+   "gpa25": 3.02,
+   "gpa50": 3.43,
+   "gpa75": 3.73,
+   "lsat25": 147,
+   "lsat50": 150,
+   "lsat75": 154
+  },
+  {
+   "slug": "rutgers-university",
+   "abaName": "Rutgers University",
+   "gpa25": 3.35,
+   "gpa50": 3.66,
+   "gpa75": 3.82,
+   "lsat25": 155,
+   "lsat50": 158,
+   "lsat75": 161
+  },
+  {
+   "slug": "saint-louis-university",
+   "abaName": "Saint Louis University",
+   "gpa25": 3.37,
+   "gpa50": 3.61,
+   "gpa75": 3.83,
+   "lsat25": 154,
+   "lsat50": 157,
+   "lsat75": 161
+  },
+  {
+   "slug": "samford-university",
+   "abaName": "Samford University",
+   "gpa25": 3.42,
+   "gpa50": 3.63,
+   "gpa75": 3.84,
+   "lsat25": 154,
+   "lsat50": 156,
+   "lsat75": 160
+  },
+  {
+   "slug": "san-diego-university-of",
+   "abaName": "San Diego, University of",
+   "gpa25": 3.59,
+   "gpa50": 3.84,
+   "gpa75": 3.92,
+   "lsat25": 160,
+   "lsat50": 163,
+   "lsat75": 165
+  },
+  {
+   "slug": "san-francisco-university-of",
+   "abaName": "San Francisco, University of",
+   "gpa25": 3.16,
+   "gpa50": 3.47,
+   "gpa75": 3.68,
+   "lsat25": 152,
+   "lsat50": 155,
+   "lsat75": 157
+  },
+  {
+   "slug": "santa-clara-university",
+   "abaName": "Santa Clara University",
+   "gpa25": 3.21,
+   "gpa50": 3.5,
+   "gpa75": 3.74,
+   "lsat25": 157,
+   "lsat50": 159,
+   "lsat75": 162
+  },
+  {
+   "slug": "seattle-university",
+   "abaName": "Seattle University",
+   "gpa25": 3.22,
+   "gpa50": 3.6,
+   "gpa75": 3.8,
+   "lsat25": 155,
+   "lsat50": 159,
+   "lsat75": 162
+  },
+  {
+   "slug": "seton-hall-university",
+   "abaName": "Seton Hall University",
+   "gpa25": 3.51,
+   "gpa50": 3.71,
+   "gpa75": 3.86,
+   "lsat25": 158,
+   "lsat50": 161,
+   "lsat75": 164
+  },
+  {
+   "slug": "south-carolina-university-of",
+   "abaName": "South Carolina, University of",
+   "gpa25": 3.43,
+   "gpa50": 3.67,
+   "gpa75": 3.86,
+   "lsat25": 160,
+   "lsat50": 162,
+   "lsat75": 164
+  },
+  {
+   "slug": "south-dakota-university-of",
+   "abaName": "South Dakota, University of",
+   "gpa25": 3.16,
+   "gpa50": 3.47,
+   "gpa75": 3.81,
+   "lsat25": 149,
+   "lsat50": 152,
+   "lsat75": 156
+  },
+  {
+   "slug": "south-texas-college-of-law-houston",
+   "abaName": "South Texas College of Law Houston",
+   "gpa25": 3.08,
+   "gpa50": 3.41,
+   "gpa75": 3.65,
+   "lsat25": 153,
+   "lsat50": 155,
+   "lsat75": 158
+  },
+  {
+   "slug": "southern-california-university-of",
+   "abaName": "Southern California, University of",
+   "gpa25": 3.73,
+   "gpa50": 3.91,
+   "gpa75": 3.97,
+   "lsat25": 165,
+   "lsat50": 169,
+   "lsat75": 170
+  },
+  {
+   "slug": "southern-illinois-university",
+   "abaName": "Southern Illinois University",
+   "gpa25": 2.93,
+   "gpa50": 3.38,
+   "gpa75": 3.78,
+   "lsat25": 146,
+   "lsat50": 149,
+   "lsat75": 155
+  },
+  {
+   "slug": "southern-methodist-university",
+   "abaName": "Southern Methodist University",
+   "gpa25": 3.52,
+   "gpa50": 3.81,
+   "gpa75": 3.92,
+   "lsat25": 163,
+   "lsat50": 167,
+   "lsat75": 168
+  },
+  {
+   "slug": "southern-university",
+   "abaName": "Southern University",
+   "gpa25": 2.86,
+   "gpa50": 3.15,
+   "gpa75": 3.48,
+   "lsat25": 145,
+   "lsat50": 147,
+   "lsat75": 150
+  },
+  {
+   "slug": "southwestern-law-school",
+   "abaName": "Southwestern Law School",
+   "gpa25": 3.23,
+   "gpa50": 3.51,
+   "gpa75": 3.72,
+   "lsat25": 154,
+   "lsat50": 157,
+   "lsat75": 160
+  },
+  {
+   "slug": "st-john-s-university",
+   "abaName": "St. John's University",
+   "gpa25": 3.44,
+   "gpa50": 3.81,
+   "gpa75": 3.91,
+   "lsat25": 156,
+   "lsat50": 164,
+   "lsat75": 166
+  },
+  {
+   "slug": "st-mary-s-university",
+   "abaName": "St. Mary's University",
+   "gpa25": 3.14,
+   "gpa50": 3.49,
+   "gpa75": 3.69,
+   "lsat25": 151,
+   "lsat50": 153,
+   "lsat75": 156
+  },
+  {
+   "slug": "st-thomas-university-miami",
+   "abaName": "St. Thomas University (Miami)",
+   "gpa25": 3.12,
+   "gpa50": 3.42,
+   "gpa75": 3.65,
+   "lsat25": 150,
+   "lsat50": 152,
+   "lsat75": 156
+  },
+  {
+   "slug": "st-thomas-minneapolis-university-of",
+   "abaName": "St. Thomas, (Minneapolis) University of",
+   "gpa25": 3.46,
+   "gpa50": 3.72,
+   "gpa75": 3.88,
+   "lsat25": 155,
+   "lsat50": 159,
+   "lsat75": 162
+  },
+  {
+   "slug": "stanford",
+   "abaName": "Stanford University",
+   "name": "Stanford Law School",
+   "gpa25": 3.87,
+   "gpa50": 3.96,
+   "gpa75": 4.0,
+   "lsat25": 171,
+   "lsat50": 173,
+   "lsat75": 176
+  },
+  {
+   "slug": "stetson-university",
+   "abaName": "Stetson University",
+   "gpa25": 3.42,
+   "gpa50": 3.63,
+   "gpa75": 3.81,
+   "lsat25": 157,
+   "lsat50": 159,
+   "lsat75": 162
+  },
+  {
+   "slug": "suffolk-university",
+   "abaName": "Suffolk University",
+   "gpa25": 3.37,
+   "gpa50": 3.58,
+   "gpa75": 3.79,
+   "lsat25": 152,
+   "lsat50": 155,
+   "lsat75": 159
+  },
+  {
+   "slug": "syracuse-university",
+   "abaName": "Syracuse University",
+   "gpa25": 3.18,
+   "gpa50": 3.6,
+   "gpa75": 3.77,
+   "lsat25": 154,
+   "lsat50": 158,
+   "lsat75": 160
+  },
+  {
+   "slug": "temple-university",
+   "abaName": "Temple University",
+   "gpa25": 3.59,
+   "gpa50": 3.76,
+   "gpa75": 3.9,
+   "lsat25": 162,
+   "lsat50": 165,
+   "lsat75": 168
+  },
+  {
+   "slug": "tennessee-university-of",
+   "abaName": "Tennessee, University of",
+   "gpa25": 3.67,
+   "gpa50": 3.89,
+   "gpa75": 3.95,
+   "lsat25": 160,
+   "lsat50": 164,
+   "lsat75": 166
+  },
+  {
+   "slug": "texas-a-m-university",
+   "abaName": "Texas A&M University",
+   "gpa25": 3.67,
+   "gpa50": 4.0,
+   "gpa75": 4.0,
+   "lsat25": 161,
+   "lsat50": 169,
+   "lsat75": 170
+  },
+  {
+   "slug": "texas-southern-university",
+   "abaName": "Texas Southern University",
+   "gpa25": 2.99,
+   "gpa50": 3.33,
+   "gpa75": 3.62,
+   "lsat25": 148,
+   "lsat50": 150,
+   "lsat75": 152
+  },
+  {
+   "slug": "texas-tech-university",
+   "abaName": "Texas Tech University",
+   "gpa25": 3.41,
+   "gpa50": 3.69,
+   "gpa75": 3.85,
+   "lsat25": 157,
+   "lsat50": 159,
+   "lsat75": 160
+  },
+  {
+   "slug": "texas-university-of",
+   "abaName": "Texas, University of",
+   "gpa25": 3.75,
+   "gpa50": 3.89,
+   "gpa75": 3.96,
+   "lsat25": 166,
+   "lsat50": 172,
+   "lsat75": 173
+  },
+  {
+   "slug": "the-ohio-state-university",
+   "abaName": "The Ohio State University",
+   "gpa25": 3.64,
+   "gpa50": 3.91,
+   "gpa75": 3.97,
+   "lsat25": 163,
+   "lsat50": 168,
+   "lsat75": 169
+  },
+  {
+   "slug": "toledo-the-university-of",
+   "abaName": "Toledo, The University of",
+   "gpa25": 3.37,
+   "gpa50": 3.53,
+   "gpa75": 3.79,
+   "lsat25": 150,
+   "lsat50": 153,
+   "lsat75": 156
+  },
+  {
+   "slug": "touro-university",
+   "abaName": "Touro University",
+   "gpa25": 3.05,
+   "gpa50": 3.35,
+   "gpa75": 3.66,
+   "lsat25": 151,
+   "lsat50": 153,
+   "lsat75": 156
+  },
+  {
+   "slug": "tulane-university",
+   "abaName": "Tulane University",
+   "gpa25": 3.47,
+   "gpa50": 3.67,
+   "gpa75": 3.81,
+   "lsat25": 159,
+   "lsat50": 161,
+   "lsat75": 164
+  },
+  {
+   "slug": "tulsa-the-university-of",
+   "abaName": "Tulsa, The University of",
+   "gpa25": 3.27,
+   "gpa50": 3.45,
+   "gpa75": 3.72,
+   "lsat25": 155,
+   "lsat50": 157,
+   "lsat75": 160
+  },
+  {
+   "slug": "utah-the-university-of",
+   "abaName": "Utah, The University of",
+   "gpa25": 3.62,
+   "gpa50": 3.87,
+   "gpa75": 3.94,
+   "lsat25": 162,
+   "lsat50": 166,
+   "lsat75": 168
+  },
+  {
+   "slug": "vanderbilt-university",
+   "abaName": "Vanderbilt University",
+   "gpa25": 3.77,
+   "gpa50": 3.91,
+   "gpa75": 3.97,
+   "lsat25": 167,
+   "lsat50": 170,
+   "lsat75": 171
+  },
+  {
+   "slug": "vermont-law-school",
+   "abaName": "Vermont Law School",
+   "gpa25": 2.81,
+   "gpa50": 3.25,
+   "gpa75": 3.61,
+   "lsat25": 148,
+   "lsat50": 152,
+   "lsat75": 157
+  },
+  {
+   "slug": "villanova-university",
+   "abaName": "Villanova University",
+   "gpa25": 3.64,
+   "gpa50": 3.8,
+   "gpa75": 3.9,
+   "lsat25": 159,
+   "lsat50": 164,
+   "lsat75": 166
+  },
+  {
+   "slug": "virginia",
+   "abaName": "Virginia, University of",
+   "name": "University of Virginia School of Law",
+   "gpa25": 3.83,
+   "gpa50": 3.99,
+   "gpa75": 4.04,
+   "lsat25": 168,
+   "lsat50": 173,
+   "lsat75": 175
+  },
+  {
+   "slug": "wake-forest-university",
+   "abaName": "Wake Forest University",
+   "gpa25": 3.6,
+   "gpa50": 3.79,
+   "gpa75": 3.9,
+   "lsat25": 163,
+   "lsat50": 166,
+   "lsat75": 168
+  },
+  {
+   "slug": "washburn-university",
+   "abaName": "Washburn University",
+   "gpa25": 3.37,
+   "gpa50": 3.68,
+   "gpa75": 3.88,
+   "lsat25": 151,
+   "lsat50": 155,
+   "lsat75": 159
+  },
+  {
+   "slug": "washington-and-lee-university",
+   "abaName": "Washington and Lee University",
+   "gpa25": 3.51,
+   "gpa50": 3.75,
+   "gpa75": 3.85,
+   "lsat25": 161,
+   "lsat50": 167,
+   "lsat75": 168
+  },
+  {
+   "slug": "washington-university-st-louis",
+   "abaName": "Washington University (St. Louis)",
+   "gpa25": 3.58,
+   "gpa50": 3.96,
+   "gpa75": 4.0,
+   "lsat25": 165,
+   "lsat50": 175,
+   "lsat75": 176
+  },
+  {
+   "slug": "washington-university-of",
+   "abaName": "Washington, University of",
+   "gpa25": 3.6,
+   "gpa50": 3.76,
+   "gpa75": 3.86,
+   "lsat25": 162,
+   "lsat50": 165,
+   "lsat75": 167
+  },
+  {
+   "slug": "wayne-state-university",
+   "abaName": "Wayne State University",
+   "gpa25": 3.56,
+   "gpa50": 3.89,
+   "gpa75": 3.95,
+   "lsat25": 157,
+   "lsat50": 164,
+   "lsat75": 166
+  },
+  {
+   "slug": "west-virginia-university",
+   "abaName": "West Virginia University",
+   "gpa25": 3.34,
+   "gpa50": 3.65,
+   "gpa75": 3.89,
+   "lsat25": 151,
+   "lsat50": 155,
+   "lsat75": 159
+  },
+  {
+   "slug": "western-new-england-university",
+   "abaName": "Western New England University",
+   "gpa25": 2.84,
+   "gpa50": 3.27,
+   "gpa75": 3.57,
+   "lsat25": 149,
+   "lsat50": 153,
+   "lsat75": 156
+  },
+  {
+   "slug": "western-state-westcliff-university",
+   "abaName": "Western State, Westcliff University",
+   "gpa25": 3.03,
+   "gpa50": 3.36,
+   "gpa75": 3.62,
+   "lsat25": 150,
+   "lsat50": 152,
+   "lsat75": 156
+  },
+  {
+   "slug": "widener-university-commonwealth-law-school",
+   "abaName": "Widener University Commonwealth Law School",
+   "gpa25": 2.98,
+   "gpa50": 3.33,
+   "gpa75": 3.64,
+   "lsat25": 147,
+   "lsat50": 150,
+   "lsat75": 153
+  },
+  {
+   "slug": "widener-university-delaware-law-school",
+   "abaName": "Widener University Delaware Law School",
+   "gpa25": 2.95,
+   "gpa50": 3.33,
+   "gpa75": 3.6,
+   "lsat25": 149,
+   "lsat50": 152,
+   "lsat75": 154
+  },
+  {
+   "slug": "willamette-university",
+   "abaName": "Willamette University",
+   "gpa25": 3.22,
+   "gpa50": 3.48,
+   "gpa75": 3.7,
+   "lsat25": 151,
+   "lsat50": 154,
+   "lsat75": 157
+  },
+  {
+   "slug": "william-mary",
+   "abaName": "William & Mary",
+   "gpa25": 3.53,
+   "gpa50": 3.82,
+   "gpa75": 3.94,
+   "lsat25": 161,
+   "lsat50": 166,
+   "lsat75": 167
+  },
+  {
+   "slug": "wilmington-university-school-of-law",
+   "abaName": "Wilmington University School of Law",
+   "gpa25": 2.67,
+   "gpa50": 3.13,
+   "gpa75": 3.49,
+   "lsat25": 146,
+   "lsat50": 149,
+   "lsat75": 152
+  },
+  {
+   "slug": "wisconsin-university-of",
+   "abaName": "Wisconsin, University of",
+   "gpa25": 3.61,
+   "gpa50": 3.81,
+   "gpa75": 3.93,
+   "lsat25": 161,
+   "lsat50": 167,
+   "lsat75": 169
+  },
+  {
+   "slug": "wyoming-university-of",
+   "abaName": "Wyoming, University of",
+   "gpa25": 3.32,
+   "gpa50": 3.55,
+   "gpa75": 3.8,
+   "lsat25": 153,
+   "lsat50": 156,
+   "lsat75": 160
+  },
+  {
+   "slug": "yale",
+   "abaName": "Yale University",
+   "name": "Yale Law School",
+   "gpa25": 3.9,
+   "gpa50": 3.96,
+   "gpa75": 4.0,
+   "lsat25": 171,
+   "lsat50": 174,
+   "lsat75": 177
+  }
+ ]
+}
