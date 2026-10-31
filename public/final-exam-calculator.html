@@ -319,7 +319,7 @@
       <div class="calc-field">
         <label for="final-weight">Final exam weight (%)</label>
         <input type="number" id="final-weight" min="1" max="100" step="1" placeholder="e.g. 30" />
-        <div class="field-hint">Check your syllabus. Typically 20-40%.</div>
+        <div class="field-hint">Check your syllabus for the exact weight.</div>
       </div>
       <div class="calc-field">
         <label for="desired-grade">Desired final course grade (%)</label>
@@ -333,6 +333,12 @@
         <div class="result-value" id="result-need-value"></div>
         <div class="result-note" id="result-need-note"></div>
         <div id="scenario-block"></div>
+        <div id="plan-cta" class="post-cta" style="margin:20px 0 0" hidden>
+          <h3>Make a plan to hit it</h3>
+          <p id="plan-cta-text"></p>
+          <a href="/app?signup=1" class="btn btn-primary" data-seo-cta="final-calc-result">Make my finals plan</a>
+          <p style="font-size:13px;color:#6E6B64;margin-top:8px;">Free to start. Or build a schedule without an account in the <a href="/study-schedule-generator">study schedule generator</a>.</p>
+        </div>
       </div>
     </div>
 
@@ -473,6 +479,23 @@
     document.getElementById('panel-' + tab).classList.add('active');
   }
 
+  // Course grade = semester grade x (1 - w) + final x w, with w the final's weight.
+  function requiredFinal(current, weightPct, target) {
+    var w = weightPct / 100;
+    return (target - current * (1 - w)) / w;
+  }
+
+  function courseGrade(current, weightPct, finalScore) {
+    var w = weightPct / 100;
+    return current * (1 - w) + finalScore * w;
+  }
+
+  function inputError(cur, wtPct, other) {
+    if (isNaN(cur) || isNaN(wtPct) || isNaN(other)) return 'Fill in all three fields to see your result.';
+    if (wtPct <= 0 || wtPct > 100) return 'The final exam weight has to be more than 0% and at most 100%.';
+    return '';
+  }
+
   function scoreColor(score) {
     if (score > 100) return 'impossible';
     if (score > 90) return 'red';
@@ -489,23 +512,28 @@
 
   function calcNeed() {
     const cur = parseFloat(document.getElementById('current-grade').value);
-    const wt = parseFloat(document.getElementById('final-weight').value) / 100;
+    const wtPct = parseFloat(document.getElementById('final-weight').value);
     const des = parseFloat(document.getElementById('desired-grade').value);
-
-    if (isNaN(cur) || isNaN(wt) || isNaN(des)) {
-      alert('Please fill in all three fields.');
-      return;
-    }
-
-    const needed = (des / 100 - (cur / 100) * (1 - wt)) / wt;
-    const neededPct = needed * 100;
 
     const resultEl = document.getElementById('result-need');
     const valueEl = document.getElementById('result-need-value');
     const noteEl = document.getElementById('result-need-note');
     const scenarioEl = document.getElementById('scenario-block');
+    const planEl = document.getElementById('plan-cta');
 
     resultEl.classList.add('visible');
+
+    const err = inputError(cur, wtPct, des);
+    if (err) {
+      valueEl.className = 'result-value';
+      valueEl.textContent = '';
+      noteEl.textContent = err;
+      scenarioEl.innerHTML = '';
+      planEl.hidden = true;
+      return;
+    }
+
+    const neededPct = requiredFinal(cur, wtPct, des);
 
     if (neededPct > 100) {
       valueEl.className = 'result-value impossible';
@@ -530,7 +558,7 @@
     ];
 
     let rows = grades.map(g => {
-      const s = ((g.pct / 100 - (cur / 100) * (1 - wt)) / wt) * 100;
+      const s = requiredFinal(cur, wtPct, g.pct);
       let cls, label;
       if (s > 100) { cls = 'score-impossible'; label = 'Not possible'; }
       else if (s > 90) { cls = 'score-red'; label = s.toFixed(1) + '%'; }
@@ -543,27 +571,35 @@
       <table class="scenario-table" style="margin-top:20px">
         <thead><tr><th>Target grade</th><th>Score needed on final</th></tr></thead>
         <tbody>${rows}</tbody>
-      </table>`;
+      </table>
+      <p class="field-hint" style="margin-top:8px">Letter cutoffs use a common 93 / 90 / 87 scale. Schools and professors set their own, so check your syllabus.</p>`;
+
+    document.getElementById('plan-cta-text').textContent = neededPct > 100
+      ? 'That target is out of reach, but the next grade down may not be. Put your final on a schedule and give the topics you missed this semester the most time.'
+      : 'You need ' + neededPct.toFixed(1) + '% on the final. Add the exam date in StudyEdge AI and it plans study sessions from now until exam day, giving more time to courses where you set a higher target grade.';
+    planEl.hidden = false;
   }
 
   function calcGet() {
     const cur = parseFloat(document.getElementById('current-grade-2').value);
-    const wt = parseFloat(document.getElementById('final-weight-2').value) / 100;
+    const wtPct = parseFloat(document.getElementById('final-weight-2').value);
     const fs = parseFloat(document.getElementById('final-score').value);
-
-    if (isNaN(cur) || isNaN(wt) || isNaN(fs)) {
-      alert('Please fill in all three fields.');
-      return;
-    }
-
-    const finalGrade = cur / 100 * (1 - wt) + fs / 100 * wt;
-    const finalPct = finalGrade * 100;
 
     const resultEl = document.getElementById('result-get');
     const valueEl = document.getElementById('result-get-value');
     const noteEl = document.getElementById('result-get-note');
 
     resultEl.classList.add('visible');
+
+    const err = inputError(cur, wtPct, fs);
+    if (err) {
+      valueEl.className = 'result-value';
+      valueEl.textContent = '';
+      noteEl.textContent = err;
+      return;
+    }
+
+    const finalPct = courseGrade(cur, wtPct, fs);
 
     let letter;
     if (finalPct >= 93) letter = 'A';
